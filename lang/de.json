@@ -1,15 +1,19 @@
 {
+    "<p>Hi :Name,</p><p> </p><p>Best regards<br>Andreas Müller</p>": "<p>Hallo :Name,</p><p> </p><p>Beste Grüße<br>Andreas Müller</p>",
     "Address": "Anschrift",
+    "Amount": "Betrag",
     "Client": "Kunde",
     "Clients": "Kunden",
-    "Created at": "Registriert",
     "Color": "Farbe",
+    "Content": "Inhalt",
+    "Created at": "Registriert",
     "Email": "E-Mail",
+    "Gift": "Schenkung",
+    "Gifts": "Schenkungen",
     "Language": "Sprache",
     "Name": "Name",
     "Phone": "Telefon",
+    "Received at": "Erhalten am",
     "Short": "Abkürzung",
-    "Subject": "Betreff",
-    "Content": "Inhalt",
-    "<p>Hi :Name,</p><p> </p><p>Best regards<br>Andreas Müller</p>": "<p>Hallo :Name,</p><p> </p><p>Beste Grüße<br>Andreas Müller</p>"
+    "Subject": "Betreff"
 }

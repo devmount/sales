@@ -6,15 +6,23 @@ use App\Filament\Resources\ClientResource\Pages;
 use App\Filament\Resources\ClientResource\RelationManagers;
 use App\Mail\ContactClient;
 use App\Models\Client;
-use Filament\Forms;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Mail;
@@ -29,13 +37,13 @@ class ClientResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')->translateLabel()->required(),
-                Forms\Components\TextInput::make('short')->translateLabel(),
-                Forms\Components\ColorPicker::make('color')->translateLabel(),
-                Forms\Components\Textarea::make('address')->translateLabel()->rows(4)->autosize()->required(),
-                Forms\Components\TextInput::make('email')->translateLabel()->email(),
-                Forms\Components\TextInput::make('phone')->translateLabel()->tel(),
-                Forms\Components\Select::make('language')->translateLabel()->options([
+                TextInput::make('name')->translateLabel()->required(),
+                TextInput::make('short')->translateLabel(),
+                ColorPicker::make('color')->translateLabel(),
+                Textarea::make('address')->translateLabel()->rows(4)->autosize()->required(),
+                TextInput::make('email')->translateLabel()->email(),
+                TextInput::make('phone')->translateLabel()->tel(),
+                Select::make('language')->translateLabel()->options([
                     'de' => 'DE',
                     'en' => 'EN',
                 ])->native(false)->required(),
@@ -46,21 +54,21 @@ class ClientResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ColorColumn::make('color')->label(''),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()
+                ColorColumn::make('color')->label(''),
+                TextColumn::make('name')->searchable()->sortable()
                     ->description(fn (Client $record): string => $record->address)->wrap(),
-                Tables\Columns\TextColumn::make('language')->translateLabel()->badge()->sortable(),
-                Tables\Columns\TextColumn::make('created_at')->translateLabel()->since()->sortable(),
+                TextColumn::make('language')->translateLabel()->badge()->sortable(),
+                TextColumn::make('created_at')->translateLabel()->since()->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('language')->translateLabel()->options([
+                SelectFilter::make('language')->translateLabel()->options([
                     'de' => 'DE',
                     'en' => 'EN',
                 ])->native(false),
             ])
             ->actions(ActionGroup::make([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('kontaktieren')
+                EditAction::make(),
+                Action::make('kontaktieren')
                     ->icon('heroicon-o-envelope')
                     ->form(fn (Client $record) => [
                         TextInput::make('subject')->translateLabel()->required(),
@@ -74,12 +82,12 @@ class ClientResource extends Resource
                     })
             ]))
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ]);
     }
 
@@ -112,5 +120,10 @@ class ClientResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('Clients');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->orderByDesc('created_at');
     }
 }
