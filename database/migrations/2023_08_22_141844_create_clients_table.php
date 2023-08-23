@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('short');
-            $table->string('color');
+            $table->string('short')->nullable();
+            $table->string('color')->nullable();
             $table->text('address');
-            $table->string('email');
-            $table->string('phone');
-            $table->string('language');
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('language')->default('de');
             $table->timestamps();
         });
     }

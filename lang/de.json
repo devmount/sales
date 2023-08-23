@@ -1,0 +1,15 @@
+{
+    "Address": "Anschrift",
+    "Client": "Kunde",
+    "Clients": "Kunden",
+    "Created at": "Registriert",
+    "Color": "Farbe",
+    "Email": "E-Mail",
+    "Language": "Sprache",
+    "Name": "Name",
+    "Phone": "Telefon",
+    "Short": "Abkürzung",
+    "Subject": "Betreff",
+    "Content": "Inhalt",
+    "<p>Hi :Name,</p><p> </p><p>Best regards<br>Andreas Müller</p>": "<p>Hallo :Name,</p><p> </p><p>Beste Grüße<br>Andreas Müller</p>"
+}
