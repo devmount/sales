@@ -37,16 +37,32 @@ class ClientResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->translateLabel()->required(),
-                TextInput::make('short')->translateLabel(),
-                ColorPicker::make('color')->translateLabel(),
-                Textarea::make('address')->translateLabel()->rows(4)->autosize()->required(),
-                TextInput::make('email')->translateLabel()->email(),
-                TextInput::make('phone')->translateLabel()->tel(),
-                Select::make('language')->translateLabel()->options([
-                    'de' => 'DE',
-                    'en' => 'EN',
-                ])->native(false)->required(),
+                TextInput::make('name')
+                    ->translateLabel()
+                    ->required(),
+                TextInput::make('short')
+                    ->translateLabel(),
+                ColorPicker::make('color')
+                    ->translateLabel(),
+                Textarea::make('address')
+                    ->translateLabel()
+                    ->rows(4)
+                    ->autosize()
+                    ->required(),
+                TextInput::make('email')
+                    ->translateLabel()
+                    ->email(),
+                TextInput::make('phone')
+                    ->translateLabel()
+                    ->tel(),
+                Select::make('language')
+                    ->translateLabel()
+                    ->options([
+                        'de' => 'DE',
+                        'en' => 'EN',
+                    ])
+                    ->native(false)
+                    ->required(),
             ]);
     }
 
@@ -54,25 +70,47 @@ class ClientResource extends Resource
     {
         return $table
             ->columns([
-                ColorColumn::make('color')->label(''),
-                TextColumn::make('name')->searchable()->sortable()
-                    ->description(fn (Client $record): string => $record->address)->wrap(),
-                TextColumn::make('language')->translateLabel()->badge()->sortable(),
-                TextColumn::make('created_at')->translateLabel()->since()->sortable(),
+                ColorColumn::make('color')
+                    ->label(''),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->description(fn (Client $record): string => $record->address)
+                    ->wrap(),
+                TextColumn::make('language')
+                    ->translateLabel()
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->since()
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('language')->translateLabel()->options([
-                    'de' => 'DE',
-                    'en' => 'EN',
-                ])->native(false),
+                SelectFilter::make('language')
+                    ->translateLabel()
+                    ->options([
+                        'de' => 'DE',
+                        'en' => 'EN',
+                    ])
+                    ->native(false),
             ])
             ->actions(ActionGroup::make([
                 EditAction::make(),
                 Action::make('kontaktieren')
                     ->icon('heroicon-o-envelope')
                     ->form(fn (Client $record) => [
-                        TextInput::make('subject')->translateLabel()->required(),
-                        RichEditor::make('content')->translateLabel()->required()
+                        TextInput::make('subject')
+                            ->translateLabel()
+                            ->required(),
+                        RichEditor::make('content')
+                            ->translateLabel()
+                            ->required()
                             ->default(__("<p>Hi :Name,</p><p> </p><p>Best regards<br>Andreas Müller</p>", ['name' => $record->name])),
                     ])
                     ->action(function (Client $record, array $data) {

@@ -12,11 +12,18 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
-use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -25,46 +32,58 @@ class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(6)
             ->schema([
                 DatePicker::make('expended_at')
                     ->translateLabel()
                     ->native(false)
                     ->weekStartsOnMonday()
-                    ->required(),
+                    ->required()
+                    ->columnSpan(3),
+                Select::make('category')
+                    ->translateLabel()
+                    ->options(ExpenseCategory::class)
+                    ->native(false)
+                    ->required()
+                    ->columnSpan(3),
                 TextInput::make('price')
                     ->translateLabel()
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffix('EUR')
-                    ->required(),
+                    ->required()
+                    ->columnSpan(3),
                 Toggle::make('taxable')
                     ->translateLabel()
-                    ->required(),
+                    ->inline(false)
+                    ->required()
+                    ->columnSpan(1),
                 TextInput::make('vat')
                     ->translateLabel()
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->maxValue(1)
-                    ->suffix('%')
-                    ->required(),
+                    ->required()
+                    ->columnSpan(2)
+                    ->hidden(fn (Get $get): bool => ! $get('taxable')),
                 TextInput::make('quantity')
                     ->translateLabel()
                     ->numeric()
                     ->step(1)
                     ->minValue(1)
-                    ->required(),
-                Select::make('category')
-                    ->options(ExpenseCategory::class)
-                    ->required(),
+                    ->required()
+                    ->columnSpan(3),
                 Textarea::make('description')
-                    ->maxLength(65535),
+                    ->translateLabel()
+                    ->maxLength(65535)
+                    ->columnSpan(3),
             ]);
     }
 
@@ -72,51 +91,58 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('expended_at')
+                TextColumn::make('expended_at')
                     ->translateLabel()
                     ->date('j. F Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('price')
+                TextColumn::make('price')
                     ->translateLabel()
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->alignment(Alignment::End)
                     ->sortable()
                     ->summarize(Sum::make()->money('eur')),
-                Tables\Columns\IconColumn::make('taxable')
+                IconColumn::make('taxable')
+                    ->translateLabel()
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('vat')
+                TextColumn::make('vat')
+                    ->translateLabel()
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('quantity')
+                TextColumn::make('quantity')
+                    ->translateLabel()
                     ->numeric()
                     ->sortable()
                     ->summarize(Sum::make()),
-                Tables\Columns\SelectColumn::make('category')
-                    ->options(Status::class),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                TextColumn::make('category')
+                    ->translateLabel()
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                TextColumn::make('updated_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
+            ->actions(ActionGroup::make([
+                EditAction::make(),
+            ]))
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ]);
     }
 

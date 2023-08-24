@@ -10,7 +10,7 @@
     "Created at": "Registriert",
     "Description": "Beschreibung",
     "Email": "E-Mail",
-    "Expended at": "Ausgegeben am",
+    "Expended at": "Ausgegeben",
     "Expense": "Ausgabe",
     "Expenses": "Ausgaben",
     "Gift": "Schenkung",
@@ -21,11 +21,12 @@
     "Phone": "Telefon",
     "Price": "Preis",
     "Quantity": "Menge",
-    "Received at": "Erhalten am",
+    "Received at": "Erhalten",
     "Service": "Leistung",
     "Short": "Abkürzung",
     "Subject": "Betreff",
     "Tax": "ESt.",
     "Taxable": "Versteuert",
+    "Updated at": "Aktualisiert",
     "Vat": "USt."
 }

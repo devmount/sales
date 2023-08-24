@@ -33,15 +33,25 @@ class GiftResource extends Resource
         return $form
             ->schema([
                 DatePicker::make('received_at')
-                    ->translateLabel()->native(false)->weekStartsOnMonday()->required(),
+                    ->translateLabel()
+                    ->native(false)
+                    ->weekStartsOnMonday()
+                    ->required(),
                 TextInput::make('subject')
-                    ->translateLabel()->required(),
+                    ->translateLabel()
+                    ->required(),
                 TextInput::make('name')
                     ->translateLabel(),
                 TextInput::make('email')
-                    ->translateLabel()->email(),
+                    ->translateLabel()
+                    ->email(),
                 TextInput::make('amount')
-                    ->translateLabel()->numeric()->step(0.01)->minValue(0.01)->suffix('EUR')->required(),
+                    ->translateLabel()
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->suffix('EUR')
+                    ->required(),
             ]);
     }
 
@@ -50,16 +60,36 @@ class GiftResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('received_at')
-                    ->translateLabel()->date('j. F Y')->sortable(),
+                    ->translateLabel()
+                    ->date('j. F Y')
+                    ->sortable(),
                 TextColumn::make('subject')
-                    ->translateLabel()->searchable()->sortable(),
+                    ->translateLabel()
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('name')
-                    ->translateLabel()->searchable()->sortable()
+                    ->translateLabel()
+                    ->searchable()
+                    ->sortable()
                     ->description(fn (Gift $record): string => $record->email),
                 TextColumn::make('amount')
-                    ->translateLabel()->money('eur')->fontFamily(FontFamily::Mono)
-                    ->alignment(Alignment::End)->sortable()
-                    ->summarize(Sum::make()->money('eur')),
+                    ->translateLabel()
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->alignment(Alignment::End)
+                    ->sortable()
+                    ->summarize(Sum::make()
+                    ->money('eur')),
+                TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
