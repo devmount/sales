@@ -5,23 +5,26 @@ namespace App\Filament\Resources;
 use App\Enums\PricingUnit;
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource\RelationManagers;
-use App\Models\Project;
 use App\Models\Client;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Project;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Carbon;
 
 class ProjectResource extends Resource
 {
@@ -94,7 +97,20 @@ class ProjectResource extends Resource
     {
         return $table
             ->columns([
-                //
+                ColorColumn::make('client.color')
+                    ->label(''),
+                TextColumn::make('title')
+                    ->searchable()
+                    ->sortable()
+                    ->description(fn (Project $record): string => $record->client?->name)
+                    ->tooltip(fn (Project $record): string => $record->description),
+                TextColumn::make('date_range')
+                    ->state(fn (Project $record): string =>
+                        Carbon::parse($record->start_at)->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
+                    )
+                    ->description(fn (Project $record): string =>
+                        Carbon::parse($record->start_at)->format('j. M Y') . ' - ' . Carbon::parse($record->due_at)->format('j. M Y')
+                    )
             ])
             ->filters([
                 //
