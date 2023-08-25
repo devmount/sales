@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
+            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->date('start_at')->nullable();
             $table->date('due_at')->nullable();
             $table->decimal('minimum', 7, 2, true)->nullable();

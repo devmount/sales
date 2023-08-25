@@ -26,8 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
-
     protected static ?string $navigationIcon = 'tabler-package';
+    protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
     {
@@ -126,5 +126,30 @@ class ProjectResource extends Resource
             'create' => Pages\CreateProject::route('/create'),
             'edit' => Pages\EditProject::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Core data');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Projects');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Project');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Projects');
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->orderByDesc('due_at');
     }
 }

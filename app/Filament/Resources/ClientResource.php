@@ -30,8 +30,8 @@ use Illuminate\Support\Facades\Mail;
 class ClientResource extends Resource
 {
     protected static ?string $model = Client::class;
-
     protected static ?string $navigationIcon = 'tabler-users';
+    protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form
     {
@@ -143,6 +143,11 @@ class ClientResource extends Resource
             'create' => Pages\CreateClient::route('/create'),
             'edit' => Pages\EditClient::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Core data');
     }
 
     public static function getNavigationLabel(): string

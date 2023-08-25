@@ -31,8 +31,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
-
     protected static ?string $navigationIcon = 'tabler-credit-card';
+    protected static ?int $navigationSort = 40;
 
     public static function form(Form $form): Form
     {
@@ -160,6 +160,11 @@ class ExpenseResource extends Resource
             'create' => Pages\CreateExpense::route('/create'),
             'edit' => Pages\EditExpense::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Core data');
     }
 
     public static function getNavigationLabel(): string

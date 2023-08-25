@@ -25,8 +25,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class GiftResource extends Resource
 {
     protected static ?string $model = Gift::class;
-
     protected static ?string $navigationIcon = 'tabler-gift';
+    protected static ?int $navigationSort = 50;
 
     public static function form(Form $form): Form
     {
@@ -121,6 +121,11 @@ class GiftResource extends Resource
             'create' => Pages\CreateGift::route('/create'),
             'edit' => Pages\EditGift::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Core data');
     }
 
     public static function getNavigationLabel(): string
