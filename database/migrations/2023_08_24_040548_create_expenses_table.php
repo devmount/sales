@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->date('expended_at'); // date NOT NULL,
-            $table->decimal('price', 6, 2, true); // real NOT NULL,
-            $table->boolean('taxable')->default(true); // boolean DEFAULT TRUE NOT NULL, -- former: transitory, must be negated
-            $table->decimal('vat', 4, 2, true)->nullable(); // real,
-            $table->integer('quantity'); // smallint DEFAULT 1 NOT NULL,
-            $table->string('category'); // category DEFAULT 'good' NOT NULL, ('vat', 'good', 'service', 'tax')
-            $table->text('description')->nullable(); // text,
+            $table->date('expended_at');
+            $table->decimal('price', 6, 2, true);
+            $table->boolean('taxable')->default(true);
+            $table->decimal('vat', 4, 2, true)->nullable();
+            $table->integer('quantity');
+            $table->string('category');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

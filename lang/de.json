@@ -28,5 +28,8 @@
     "Tax": "ESt.",
     "Taxable": "Versteuert",
     "Updated at": "Aktualisiert",
+    "Per hour": "Pro Stunde",
+    "Per day": "Pro Tag",
+    "Per project": "Pro Projekt",
     "Vat": "USt."
 }

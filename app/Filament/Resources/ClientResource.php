@@ -31,7 +31,7 @@ class ClientResource extends Resource
 {
     protected static ?string $model = Client::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'tabler-users';
 
     public static function form(Form $form): Form
     {
@@ -103,7 +103,7 @@ class ClientResource extends Resource
             ->actions(ActionGroup::make([
                 EditAction::make(),
                 Action::make('kontaktieren')
-                    ->icon('heroicon-o-envelope')
+                    ->icon('tabler-mail')
                     ->form(fn (Client $record) => [
                         TextInput::make('subject')
                             ->translateLabel()

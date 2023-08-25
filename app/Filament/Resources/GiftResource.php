@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\GiftResource\Pages;
-use Filament\Tables\Columns\Summarizers\Sum;
 use App\Filament\Resources\GiftResource\RelationManagers;
 use App\Models\Gift;
 use Filament\Forms\Components\DatePicker;
@@ -17,6 +16,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,7 +26,7 @@ class GiftResource extends Resource
 {
     protected static ?string $model = Gift::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-gift';
+    protected static ?string $navigationIcon = 'tabler-gift';
 
     public static function form(Form $form): Form
     {
