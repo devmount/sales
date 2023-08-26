@@ -62,7 +62,7 @@ class AppServiceProvider extends ServiceProvider
 
             // Table Builder icon aliases
             // 'tables::columns.collapse-button' => 'tabler-columns-3',
-            // 'tables::filters.remove-all-button' => 'tabler-', // Button to remove all filters
+            'tables::filters.remove-all-button' => 'tabler-x', // Button to remove all filters
             // 'tables::grouping.collapse-button' => 'tabler-', // Button to collapse a group of records
             'tables::header-cell.sort-asc-button' => 'tabler-chevron-up', // Sort button of a column sorted in ascending order
             'tables::header-cell.sort-desc-button' => 'tabler-chevron-down', // Sort button of a column sorted in descending order
