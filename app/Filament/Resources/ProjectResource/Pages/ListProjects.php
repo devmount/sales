@@ -23,8 +23,6 @@ class ListProjects extends ListRecords
     public function getTabs(): array
     {
         return [
-            'all' => Tab::make()
-                ->label(__('All')),
             'active' => Tab::make()
                 ->label(__('Active'))
                 ->badge(Project::query()->where('start_at', '<=', now())->where('due_at', '>=', now())->count())
@@ -35,6 +33,8 @@ class ListProjects extends ListRecords
             'aborted' => Tab::make()
                 ->label(__('Aborted'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('aborted', true)),
+            'all' => Tab::make()
+                ->label(__('All')),
         ];
     }
 }

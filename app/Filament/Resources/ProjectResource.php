@@ -100,16 +100,26 @@ class ProjectResource extends Resource
                 ColorColumn::make('client.color')
                     ->label(''),
                 TextColumn::make('title')
+                    ->translateLabel()
                     ->searchable()
                     ->sortable()
                     ->description(fn (Project $record): string => $record->client?->name)
                     ->tooltip(fn (Project $record): string => $record->description),
                 TextColumn::make('date_range')
-                    ->state(fn (Project $record): string =>
-                        Carbon::parse($record->start_at)->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
+                    ->translateLabel()
+                    ->state(fn (Project $record): string => Carbon::parse($record->start_at)
+                        ->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
                     )
-                    ->description(fn (Project $record): string =>
-                        Carbon::parse($record->start_at)->format('j. M Y') . ' - ' . Carbon::parse($record->due_at)->format('j. M Y')
+                    ->description(fn (Project $record): string => Carbon::parse($record->start_at)
+                        ->isoFormat('ll') . ' - ' . Carbon::parse($record->due_at)->isoFormat('ll')
+                ),
+                TextColumn::make('scope')
+                    ->translateLabel()
+                    ->state(fn (Project $record): string => $record->minimum != $record->scope
+                        ? (int)$record->minimum . ' - ' . (int)$record->scope . ' ' . __('Hours')
+                        : (int)$record->scope . ' ' . __('Hours')
+                    )
+                    ->description(fn (Project $record): string => $record->price . ' €, ' . $record->pricing_unit->getLabel()
                     )
             ])
             ->filters([
