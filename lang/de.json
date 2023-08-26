@@ -16,6 +16,8 @@
     "Description": "Beschreibung",
     "Due at": "Fällig",
     "Email": "E-Mail",
+    "Estimate": "Schätzung",
+    "Estimates": "Schätzungen",
     "Expended at": "Ausgegeben",
     "Expense": "Ausgabe",
     "Expenses": "Ausgaben",
@@ -46,5 +48,6 @@
     "Taxable": "Versteuert",
     "Title": "Titel",
     "Updated at": "Aktualisiert",
-    "Vat": "USt."
+    "Vat": "USt.",
+    "Weight": "Gewicht"
 }

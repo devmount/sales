@@ -11,8 +11,8 @@ class Client extends Model
     use HasFactory;
 
     /**
-	 * The projects this client ordered.
-	 */
+     * The projects this client ordered.
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);

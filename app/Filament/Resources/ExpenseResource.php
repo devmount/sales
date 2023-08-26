@@ -143,7 +143,8 @@ class ExpenseResource extends Resource
             ])
             ->emptyStateActions([
                 CreateAction::make(),
-            ]);
+            ])
+            ->emptyStateIcon('tabler-ban');
     }
 
     public static function getRelations(): array
