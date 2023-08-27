@@ -21,6 +21,8 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
@@ -133,18 +135,25 @@ class ExpenseResource extends Resource
             ->filters([
                 //
             ])
-            ->actions(ActionGroup::make([
-                EditAction::make(),
-            ]))
+            ->actions(
+                ActionGroup::make([
+                    EditAction::make()->icon('tabler-edit'),
+                    ReplicateAction::make()->icon('tabler-copy'),
+                    DeleteAction::make()->icon('tabler-trash'),
+                ])
+                ->icon('tabler-dots-vertical')
+            )
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                    DeleteBulkAction::make()->icon('tabler-trash'),
+                ])
+                ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make(),
+                CreateAction::make()->icon('tabler-plus'),
             ])
-            ->emptyStateIcon('tabler-ban');
+            ->emptyStateIcon('tabler-ban')
+            ->deferLoading();
     }
 
     public static function getRelations(): array
