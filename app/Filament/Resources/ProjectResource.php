@@ -48,8 +48,7 @@ class ProjectResource extends Resource
                     ->required(),
                 Toggle::make('aborted')
                     ->translateLabel()
-                    ->inline(false)
-                    ->required(),
+                    ->inline(false),
                 TextInput::make('title')
                     ->translateLabel()
                     ->required(),

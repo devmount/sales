@@ -36,4 +36,12 @@ class Project extends Model
     {
         return $this->hasMany(Estimate::class);
     }
+
+    /**
+     * The invoices created for this project.
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }
