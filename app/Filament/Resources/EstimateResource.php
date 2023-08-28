@@ -4,15 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EstimateResource\Pages;
 use App\Filament\Resources\EstimateResource\RelationManagers;
-use App\Models\Client;
-use App\Models\Project;
 use App\Models\Estimate;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Support\Enums\FontFamily;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\ActionGroup;
@@ -25,9 +20,7 @@ use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Carbon;
 
 class EstimateResource extends Resource
 {
@@ -88,6 +81,16 @@ class EstimateResource extends Resource
                     ->translateLabel()
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

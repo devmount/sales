@@ -147,6 +147,16 @@ class InvoiceResource extends Resource
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel()),
+                TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

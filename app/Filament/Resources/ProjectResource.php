@@ -121,6 +121,16 @@ class ProjectResource extends Resource
                         : (int)$record->scope . ' ' . __('Hours')
                     )
                     ->description(fn (Project $record): string => $record->price . ' €, ' . $record->pricing_unit->getLabel()),
+                TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->translateLabel()
+                    ->datetime('j. F Y, H:i:s')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

@@ -20,10 +20,10 @@ class Expense extends Model
     ];
 
     /**
-	 * Serve year of expense
-	 */
-	public function getYearAttribute()
-	{
-		return substr($this->expanded_at, 0 ,4);
-	}
+     * Serve year of expense
+     */
+    public function getYearAttribute()
+    {
+        return substr($this->expanded_at, 0 ,4);
+    }
 }

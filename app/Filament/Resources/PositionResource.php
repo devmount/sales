@@ -2,20 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\ExpenseCategory;
-use App\Filament\Resources\ExpenseResource\Pages;
-use App\Filament\Resources\ExpenseResource\RelationManagers;
-use App\Models\Expense;
-use Filament\Forms\Components\DatePicker;
+use App\Filament\Resources\PositionResource\Pages;
+use App\Filament\Resources\PositionResource\RelationManagers;
+use App\Models\Client;
+use App\Models\Position;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Resources\Resource;
-use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
@@ -23,68 +21,69 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ReplicateAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Carbon;
 
-class ExpenseResource extends Resource
+class PositionResource extends Resource
 {
-    protected static ?string $model = Expense::class;
-    protected static ?string $navigationIcon = 'tabler-credit-card';
-    protected static ?int $navigationSort = 40;
+    protected static ?string $model = Position::class;
+    protected static ?string $navigationIcon = 'tabler-list-details';
+    protected static ?int $navigationSort = 35;
 
     public static function form(Form $form): Form
     {
         return $form
-            ->columns(6)
+            ->columns(12)
             ->schema([
-                DatePicker::make('expended_at')
+                Select::make('invoice_id')
+                    ->translateLabel()
+                    ->relationship('invoice', 'title')
+                    ->native(false)
+                    ->searchable()
+                    ->suffixIcon('tabler-file-stack')
+                    ->required()
+                    ->columnSpan(6),
+                Toggle::make('remote')
+                    ->translateLabel()
+                    ->inline(false)
+                    ->default(true)
+                    ->columnSpan(6),
+                DateTimePicker::make('started_at')
                     ->translateLabel()
                     ->native(false)
                     ->weekStartsOnMonday()
+                    ->seconds(false)
+                    ->minutesStep(30)
+                    ->default(now()->setHour(9)->setMinute(0))
                     ->required()
                     ->columnSpan(3),
-                Select::make('category')
+                DateTimePicker::make('finished_at')
                     ->translateLabel()
-                    ->options(ExpenseCategory::class)
                     ->native(false)
+                    ->weekStartsOnMonday()
+                    ->seconds(false)
+                    ->minutesStep(30)
+                    ->default(now()->setHour(17)->setMinute(0))
                     ->required()
                     ->columnSpan(3),
-                TextInput::make('price')
+                TextInput::make('pause_duration')
                     ->translateLabel()
                     ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->suffix('EUR')
+                    ->step(.01)
+                    ->minValue(0)
                     ->required()
-                    ->columnSpan(3),
-                Toggle::make('taxable')
-                    ->translateLabel()
-                    ->inline(false)
-                    ->columnSpan(1),
-                TextInput::make('vat')
-                    ->translateLabel()
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->maxValue(1)
-                    ->required()
-                    ->columnSpan(2)
-                    ->hidden(fn (Get $get): bool => ! $get('taxable')),
-                TextInput::make('quantity')
-                    ->translateLabel()
-                    ->numeric()
-                    ->step(1)
-                    ->minValue(1)
-                    ->required()
-                    ->columnSpan(3),
+                    ->columnSpan(6),
                 Textarea::make('description')
                     ->translateLabel()
+                    ->autosize()
                     ->maxLength(65535)
-                    ->columnSpan(3),
+                    ->required()
+                    ->columnSpan(12),
             ]);
     }
 
@@ -92,34 +91,20 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('expended_at')
+                ColorColumn::make('invoice.project.client.color')
+                    ->label('')
+                    ->tooltip(fn (Position $record): string => $record->invoice?->project?->client?->name),
+                TextColumn::make('description')
                     ->translateLabel()
-                    ->date('j. F Y')
-                    ->sortable(),
-                TextColumn::make('price')
-                    ->translateLabel()
-                    ->money('eur')
-                    ->fontFamily(FontFamily::Mono)
-                    ->alignment(Alignment::End)
-                    ->sortable()
-                    ->summarize(Sum::make()->money('eur')),
-                IconColumn::make('taxable')
-                    ->translateLabel()
-                    ->boolean()
-                    ->sortable(),
-                TextColumn::make('vat')
-                    ->translateLabel()
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('quantity')
-                    ->translateLabel()
-                    ->numeric()
-                    ->sortable()
-                    ->summarize(Sum::make()),
-                TextColumn::make('category')
-                    ->translateLabel()
-                    ->badge()
-                    ->sortable(),
+                    ->searchable()
+                    ->tooltip(fn (Position $record): string => $record->invoice?->title)
+                    ->formatStateUsing(fn (string $state): string => nl2br($state))
+                    ->html(),
+                TextColumn::make('amount')
+                    ->label(__('Hours'))
+                    ->state(fn (Position $record): float => $record->duration)
+                    ->description(fn (Position $record): string => $record->time_range),
+                ToggleColumn::make('remote'),
                 TextColumn::make('created_at')
                     ->translateLabel()
                     ->datetime('j. F Y, H:i:s')
@@ -155,19 +140,10 @@ class ExpenseResource extends Resource
             ->deferLoading();
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListExpenses::route('/'),
-            'create' => Pages\CreateExpense::route('/create'),
-            'edit' => Pages\EditExpense::route('/{record}/edit'),
+            'index' => Pages\ManagePositions::route('/'),
         ];
     }
 
@@ -178,21 +154,21 @@ class ExpenseResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Expenses');
+        return __('Positions');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Expense');
+        return __('Position');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Expenses');
+        return __('Positions');
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->orderByDesc('expended_at');
+        return parent::getEloquentQuery()->orderByDesc('created_at');
     }
 }

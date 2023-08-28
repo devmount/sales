@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\EstimateResource\Pages;
+namespace App\Filament\Resources\PositionResource\Pages;
 
-use App\Filament\Resources\EstimateResource;
+use App\Filament\Resources\PositionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
 
-class ManageEstimates extends ManageRecords
+class ManagePositions extends ManageRecords
 {
-    protected static string $resource = EstimateResource::class;
+    protected static string $resource = PositionResource::class;
 
     protected function getHeaderActions(): array
     {
