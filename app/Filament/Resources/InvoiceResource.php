@@ -26,6 +26,8 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Summarizers\Average;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -146,7 +148,15 @@ class InvoiceResource extends Resource
                     ->translateLabel()
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel()),
+                    ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel())
+                    ->summarize(Average::make()->money('eur')),
+                TextColumn::make('net')
+                    ->translateLabel()
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn (Invoice $record): float => $record->net)
+                    ->description(fn (Invoice $record): string => count($record->positions) . ' ' . trans_choice('entry', count($record->positions))),
+                    // ->summarize(Sum::make()->money('eur')),
                 TextColumn::make('created_at')
                     ->translateLabel()
                     ->datetime('j. F Y, H:i:s')
