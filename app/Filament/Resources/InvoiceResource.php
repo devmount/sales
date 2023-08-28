@@ -6,21 +6,23 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Client;
-use App\Models\Project;
 use App\Models\Invoice;
+use App\Models\Project;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -89,7 +91,8 @@ class InvoiceResource extends Resource
                 Toggle::make('taxable')
                     ->columnSpan(1)
                     ->translateLabel()
-                    ->inline(false),
+                    ->inline(false)
+                    ->default(true),
                 TextInput::make('vat')
                     ->columnSpan(5)
                     ->translateLabel()
@@ -97,9 +100,10 @@ class InvoiceResource extends Resource
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffixIcon('tabler-receipt-tax')
-                    ->required(),
+                    ->hidden(fn (Get $get): bool => ! $get('taxable')),
                 DatePicker::make('invoiced_at')
                     ->columnSpan(3)
+                    ->columnStart(7)
                     ->translateLabel()
                     ->native(false)
                     ->weekStartsOnMonday()
@@ -130,21 +134,39 @@ class InvoiceResource extends Resource
     {
         return $table
             ->columns([
-                //
+                ColorColumn::make('project.client.color')
+                    ->label(''),
+                TextColumn::make('title')
+                    ->translateLabel()
+                    ->searchable()
+                    ->sortable()
+                    ->description(fn (Invoice $record): string => $record->project?->client?->name)
+                    ->tooltip(fn (Invoice $record): string => $record->description),
+                TextColumn::make('price')
+                    ->translateLabel()
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel()),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                EditAction::make(),
-            ])
+            ->actions(
+                ActionGroup::make([
+                    EditAction::make()->icon('tabler-edit'),
+                    ReplicateAction::make()->icon('tabler-copy'),
+                    DeleteAction::make()->icon('tabler-trash'),
+                ])
+                ->icon('tabler-dots-vertical')
+            )
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                    DeleteBulkAction::make()->icon('tabler-trash'),
+                ])
+                ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make(),
+                CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
             ->deferLoading();

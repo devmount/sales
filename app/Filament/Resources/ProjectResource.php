@@ -120,8 +120,7 @@ class ProjectResource extends Resource
                         ? (int)$record->minimum . ' - ' . (int)$record->scope . ' ' . __('Hours')
                         : (int)$record->scope . ' ' . __('Hours')
                     )
-                    ->description(fn (Project $record): string => $record->price . ' €, ' . $record->pricing_unit->getLabel()
-                    )
+                    ->description(fn (Project $record): string => $record->price . ' €, ' . $record->pricing_unit->getLabel()),
             ])
             ->filters([
                 //
