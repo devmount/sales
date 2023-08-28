@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Enums\PricingUnit;
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource\RelationManagers;
-use App\Models\Client;
 use App\Models\Project;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;

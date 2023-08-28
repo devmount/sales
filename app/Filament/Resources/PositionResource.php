@@ -4,16 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PositionResource\Pages;
 use App\Filament\Resources\PositionResource\RelationManagers;
-use App\Models\Client;
 use App\Models\Position;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Support\Enums\FontFamily;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
@@ -24,10 +24,13 @@ use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Carbon;
 
 class PositionResource extends Resource
 {
@@ -103,6 +106,7 @@ class PositionResource extends Resource
                 TextColumn::make('amount')
                     ->label(__('Hours'))
                     ->state(fn (Position $record): float => $record->duration)
+                    ->weight(FontWeight::ExtraBold)
                     ->description(fn (Position $record): string => $record->time_range),
                 ToggleColumn::make('remote'),
                 TextColumn::make('created_at')
@@ -117,8 +121,34 @@ class PositionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('invoice')
+                    ->translateLabel()
+                    ->native(false)
+                    ->relationship('invoice', 'title', fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderByDesc('created_at'))
+                    ->searchable()
+                    ->preload(),
+                Filter::make('created_at')
+                    ->form([
+                        DatePicker::make('earliest')->translateLabel()->native(false),
+                        DatePicker::make('latest')->translateLabel()->native(false),
+                    ])
+                    ->columns(2)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['earliest'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('started_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['latest'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('finished_at', '<=', $date),
+                            );
+                    }),
+                TernaryFilter::make('remote')
+                    ->nullable()
+                    ->native(false),
+            ], layout: FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->actions(
                 ActionGroup::make([
                     EditAction::make()->icon('tabler-edit'),
