@@ -16,7 +16,6 @@
     "Deduction": "Abzug",
     "Description": "Beschreibung",
     "Discount": "Rabatt",
-    "entry": "Eintrag|Einträge",
     "Due at": "Fällig",
     "Earliest": "Früheste",
     "Email": "E-Mail",
@@ -30,6 +29,8 @@
     "Gift": "Schenkung",
     "Gifts": "Schenkungen",
     "Good": "Ware",
+    "Gross": "Brutto",
+    "Total": "Gesamt",
     "Hide date of positions in invoice.": "Das Datum einzelner Leistungspositionen in der Rechnung verbergen.",
     "Hours": "Stunden",
     "In progress": "In Arbeit",
@@ -41,6 +42,7 @@
     "Latest": "Späteste",
     "Minimum": "Minimum",
     "Name": "Name",
+    "Net": "Netto",
     "Paid at": "Beglichen am",
     "Pause duration": "Dauer der Pause",
     "Per day": "Pro Tag",
@@ -72,6 +74,8 @@
     "Undated": "Undatiert",
     "Updated at": "Aktualisiert",
     "Vat": "USt.",
+    "Vat rate": "Umsatzsteuersatz",
     "Waiting for payment": "Warten auf Bezahlung",
-    "Weight": "Gewicht"
+    "Weight": "Gewicht",
+    "entry": "Eintrag|Einträge"
 }

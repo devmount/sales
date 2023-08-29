@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('expended_at');
             $table->decimal('price', 6, 2, true);
             $table->boolean('taxable')->default(true);
-            $table->decimal('vat', 4, 2, true)->nullable();
+            $table->decimal('vat_rate', 4, 2, true)->nullable();
             $table->integer('quantity');
             $table->string('category');
             $table->text('description')->nullable();

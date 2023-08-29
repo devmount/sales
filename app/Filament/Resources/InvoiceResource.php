@@ -32,6 +32,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Carbon;
+use NumberFormatter;
 
 class InvoiceResource extends Resource
 {
@@ -95,7 +96,7 @@ class InvoiceResource extends Resource
                     ->translateLabel()
                     ->inline(false)
                     ->default(true),
-                TextInput::make('vat')
+                TextInput::make('vat_rate')
                     ->columnSpan(5)
                     ->translateLabel()
                     ->numeric()
@@ -156,7 +157,18 @@ class InvoiceResource extends Resource
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->net)
                     ->description(fn (Invoice $record): string => count($record->positions) . ' ' . trans_choice('entry', count($record->positions))),
-                    // ->summarize(Sum::make()->money('eur')),
+                TextColumn::make('net')
+                    ->translateLabel()
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn (Invoice $record): float => $record->net)
+                    ->description(fn (Invoice $record): string => count($record->positions) . ' ' . trans_choice('entry', count($record->positions))),
+                TextColumn::make('total')
+                    ->translateLabel()
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn (Invoice $record): float => $record->final)
+                    ->description(fn (Invoice $record): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY))->formatCurrency($record->vat, 'eur') . ' ' . __('Vat')),
                 TextColumn::make('created_at')
                     ->translateLabel()
                     ->datetime('j. F Y, H:i:s')

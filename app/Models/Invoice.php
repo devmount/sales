@@ -57,12 +57,20 @@ class Invoice extends Model
     }
 
     /**
+     * Vat amount of current net amount
+     */
+    public function getVatAttribute()
+    {
+        return $this->net * $this->vat_rate;
+    }
+
+    /**
      * Gross amount of all assigned positions
      */
     public function getGrossAttribute()
     {
         return $this->taxable
-            ? $this->net * ($this->vat+1)
+            ? $this->net + $this->vat
             : $this->net;
     }
 

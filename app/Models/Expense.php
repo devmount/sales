@@ -26,4 +26,14 @@ class Expense extends Model
     {
         return substr($this->expanded_at, 0 ,4);
     }
+
+    /**
+     * Vat amount of this expense
+     */
+    public function getVatAttribute()
+    {
+        return $this->taxable
+            ? $this->price - ($this->price / ($this->vat_rate+1))
+            : 0;
+    }
 }

@@ -65,7 +65,7 @@ class ExpenseResource extends Resource
                     ->translateLabel()
                     ->inline(false)
                     ->columnSpan(1),
-                TextInput::make('vat')
+                TextInput::make('vat_rate')
                     ->translateLabel()
                     ->numeric()
                     ->step(0.01)
@@ -97,7 +97,7 @@ class ExpenseResource extends Resource
                     ->date('j. F Y')
                     ->sortable(),
                 TextColumn::make('price')
-                    ->translateLabel()
+                    ->label(__('Gross'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->alignment(Alignment::End)
@@ -106,10 +106,14 @@ class ExpenseResource extends Resource
                 IconColumn::make('taxable')
                     ->translateLabel()
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('vat')
                     ->translateLabel()
-                    ->numeric()
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn (Expense $record): float => $record->vat)
+                    ->color(fn (string $state): string => $state == 0 ? 'gray' : 'normal')
                     ->sortable(),
                 TextColumn::make('quantity')
                     ->translateLabel()
@@ -120,6 +124,8 @@ class ExpenseResource extends Resource
                     ->translateLabel()
                     ->badge()
                     ->sortable(),
+                TextColumn::make('description')
+                    ->translateLabel(),
                 TextColumn::make('created_at')
                     ->translateLabel()
                     ->datetime('j. F Y, H:i:s')

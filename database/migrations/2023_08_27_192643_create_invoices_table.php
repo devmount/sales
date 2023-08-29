@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('taxable')->default(true);
             $table->boolean('transitory')->default(false);
             $table->boolean('undated')->default(false);
-            $table->decimal('vat', 4, 2, true)->nullable();
+            $table->decimal('vat_rate', 4, 2, true)->nullable();
             $table->date('invoiced_at')->nullable();
             $table->date('paid_at')->nullable();
             $table->decimal('deduction', 8, 2, true)->nullable();
