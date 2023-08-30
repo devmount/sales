@@ -38,6 +38,18 @@ class Invoice extends Model
     }
 
     /**
+     * Number of hours worked for this invoice
+     */
+    public function getHoursAttribute()
+    {
+        $hours = 0;
+        foreach ($this->positions as $position) {
+            $hours += $position->duration;
+        }
+        return $hours;
+    }
+
+    /**
      * Net amount of all assigned positions
      */
     public function getNetAttribute()
@@ -46,12 +58,10 @@ class Invoice extends Model
         if ($this->pricing_unit === PricingUnit::Project) {
             $net = $this->price;
         } else {
-            foreach ($this->positions as $position) {
-                $net += $position->duration * $this->price / match ($this->pricing_unit) {
-                    PricingUnit::Hour => 1,
-                    PricingUnit::Day => 8,
-                };
-            }
+            $net += $this->hours * $this->price / match ($this->pricing_unit) {
+                PricingUnit::Hour => 1,
+                PricingUnit::Day => 8,
+            };
         }
         return $net - $this->discount;
     }
