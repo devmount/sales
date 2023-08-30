@@ -5,8 +5,10 @@ namespace App\Providers;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
+use Filament\Support\Assets\Js;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Filament only saves valid data to models so the models can be unguarded safely
         Model::unguard();
+
+        // Register assets
+        FilamentAsset::register([
+            Js::make('jspdf-script', asset('js/jspdf.umd.min.js')),
+        ]);
 
         // Customize Filament colors
         FilamentColor::register([

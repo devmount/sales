@@ -5,9 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
-use App\Models\Client;
 use App\Models\Invoice;
-use App\Models\Project;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -17,6 +15,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
@@ -188,6 +187,9 @@ class InvoiceResource extends Resource
                     EditAction::make()->icon('tabler-edit'),
                     ReplicateAction::make()->icon('tabler-copy'),
                     DeleteAction::make()->icon('tabler-trash'),
+                    Action::make('download')
+                        ->url(fn (Invoice $record): string => static::getUrl('download', ['record' => $record]))
+                        ->openUrlInNewTab(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
@@ -217,6 +219,7 @@ class InvoiceResource extends Resource
             'index' => Pages\ListInvoices::route('/'),
             'create' => Pages\CreateInvoice::route('/create'),
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            'download' => Pages\DownloadInvoice::route('/{record}/download'),
         ];
     }
 
