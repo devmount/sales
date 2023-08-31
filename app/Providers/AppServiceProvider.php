@@ -9,6 +9,9 @@ use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Assets\Js;
+use Filament\Tables\Actions\Action;
+use Filament\Support\Enums\IconSize;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +30,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // Filament only saves valid data to models so the models can be unguarded safely
         Model::unguard();
+
+        Action::configureUsing(function (Action $action): void {
+            $action->iconSize(IconSize::Large);
+        });
 
         // Register assets
         FilamentAsset::register([
