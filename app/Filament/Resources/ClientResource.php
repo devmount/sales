@@ -2,31 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\LanguageCode;
 use App\Filament\Resources\ClientResource\Pages;
-use App\Filament\Resources\ClientResource\RelationManagers;
 use App\Mail\ContactClient;
 use App\Models\Client;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\ReplicateAction;
-use Filament\Tables\Columns\ColorColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Support\Enums\FontFamily;
+use Filament\Tables\Actions;
+use Filament\Tables\Columns;
+use Filament\Tables\Filters;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Mail;
 
 class ClientResource extends Resource
@@ -39,32 +27,47 @@ class ClientResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label(__('name'))
-                    ->required(),
-                TextInput::make('short')
-                    ->label(__('short')),
-                ColorPicker::make('color')
-                    ->label(__('color')),
-                Textarea::make('address')
-                    ->label(__('address'))
-                    ->rows(4)
-                    ->autosize()
-                    ->required(),
-                TextInput::make('email')
-                    ->label(__('email'))
-                    ->email(),
-                TextInput::make('phone')
-                    ->label(__('phone'))
-                    ->tel(),
-                Select::make('language')
-                    ->label(__('language'))
-                    ->options([
-                        'de' => 'DE',
-                        'en' => 'EN',
+                Components\Section::make()
+                    ->columns(12)
+                    ->schema([
+                        Components\TextInput::make('name')
+                            ->label(__('name'))
+                            ->hint(__('client.name.hint'))
+                            ->hintIcon('tabler-info-circle')
+                            ->columnSpan(6)
+                            ->required(),
+                        Components\TextInput::make('short')
+                            ->label(__('short'))
+                            ->columnSpan(3)
+                            ->suffixIcon('tabler-letter-spacing'),
+                        Components\ColorPicker::make('color')
+                            ->label(__('color'))
+                            ->columnSpan(3)
+                            ->suffixIcon('tabler-palette'),
+                        Components\Textarea::make('address')
+                            ->label(__('address'))
+                            ->columnSpan(6)
+                            ->rows(4)
+                            ->autosize()
+                            ->required(),
+                        Components\Select::make('language')
+                            ->label(__('language'))
+                            ->columnSpan(6)
+                            ->suffixIcon('tabler-language')
+                            ->options(LanguageCode::class)
+                            ->native(false)
+                            ->required(),
+                        Components\TextInput::make('email')
+                            ->label(__('email'))
+                            ->columnSpan(6)
+                            ->suffixIcon('tabler-mail')
+                            ->email(),
+                        Components\TextInput::make('phone')
+                            ->label(__('phone'))
+                            ->columnSpan(6)
+                            ->suffixIcon('tabler-phone')
+                            ->tel(),
                     ])
-                    ->native(false)
-                    ->required(),
             ]);
     }
 
@@ -72,46 +75,54 @@ class ClientResource extends Resource
     {
         return $table
             ->columns([
-                ColorColumn::make('color')
+                Columns\ColorColumn::make('color')
                     ->label(''),
-                TextColumn::make('name')
+                Columns\TextColumn::make('name')
                     ->label(__('name'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Client $record): string => $record->address)
                     ->wrap(),
-                TextColumn::make('language')
+                Columns\TextColumn::make('language')
                     ->label(__('language'))
                     ->badge()
                     ->sortable(),
-                TextColumn::make('created_at')
+                Columns\TextColumn::make('net')
+                    ->label(__('net'))
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn (Client $record): float => $record->net)
+                    ->description(fn (Client $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
+                Columns\TextColumn::make('days_to_pay')
+                    ->label(__('payment'))
+                    ->numeric(1)
+                    ->state(fn (Client $record): float => $record->avg_payment_delay)
+                    ->description(__('days')),
+                Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->since()
                     ->sortable(),
-                TextColumn::make('updated_at')
+                Columns\TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('language')
+                Filters\SelectFilter::make('language')
                     ->label(__('language'))
-                    ->options([
-                        'de' => 'DE',
-                        'en' => 'EN',
-                    ])
+                    ->options(LanguageCode::class)
                     ->native(false),
             ])
-            ->actions(ActionGroup::make([
-                EditAction::make()->icon('tabler-edit'),
-                Action::make('kontaktieren')
+            ->actions(Actions\ActionGroup::make([
+                Actions\EditAction::make()->icon('tabler-edit'),
+                Actions\Action::make('kontaktieren')
                     ->icon('tabler-mail')
                     ->form(fn (Client $record) => [
-                        TextInput::make('subject')
+                        Components\TextInput::make('subject')
                             ->label(__('subject'))
                             ->required(),
-                        RichEditor::make('content')
+                        Components\RichEditor::make('content')
                             ->label(__('content'))
                             ->required()
                             ->default(__("email.template.contact.body", ['name' => $record->name])),
@@ -121,17 +132,17 @@ class ClientResource extends Resource
                             (new ContactClient(body: $data['content']))->subject($data['subject'])
                         );
                     }),
-                ReplicateAction::make()->icon('tabler-copy'),
-                DeleteAction::make()->icon('tabler-trash'),
+                Actions\ReplicateAction::make()->icon('tabler-copy'),
+                Actions\DeleteAction::make()->icon('tabler-trash'),
             ]))
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
             ->deferLoading();

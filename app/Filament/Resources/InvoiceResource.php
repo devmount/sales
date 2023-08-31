@@ -16,8 +16,6 @@ use Filament\Tables\Columns;
 use Filament\Tables\Columns\Summarizers;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Carbon;
 use NumberFormatter;
 
 class InvoiceResource extends Resource
@@ -119,7 +117,7 @@ class InvoiceResource extends Resource
                             ->weekStartsOnMonday()
                             ->suffixIcon('tabler-calendar-down'),
                     ])
-                ]);
+            ]);
     }
 
     public static function table(Table $table): Table
