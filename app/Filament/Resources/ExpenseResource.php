@@ -42,19 +42,19 @@ class ExpenseResource extends Resource
             ->columns(6)
             ->schema([
                 DatePicker::make('expended_at')
-                    ->translateLabel()
+                    ->label(__('expendedAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->required()
                     ->columnSpan(3),
                 Select::make('category')
-                    ->translateLabel()
+                    ->label(__('category'))
                     ->options(ExpenseCategory::class)
                     ->native(false)
                     ->required()
                     ->columnSpan(3),
                 TextInput::make('price')
-                    ->translateLabel()
+                    ->label(__('price'))
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
@@ -62,11 +62,11 @@ class ExpenseResource extends Resource
                     ->required()
                     ->columnSpan(3),
                 Toggle::make('taxable')
-                    ->translateLabel()
+                    ->label(__('taxable'))
                     ->inline(false)
                     ->columnSpan(1),
                 TextInput::make('vat_rate')
-                    ->translateLabel()
+                    ->label(__('vatRate'))
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
@@ -75,14 +75,14 @@ class ExpenseResource extends Resource
                     ->columnSpan(2)
                     ->hidden(fn (Get $get): bool => ! $get('taxable')),
                 TextInput::make('quantity')
-                    ->translateLabel()
+                    ->label(__('quantity'))
                     ->numeric()
                     ->step(1)
                     ->minValue(1)
                     ->required()
                     ->columnSpan(3),
                 Textarea::make('description')
-                    ->translateLabel()
+                    ->label(__('description'))
                     ->maxLength(65535)
                     ->columnSpan(3),
             ]);
@@ -93,46 +93,46 @@ class ExpenseResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('expended_at')
-                    ->translateLabel()
+                    ->label(__('expendedAt'))
                     ->date('j. F Y')
                     ->sortable(),
                 TextColumn::make('price')
-                    ->label(__('Gross'))
+                    ->label(__('gross'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->alignment(Alignment::End)
                     ->sortable()
                     ->summarize(Sum::make()->money('eur')),
                 IconColumn::make('taxable')
-                    ->translateLabel()
+                    ->label(__('taxable'))
                     ->boolean()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('vat')
-                    ->translateLabel()
+                    ->label(__('vat'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Expense $record): float => $record->vat)
                     ->color(fn (string $state): string => $state == 0 ? 'gray' : 'normal')
                     ->sortable(),
                 TextColumn::make('quantity')
-                    ->translateLabel()
+                    ->label(__('quantity'))
                     ->numeric()
                     ->sortable()
                     ->summarize(Sum::make()),
                 TextColumn::make('category')
-                    ->translateLabel()
+                    ->label(__('category'))
                     ->badge()
                     ->sortable(),
                 TextColumn::make('description')
-                    ->translateLabel(),
+                    ->label(__('description')),
                 TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -179,22 +179,22 @@ class ExpenseResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Core data');
+        return __('coreData');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Expenses');
+        return trans_choice('expense', 2);
     }
 
     public static function getModelLabel(): string
     {
-        return __('Expense');
+        return trans_choice('expense', 1);
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Expenses');
+        return trans_choice('expense', 2);
     }
 
     public static function getEloquentQuery(): Builder

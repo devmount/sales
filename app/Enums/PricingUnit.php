@@ -14,9 +14,9 @@ enum PricingUnit: string implements HasLabel, HasColor
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Hour => __('Per hour'),
-            self::Day => __('Per day'),
-            self::Project => __('Per project'),
+            self::Hour => __('perHour'),
+            self::Day => __('perDay'),
+            self::Project => __('perProject'),
         };
     }
 

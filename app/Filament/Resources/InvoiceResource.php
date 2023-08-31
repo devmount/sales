@@ -45,8 +45,8 @@ class InvoiceResource extends Resource
             ->columns(12)
             ->schema([
                 Select::make('project_id')
+                    ->label(trans_choice('project', 1))
                     ->columnSpan(6)
-                    ->translateLabel()
                     ->relationship('project', 'title')
                     ->native(false)
                     ->searchable()
@@ -54,81 +54,81 @@ class InvoiceResource extends Resource
                     ->suffixIcon('tabler-package')
                     ->required(),
                 Toggle::make('transitory')
+                    ->label(__('transitory'))
                     ->columnSpan(6)
-                    ->translateLabel()
                     ->inline(false)
-                    ->helperText(__('This invoice only contains transitory items.')),
+                    ->helperText(__('invoice.onlyTransitory')),
                 TextInput::make('title')
+                    ->label(__('title'))
                     ->columnSpan(6)
-                    ->translateLabel()
                     ->required(),
                 Textarea::make('description')
+                    ->label(__('description'))
                     ->columnSpan(6)
-                    ->translateLabel()
                     ->autosize()
                     ->maxLength(65535),
                 TextInput::make('price')
+                    ->label(__('price'))
                     ->columnSpan(3)
-                    ->translateLabel()
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffixIcon('tabler-currency-euro')
                     ->required(),
                 Select::make('pricing_unit')
+                    ->label(__('pricingUnit'))
                     ->columnSpan(3)
-                    ->translateLabel()
                     ->options(PricingUnit::class)
                     ->native(false)
                     ->suffixIcon('tabler-clock-2')
                     ->required(),
                 TextInput::make('discount')
+                    ->label(__('discount'))
                     ->columnSpan(6)
-                    ->translateLabel()
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffixIcon('tabler-currency-euro')
-                    ->helperText(__('Price reduction before taxation.')),
+                    ->helperText(__('priceBeforeTax')),
                 Toggle::make('taxable')
+                    ->label(__('taxable'))
                     ->columnSpan(1)
-                    ->translateLabel()
                     ->inline(false)
                     ->default(true),
                 TextInput::make('vat_rate')
+                    ->label(__('vatRate'))
                     ->columnSpan(5)
-                    ->translateLabel()
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffixIcon('tabler-receipt-tax')
                     ->hidden(fn (Get $get): bool => ! $get('taxable')),
                 DatePicker::make('invoiced_at')
+                    ->label(__('invoicedAt'))
                     ->columnSpan(3)
                     ->columnStart(7)
-                    ->translateLabel()
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->suffixIcon('tabler-calendar-up'),
                 DatePicker::make('paid_at')
+                    ->label(__('paidAt'))
                     ->columnSpan(3)
-                    ->translateLabel()
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->suffixIcon('tabler-calendar-down'),
                 TextInput::make('deduction')
+                    ->label(__('deduction'))
                     ->columnSpan(6)
-                    ->translateLabel()
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffixIcon('tabler-currency-euro')
-                    ->helperText(__('Price reduction after taxation.')),
+                    ->helperText(__('priceAfterTax')),
                 Toggle::make('undated')
+                    ->label(__('undated'))
                     ->columnSpan(6)
-                    ->translateLabel()
                     ->inline(false)
-                    ->helperText(__('Hide date of positions in invoice.')),
+                    ->helperText(__('hidePositionsDate')),
             ]);
     }
 
@@ -139,42 +139,36 @@ class InvoiceResource extends Resource
                 ColorColumn::make('project.client.color')
                     ->label(''),
                 TextColumn::make('title')
-                    ->translateLabel()
+                    ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Invoice $record): string => $record->project?->client?->name)
                     ->tooltip(fn (Invoice $record): string => $record->description),
                 TextColumn::make('price')
-                    ->translateLabel()
+                    ->label(__('price'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel())
                     ->summarize(Average::make()->money('eur')),
                 TextColumn::make('net')
-                    ->translateLabel()
+                    ->label(__('net'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->net)
-                    ->description(fn (Invoice $record): string => count($record->positions) . ' ' . trans_choice('entry', count($record->positions))),
-                TextColumn::make('net')
-                    ->translateLabel()
-                    ->money('eur')
-                    ->fontFamily(FontFamily::Mono)
-                    ->state(fn (Invoice $record): float => $record->net)
-                    ->description(fn (Invoice $record): string => count($record->positions) . ' ' . trans_choice('entry', count($record->positions))),
+                    ->description(fn (Invoice $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
                 TextColumn::make('total')
-                    ->translateLabel()
+                    ->label(__('total'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->final)
-                    ->description(fn (Invoice $record): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY))->formatCurrency($record->vat, 'eur') . ' ' . __('Vat')),
+                    ->description(fn (Invoice $record): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY))->formatCurrency($record->vat, 'eur') . ' ' . __('vat')),
                 TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -225,22 +219,22 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Core data');
+        return __('coreData');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Invoices');
+        return trans_choice('invoice', 2);
     }
 
     public static function getModelLabel(): string
     {
-        return __('Invoice');
+        return trans_choice('invoice', 1);
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Invoices');
+        return trans_choice('invoice', 2);
     }
 
     public static function getEloquentQuery(): Builder

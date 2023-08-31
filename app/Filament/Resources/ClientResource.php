@@ -40,25 +40,25 @@ class ClientResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->translateLabel()
+                    ->label(__('name'))
                     ->required(),
                 TextInput::make('short')
-                    ->translateLabel(),
+                    ->label(__('short')),
                 ColorPicker::make('color')
-                    ->translateLabel(),
+                    ->label(__('color')),
                 Textarea::make('address')
-                    ->translateLabel()
+                    ->label(__('address'))
                     ->rows(4)
                     ->autosize()
                     ->required(),
                 TextInput::make('email')
-                    ->translateLabel()
+                    ->label(__('email'))
                     ->email(),
                 TextInput::make('phone')
-                    ->translateLabel()
+                    ->label(__('phone'))
                     ->tel(),
                 Select::make('language')
-                    ->translateLabel()
+                    ->label(__('language'))
                     ->options([
                         'de' => 'DE',
                         'en' => 'EN',
@@ -75,27 +75,28 @@ class ClientResource extends Resource
                 ColorColumn::make('color')
                     ->label(''),
                 TextColumn::make('name')
+                    ->label(__('name'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Client $record): string => $record->address)
                     ->wrap(),
                 TextColumn::make('language')
-                    ->translateLabel()
+                    ->label(__('language'))
                     ->badge()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label(__('createdAt'))
                     ->since()
                     ->sortable(),
                 TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('language')
-                    ->translateLabel()
+                    ->label(__('language'))
                     ->options([
                         'de' => 'DE',
                         'en' => 'EN',
@@ -108,12 +109,12 @@ class ClientResource extends Resource
                     ->icon('tabler-mail')
                     ->form(fn (Client $record) => [
                         TextInput::make('subject')
-                            ->translateLabel()
+                            ->label(__('subject'))
                             ->required(),
                         RichEditor::make('content')
-                            ->translateLabel()
+                            ->label(__('content'))
                             ->required()
-                            ->default(__("<p>Hi :Name,</p><p> </p><p>Best regards<br>Andreas Müller</p>", ['name' => $record->name])),
+                            ->default(__("email.template.contact.body", ['name' => $record->name])),
                     ])
                     ->action(function (Client $record, array $data) {
                         Mail::to($record->email)->send(
@@ -154,22 +155,22 @@ class ClientResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Core data');
+        return __('coreData');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Clients');
+        return trans_choice('client', 2);
     }
 
     public static function getModelLabel(): string
     {
-        return __('Client');
+        return trans_choice('client', 1);
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Clients');
+        return trans_choice('client', 2);
     }
 
     public static function getEloquentQuery(): Builder

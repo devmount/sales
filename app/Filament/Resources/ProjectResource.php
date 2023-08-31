@@ -38,7 +38,7 @@ class ProjectResource extends Resource
         return $form
             ->schema([
                 Select::make('client_id')
-                    ->translateLabel()
+                    ->label(trans_choice('client', 1))
                     ->relationship('client', 'name')
                     ->native(false)
                     ->searchable()
@@ -46,46 +46,46 @@ class ProjectResource extends Resource
                     ->suffixIcon('tabler-users')
                     ->required(),
                 Toggle::make('aborted')
-                    ->translateLabel()
+                    ->label(__('aborted'))
                     ->inline(false),
                 TextInput::make('title')
-                    ->translateLabel()
+                    ->label(__('title'))
                     ->required(),
                 Textarea::make('description')
-                    ->translateLabel()
+                    ->label(__('description'))
                     ->autosize()
                     ->maxLength(65535),
                 DatePicker::make('start_at')
-                    ->translateLabel()
+                    ->label(__('startAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->suffixIcon('tabler-calendar-plus'),
                 DatePicker::make('due_at')
-                    ->translateLabel()
+                    ->label(__('dueAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->suffixIcon('tabler-calendar-check'),
                 TextInput::make('minimum')
-                    ->translateLabel()
+                    ->label(__('minimum'))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffixIcon('tabler-clock-check'),
                 TextInput::make('scope')
-                    ->translateLabel()
+                    ->label(__('scope'))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffixIcon('tabler-clock-exclamation'),
                 TextInput::make('price')
-                    ->translateLabel()
+                    ->label(__('price'))
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffixIcon('tabler-currency-euro')
                     ->required(),
                 Select::make('pricing_unit')
-                    ->translateLabel()
+                    ->label(__('pricingUnit'))
                     ->options(PricingUnit::class)
                     ->native(false)
                     ->suffixIcon('tabler-clock-2')
@@ -100,13 +100,13 @@ class ProjectResource extends Resource
                 ColorColumn::make('client.color')
                     ->label(''),
                 TextColumn::make('title')
-                    ->translateLabel()
+                    ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Project $record): string => $record->client?->name)
                     ->tooltip(fn (Project $record): string => $record->description),
                 TextColumn::make('date_range')
-                    ->translateLabel()
+                    ->label(__('dateRange'))
                     ->state(fn (Project $record): string => Carbon::parse($record->start_at)
                         ->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
                     )
@@ -114,19 +114,19 @@ class ProjectResource extends Resource
                         ->isoFormat('ll') . ' - ' . Carbon::parse($record->due_at)->isoFormat('ll')
                 ),
                 TextColumn::make('scope')
-                    ->translateLabel()
+                    ->label(__('scope'))
                     ->state(fn (Project $record): string => $record->minimum != $record->scope
-                        ? (int)$record->minimum . ' - ' . (int)$record->scope . ' ' . __('Hours')
-                        : (int)$record->scope . ' ' . __('Hours')
+                        ? (int)$record->minimum . ' - ' . (int)$record->scope . ' ' . trans_choice('hour', 2)
+                        : (int)$record->scope . ' ' . trans_choice('hour', (int)$record->scope)
                     )
                     ->description(fn (Project $record): string => $record->price . ' €, ' . $record->pricing_unit->getLabel()),
                 TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -173,22 +173,22 @@ class ProjectResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Core data');
+        return __('coreData');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Projects');
+        return trans_choice('project', 2);
     }
 
     public static function getModelLabel(): string
     {
-        return __('Project');
+        return trans_choice('project', 1);
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Projects');
+        return trans_choice('project', 2);
     }
 
     public static function getEloquentQuery(): Builder

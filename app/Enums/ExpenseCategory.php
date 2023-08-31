@@ -15,10 +15,10 @@ enum ExpenseCategory: string implements HasLabel, HasColor
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Vat => __('Vat'),
-            self::Good => __('Good'),
-            self::Service => __('Service'),
-            self::Tax => __('Tax'),
+            self::Vat => __('vat'),
+            self::Good => __('good'),
+            self::Service => __('service'),
+            self::Tax => __('tax'),
         };
     }
 

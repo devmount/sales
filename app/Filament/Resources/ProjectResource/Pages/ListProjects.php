@@ -24,17 +24,17 @@ class ListProjects extends ListRecords
     {
         return [
             'active' => Tab::make()
-                ->label(__('Active'))
+                ->label(__('active'))
                 ->badge(Project::query()->where('start_at', '<=', now())->where('due_at', '>=', now())->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('start_at', '<=', now())->where('due_at', '>=', now())),
             'finished' => Tab::make()
-                ->label(__('Finished'))
+                ->label(__('finished'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('due_at', '<=', now())),
             'aborted' => Tab::make()
-                ->label(__('Aborted'))
+                ->label(__('aborted'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('aborted', true)),
             'all' => Tab::make()
-                ->label(__('All')),
+                ->label(__('all')),
         ];
     }
 }

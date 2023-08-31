@@ -44,7 +44,7 @@ class PositionResource extends Resource
             ->columns(12)
             ->schema([
                 Select::make('invoice_id')
-                    ->translateLabel()
+                    ->label(trans_choice('invoice', 1))
                     ->relationship('invoice', 'title')
                     ->native(false)
                     ->searchable()
@@ -52,12 +52,12 @@ class PositionResource extends Resource
                     ->required()
                     ->columnSpan(6),
                 Toggle::make('remote')
-                    ->translateLabel()
+                    ->label(__('remote'))
                     ->inline(false)
                     ->default(true)
                     ->columnSpan(6),
                 DateTimePicker::make('started_at')
-                    ->translateLabel()
+                    ->label(__('startedAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->seconds(false)
@@ -66,7 +66,7 @@ class PositionResource extends Resource
                     ->required()
                     ->columnSpan(3),
                 DateTimePicker::make('finished_at')
-                    ->translateLabel()
+                    ->label(__('finishedAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->seconds(false)
@@ -75,14 +75,14 @@ class PositionResource extends Resource
                     ->required()
                     ->columnSpan(3),
                 TextInput::make('pause_duration')
-                    ->translateLabel()
+                    ->label(__('pauseDuration'))
                     ->numeric()
                     ->step(.01)
                     ->minValue(0)
                     ->required()
                     ->columnSpan(6),
                 Textarea::make('description')
-                    ->translateLabel()
+                    ->label(__('description'))
                     ->autosize()
                     ->maxLength(65535)
                     ->required()
@@ -98,39 +98,44 @@ class PositionResource extends Resource
                     ->label('')
                     ->tooltip(fn (Position $record): string => $record->invoice?->project?->client?->name),
                 TextColumn::make('description')
-                    ->translateLabel()
+                    ->label(__('description'))
                     ->searchable()
                     ->tooltip(fn (Position $record): string => $record->invoice?->title)
                     ->formatStateUsing(fn (string $state): string => nl2br($state))
                     ->html(),
                 TextColumn::make('amount')
-                    ->label(__('Hours'))
+                    ->label(trans_choice('hour', 2))
                     ->state(fn (Position $record): float => $record->duration)
                     ->weight(FontWeight::ExtraBold)
                     ->description(fn (Position $record): string => $record->time_range),
-                ToggleColumn::make('remote'),
+                ToggleColumn::make('remote')
+                    ->label(__('remote')),
                 TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('invoice')
-                    ->translateLabel()
+                    ->label(trans_choice('invoice', 1))
                     ->native(false)
                     ->relationship('invoice', 'title', fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderByDesc('created_at'))
                     ->searchable()
                     ->preload(),
                 Filter::make('created_at')
                     ->form([
-                        DatePicker::make('earliest')->translateLabel()->native(false),
-                        DatePicker::make('latest')->translateLabel()->native(false),
+                        DatePicker::make('earliest')
+                            ->label(__('earliest'))
+                            ->native(false),
+                        DatePicker::make('latest')
+                            ->label(__('latest'))
+                            ->native(false),
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
@@ -179,22 +184,22 @@ class PositionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Core data');
+        return __('coreData');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Positions');
+        return trans_choice('position', 2);
     }
 
     public static function getModelLabel(): string
     {
-        return __('Position');
+        return trans_choice('position', 1);
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Positions');
+        return trans_choice('position', 2);
     }
 
     public static function getEloquentQuery(): Builder

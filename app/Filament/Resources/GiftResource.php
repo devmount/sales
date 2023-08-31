@@ -35,20 +35,20 @@ class GiftResource extends Resource
         return $form
             ->schema([
                 DatePicker::make('received_at')
-                    ->translateLabel()
+                    ->label(__('receivedAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->required(),
                 TextInput::make('subject')
-                    ->translateLabel()
+                    ->label(__('subject'))
                     ->required(),
                 TextInput::make('name')
-                    ->translateLabel(),
+                    ->label(__('name')),
                 TextInput::make('email')
-                    ->translateLabel()
+                    ->label(__('email'))
                     ->email(),
                 TextInput::make('amount')
-                    ->translateLabel()
+                    ->label(__('amount'))
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
@@ -62,20 +62,20 @@ class GiftResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('received_at')
-                    ->translateLabel()
+                    ->label(__('receivedAt'))
                     ->date('j. F Y')
                     ->sortable(),
                 TextColumn::make('subject')
-                    ->translateLabel()
+                    ->label(__('subject'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
-                    ->translateLabel()
+                    ->label(__('name'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Gift $record): string => $record->email ?? ''),
                 TextColumn::make('amount')
-                    ->translateLabel()
+                    ->label(__('amount'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->alignment(Alignment::End)
@@ -83,12 +83,12 @@ class GiftResource extends Resource
                     ->summarize(Sum::make()
                     ->money('eur')),
                 TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -135,22 +135,22 @@ class GiftResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Core data');
+        return __('coreData');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Gifts');
+        return trans_choice('gift', 2);
     }
 
     public static function getModelLabel(): string
     {
-        return __('Gift');
+        return trans_choice('gift', 1);
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Gifts');
+        return trans_choice('gift', 2);
     }
 
     public static function getEloquentQuery(): Builder

@@ -24,18 +24,18 @@ class ListInvoices extends ListRecords
     {
         return [
             'active' => Tab::make()
-                ->label(__('In progress'))
+                ->label(__('inProgress'))
                 ->badge(Invoice::query()->whereNull('invoiced_at')->whereNull('paid_at')->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')),
             'finished' => Tab::make()
-                ->label(__('Waiting for payment'))
+                ->label(__('waitingForPayment'))
                 ->badge(Invoice::query()->whereNotNull('invoiced_at')->whereNull('paid_at')->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNull('paid_at')),
             'aborted' => Tab::make()
-                ->label(__('Finished'))
+                ->label(__('finished'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNotNull('paid_at')),
             'all' => Tab::make()
-                ->label(__('All')),
+                ->label(__('all')),
         ];
     }
 }

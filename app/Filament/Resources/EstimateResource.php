@@ -33,27 +33,27 @@ class EstimateResource extends Resource
         return $form
             ->schema([
                 Select::make('project_id')
-                    ->translateLabel()
+                    ->label(trans_choice('project', 1))
                     ->relationship('project', 'title')
                     ->native(false)
                     ->searchable()
                     ->suffixIcon('tabler-package')
                     ->required(),
                 TextInput::make('title')
-                    ->translateLabel()
+                    ->label(__('title'))
                     ->required(),
                 Textarea::make('description')
-                    ->translateLabel()
+                    ->label(__('description'))
                     ->autosize()
                     ->maxLength(65535),
                 TextInput::make('amount')
-                    ->translateLabel()
+                    ->label(__('amount'))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffixIcon('tabler-clock-exclamation'),
                 TextInput::make('weight')
-                    ->translateLabel()
+                    ->label(__('weight'))
                     ->numeric()
                     ->step(1)
                     ->suffixIcon('tabler-arrows-sort'),
@@ -69,25 +69,25 @@ class EstimateResource extends Resource
                     ->label('')
                     ->tooltip(fn (Estimate $record): string => $record->project?->client?->name),
                 TextColumn::make('title')
-                    ->translateLabel()
+                    ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Estimate $record): string => substr($record->description, 0, 75) . '...'),
                 TextColumn::make('amount')
-                    ->label(__('Hours'))
+                    ->label(trans_choice('hour', 2))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('weight')
-                    ->translateLabel()
+                    ->label(__('weight'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -125,21 +125,21 @@ class EstimateResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Core data');
+        return __('coreData');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Estimates');
+        return trans_choice('estimate', 2);
     }
 
     public static function getModelLabel(): string
     {
-        return __('Estimate');
+        return trans_choice('estimate', 1);
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Estimates');
+        return trans_choice('estimate', 2);
     }
 }
