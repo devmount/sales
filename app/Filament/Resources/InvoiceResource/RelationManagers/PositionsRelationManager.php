@@ -34,6 +34,7 @@ class PositionsRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form
+            ->columns(12)
             ->schema([
                 DateTimePicker::make('started_at')
                     ->label(__('startedAt'))
@@ -43,7 +44,8 @@ class PositionsRelationManager extends RelationManager
                     ->minutesStep(30)
                     ->default(now()->setHour(9)->setMinute(0))
                     ->required()
-                    ->columnSpan(3),
+                    ->suffixIcon('tabler-calendar-up')
+                    ->columnSpan(4),
                 DateTimePicker::make('finished_at')
                     ->label(__('finishedAt'))
                     ->native(false)
@@ -52,19 +54,22 @@ class PositionsRelationManager extends RelationManager
                     ->minutesStep(30)
                     ->default(now()->setHour(17)->setMinute(0))
                     ->required()
-                    ->columnSpan(3),
+                    ->suffixIcon('tabler-calendar-down')
+                    ->columnSpan(4),
                 TextInput::make('pause_duration')
                     ->label(__('pauseDuration'))
                     ->numeric()
                     ->step(.01)
                     ->minValue(0)
-                    ->required()
+                    ->default(0)
+                    ->suffix('h')
+                    ->suffixIcon('tabler-coffee')
                     ->columnSpan(3),
                 Toggle::make('remote')
                     ->label(__('remote'))
                     ->inline(false)
                     ->default(true)
-                    ->columnSpan(3),
+                    ->columnSpan(1),
                 Textarea::make('description')
                     ->label(__('description'))
                     ->autosize()

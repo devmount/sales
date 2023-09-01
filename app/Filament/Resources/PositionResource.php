@@ -79,7 +79,7 @@ class PositionResource extends Resource
                     ->numeric()
                     ->step(.01)
                     ->minValue(0)
-                    ->required()
+                    ->default(0)
                     ->columnSpan(6),
                 Textarea::make('description')
                     ->label(__('description'))
