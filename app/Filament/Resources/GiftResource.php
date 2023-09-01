@@ -3,26 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\GiftResource\Pages;
-use App\Filament\Resources\GiftResource\RelationManagers;
 use App\Models\Gift;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\ReplicateAction;
+use Filament\Tables\Actions;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GiftResource extends Resource
 {
@@ -34,20 +24,20 @@ class GiftResource extends Resource
     {
         return $form
             ->schema([
-                DatePicker::make('received_at')
+                Components\DatePicker::make('received_at')
                     ->label(__('receivedAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->required(),
-                TextInput::make('subject')
+                Components\TextInput::make('subject')
                     ->label(__('subject'))
                     ->required(),
-                TextInput::make('name')
+                Components\TextInput::make('name')
                     ->label(__('name')),
-                TextInput::make('email')
+                Components\TextInput::make('email')
                     ->label(__('email'))
                     ->email(),
-                TextInput::make('amount')
+                Components\TextInput::make('amount')
                     ->label(__('amount'))
                     ->numeric()
                     ->step(0.01)
@@ -97,31 +87,25 @@ class GiftResource extends Resource
                 //
             ])
             ->actions(
-                ActionGroup::make([
-                    EditAction::make()->icon('tabler-edit'),
-                    ReplicateAction::make()->icon('tabler-copy'),
-                    DeleteAction::make()->icon('tabler-trash'),
+                Actions\ActionGroup::make([
+                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\ReplicateAction::make()->icon('tabler-copy'),
+                    Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
             )
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
+            ->defaultSort('received_at', 'desc')
             ->deferLoading();
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
@@ -153,8 +137,4 @@ class GiftResource extends Resource
         return trans_choice('gift', 2);
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->orderByDesc('received_at');
-    }
 }

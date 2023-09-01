@@ -145,6 +145,7 @@ class ClientResource extends Resource
                 Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
+            ->defaultSort('created_at', 'desc')
             ->deferLoading();
     }
 
@@ -182,10 +183,5 @@ class ClientResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('client', 2);
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->orderByDesc('created_at');
     }
 }

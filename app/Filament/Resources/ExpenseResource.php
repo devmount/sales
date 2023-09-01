@@ -4,31 +4,17 @@ namespace App\Filament\Resources;
 
 use App\Enums\ExpenseCategory;
 use App\Filament\Resources\ExpenseResource\Pages;
-use App\Filament\Resources\ExpenseResource\RelationManagers;
 use App\Models\Expense;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ReplicateAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\Summarizers\Sum;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions;
+use Filament\Tables\Columns;
+use Filament\Tables\Columns\Summarizers;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ExpenseResource extends Resource
 {
@@ -41,19 +27,19 @@ class ExpenseResource extends Resource
         return $form
             ->columns(6)
             ->schema([
-                DatePicker::make('expended_at')
+                Components\DatePicker::make('expended_at')
                     ->label(__('expendedAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->required()
                     ->columnSpan(3),
-                Select::make('category')
+                Components\Select::make('category')
                     ->label(__('category'))
                     ->options(ExpenseCategory::class)
                     ->native(false)
                     ->required()
                     ->columnSpan(3),
-                TextInput::make('price')
+                Components\TextInput::make('price')
                     ->label(__('price'))
                     ->numeric()
                     ->step(0.01)
@@ -61,11 +47,11 @@ class ExpenseResource extends Resource
                     ->suffix('EUR')
                     ->required()
                     ->columnSpan(3),
-                Toggle::make('taxable')
+                Components\Toggle::make('taxable')
                     ->label(__('taxable'))
                     ->inline(false)
                     ->columnSpan(1),
-                TextInput::make('vat_rate')
+                Components\TextInput::make('vat_rate')
                     ->label(__('vatRate'))
                     ->numeric()
                     ->step(0.01)
@@ -74,14 +60,14 @@ class ExpenseResource extends Resource
                     ->required()
                     ->columnSpan(2)
                     ->hidden(fn (Get $get): bool => ! $get('taxable')),
-                TextInput::make('quantity')
+                Components\TextInput::make('quantity')
                     ->label(__('quantity'))
                     ->numeric()
                     ->step(1)
                     ->minValue(1)
                     ->required()
                     ->columnSpan(3),
-                Textarea::make('description')
+                Components\Textarea::make('description')
                     ->label(__('description'))
                     ->maxLength(65535)
                     ->columnSpan(3),
@@ -92,46 +78,46 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('expended_at')
+                Columns\TextColumn::make('expended_at')
                     ->label(__('expendedAt'))
                     ->date('j. F Y')
                     ->sortable(),
-                TextColumn::make('price')
+                Columns\TextColumn::make('price')
                     ->label(__('gross'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->alignment(Alignment::End)
                     ->sortable()
-                    ->summarize(Sum::make()->money('eur')),
-                IconColumn::make('taxable')
+                    ->summarize(Summarizers\Sum::make()->money('eur')),
+                Columns\IconColumn::make('taxable')
                     ->label(__('taxable'))
                     ->boolean()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('vat')
+                Columns\TextColumn::make('vat')
                     ->label(__('vat'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Expense $record): float => $record->vat)
                     ->color(fn (string $state): string => $state == 0 ? 'gray' : 'normal')
                     ->sortable(),
-                TextColumn::make('quantity')
+                Columns\TextColumn::make('quantity')
                     ->label(__('quantity'))
                     ->numeric()
                     ->sortable()
-                    ->summarize(Sum::make()),
-                TextColumn::make('category')
+                    ->summarize(Summarizers\Sum::make()),
+                Columns\TextColumn::make('category')
                     ->label(__('category'))
                     ->badge()
                     ->sortable(),
-                TextColumn::make('description')
+                Columns\TextColumn::make('description')
                     ->label(__('description')),
-                TextColumn::make('created_at')
+                Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                Columns\TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
@@ -141,23 +127,24 @@ class ExpenseResource extends Resource
                 //
             ])
             ->actions(
-                ActionGroup::make([
-                    EditAction::make()->icon('tabler-edit'),
-                    ReplicateAction::make()->icon('tabler-copy'),
-                    DeleteAction::make()->icon('tabler-trash'),
+                Actions\ActionGroup::make([
+                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\ReplicateAction::make()->icon('tabler-copy'),
+                    Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
             )
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
+            ->defaultSort('expended_at', 'desc')
             ->deferLoading();
     }
 
@@ -195,10 +182,5 @@ class ExpenseResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('expense', 2);
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->orderByDesc('expended_at');
     }
 }

@@ -3,24 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EstimateResource\Pages;
-use App\Filament\Resources\EstimateResource\RelationManagers;
 use App\Models\Estimate;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ReplicateAction;
-use Filament\Tables\Columns\ColorColumn;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions;
+use Filament\Tables\Columns;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class EstimateResource extends Resource
 {
@@ -32,27 +21,27 @@ class EstimateResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('project_id')
+                Components\Select::make('project_id')
                     ->label(trans_choice('project', 1))
                     ->relationship('project', 'title')
                     ->native(false)
                     ->searchable()
                     ->suffixIcon('tabler-package')
                     ->required(),
-                TextInput::make('title')
+                Components\TextInput::make('title')
                     ->label(__('title'))
                     ->required(),
-                Textarea::make('description')
+                Components\Textarea::make('description')
                     ->label(__('description'))
                     ->autosize()
                     ->maxLength(65535),
-                TextInput::make('amount')
+                Components\TextInput::make('amount')
                     ->label(__('amount'))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffixIcon('tabler-clock-exclamation'),
-                TextInput::make('weight')
+                Components\TextInput::make('weight')
                     ->label(__('weight'))
                     ->numeric()
                     ->step(1)
@@ -65,28 +54,28 @@ class EstimateResource extends Resource
         return $table
             ->defaultGroup('project.title')
             ->columns([
-                ColorColumn::make('project.client.color')
+                Columns\ColorColumn::make('project.client.color')
                     ->label('')
                     ->tooltip(fn (Estimate $record): string => $record->project?->client?->name),
-                TextColumn::make('title')
+                Columns\TextColumn::make('title')
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Estimate $record): string => substr($record->description, 0, 75) . '...'),
-                TextColumn::make('amount')
+                Columns\TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('weight')
+                Columns\TextColumn::make('weight')
                     ->label(__('weight'))
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('created_at')
+                Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                Columns\TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
@@ -96,21 +85,21 @@ class EstimateResource extends Resource
                 //
             ])
             ->actions(
-                ActionGroup::make([
-                    EditAction::make()->icon('tabler-edit'),
-                    ReplicateAction::make()->icon('tabler-copy'),
-                    DeleteAction::make()->icon('tabler-trash'),
+                Actions\ActionGroup::make([
+                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\ReplicateAction::make()->icon('tabler-copy'),
+                    Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
             )
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
             ->deferLoading();

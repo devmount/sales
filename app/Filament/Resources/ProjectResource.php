@@ -4,27 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Enums\PricingUnit;
 use App\Filament\Resources\ProjectResource\Pages;
-use App\Filament\Resources\ProjectResource\RelationManagers;
 use App\Models\Project;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\ReplicateAction;
-use Filament\Tables\Columns\ColorColumn;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions;
+use Filament\Tables\Columns;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Carbon;
 
 class ProjectResource extends Resource
@@ -37,7 +23,7 @@ class ProjectResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('client_id')
+                Components\Select::make('client_id')
                     ->label(trans_choice('client', 1))
                     ->relationship('client', 'name')
                     ->native(false)
@@ -45,46 +31,46 @@ class ProjectResource extends Resource
                     ->preload()
                     ->suffixIcon('tabler-users')
                     ->required(),
-                Toggle::make('aborted')
+                Components\Toggle::make('aborted')
                     ->label(__('aborted'))
                     ->inline(false),
-                TextInput::make('title')
+                Components\TextInput::make('title')
                     ->label(__('title'))
                     ->required(),
-                Textarea::make('description')
+                Components\Textarea::make('description')
                     ->label(__('description'))
                     ->autosize()
                     ->maxLength(65535),
-                DatePicker::make('start_at')
+                Components\DatePicker::make('start_at')
                     ->label(__('startAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->suffixIcon('tabler-calendar-plus'),
-                DatePicker::make('due_at')
+                Components\DatePicker::make('due_at')
                     ->label(__('dueAt'))
                     ->native(false)
                     ->weekStartsOnMonday()
                     ->suffixIcon('tabler-calendar-check'),
-                TextInput::make('minimum')
+                Components\TextInput::make('minimum')
                     ->label(__('minimum'))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffixIcon('tabler-clock-check'),
-                TextInput::make('scope')
+                Components\TextInput::make('scope')
                     ->label(__('scope'))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffixIcon('tabler-clock-exclamation'),
-                TextInput::make('price')
+                Components\TextInput::make('price')
                     ->label(__('price'))
                     ->numeric()
                     ->step(0.01)
                     ->minValue(0.01)
                     ->suffixIcon('tabler-currency-euro')
                     ->required(),
-                Select::make('pricing_unit')
+                Components\Select::make('pricing_unit')
                     ->label(__('pricingUnit'))
                     ->options(PricingUnit::class)
                     ->native(false)
@@ -97,15 +83,15 @@ class ProjectResource extends Resource
     {
         return $table
             ->columns([
-                ColorColumn::make('client.color')
+                Columns\ColorColumn::make('client.color')
                     ->label(''),
-                TextColumn::make('title')
+                Columns\TextColumn::make('title')
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Project $record): string => $record->client?->name)
                     ->tooltip(fn (Project $record): string => $record->description),
-                TextColumn::make('date_range')
+                Columns\TextColumn::make('date_range')
                     ->label(__('dateRange'))
                     ->state(fn (Project $record): string => Carbon::parse($record->start_at)
                         ->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
@@ -113,19 +99,19 @@ class ProjectResource extends Resource
                     ->description(fn (Project $record): string => Carbon::parse($record->start_at)
                         ->isoFormat('ll') . ' - ' . Carbon::parse($record->due_at)->isoFormat('ll')
                 ),
-                TextColumn::make('scope')
+                Columns\TextColumn::make('scope')
                     ->label(__('scope'))
                     ->state(fn (Project $record): string => $record->minimum != $record->scope
                         ? (int)$record->minimum . ' - ' . (int)$record->scope . ' ' . trans_choice('hour', 2)
                         : (int)$record->scope . ' ' . trans_choice('hour', (int)$record->scope)
                     )
                     ->description(fn (Project $record): string => $record->price . ' €, ' . $record->pricing_unit->getLabel()),
-                TextColumn::make('created_at')
+                Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                Columns\TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
@@ -135,23 +121,24 @@ class ProjectResource extends Resource
                 //
             ])
             ->actions(
-                ActionGroup::make([
-                    EditAction::make()->icon('tabler-edit'),
-                    ReplicateAction::make()->icon('tabler-copy'),
-                    DeleteAction::make()->icon('tabler-trash'),
+                Actions\ActionGroup::make([
+                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\ReplicateAction::make()->icon('tabler-copy'),
+                    Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
             )
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
+            ->defaultSort('due_at', 'desc')
             ->deferLoading();
     }
 
@@ -191,8 +178,4 @@ class ProjectResource extends Resource
         return trans_choice('project', 2);
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->orderByDesc('due_at');
-    }
 }

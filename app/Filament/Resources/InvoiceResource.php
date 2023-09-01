@@ -187,6 +187,7 @@ class InvoiceResource extends Resource
                 Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->emptyStateIcon('tabler-ban')
+            ->defaultSort('created_at', 'desc')
             ->deferLoading();
     }
 
@@ -227,8 +228,4 @@ class InvoiceResource extends Resource
         return trans_choice('invoice', 2);
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->orderByDesc('created_at');
-    }
 }
