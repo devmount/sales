@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->date('expended_at');
-            $table->decimal('price', 6, 2, true);
+            $table->decimal('price', 8, 2, true);
             $table->boolean('taxable')->default(true);
             $table->decimal('vat_rate', 4, 2, true)->nullable();
             $table->integer('quantity');
