@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PositionResource\Widgets;
 
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
+use Filament\Support\Colors\Color;
 use App\Models\Position;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -36,6 +37,8 @@ class RecentPositionsChart extends ChartWidget
                 [
                     'label' => __('productiveHours'),
                     'data' => $data,
+                    'backgroundColor' => 'rgb(' . Color::Blue[500] . ')',
+                    'borderColor' => 'transparent',
                 ],
             ],
             'labels' => $labels,

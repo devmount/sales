@@ -29,41 +29,42 @@ class PositionResource extends Resource
                 Components\Select::make('invoice_id')
                     ->label(trans_choice('invoice', 1))
                     ->relationship('invoice', 'title')
-                    ->native(false)
                     ->searchable()
                     ->suffixIcon('tabler-file-stack')
                     ->required()
-                    ->columnSpan(6),
+                    ->columnSpan(8),
                 Components\Toggle::make('remote')
                     ->label(__('remote'))
                     ->inline(false)
                     ->default(true)
-                    ->columnSpan(6),
+                    ->columnSpan(4),
                 Components\DateTimePicker::make('started_at')
                     ->label(__('startedAt'))
-                    ->native(false)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
                     ->default(now()->setHour(9)->setMinute(0))
                     ->required()
-                    ->columnSpan(3),
+                    ->suffixIcon('tabler-clock-play')
+                    ->columnSpan(4),
                 Components\DateTimePicker::make('finished_at')
                     ->label(__('finishedAt'))
-                    ->native(false)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
                     ->default(now()->setHour(17)->setMinute(0))
                     ->required()
-                    ->columnSpan(3),
+                    ->suffixIcon('tabler-clock-pause')
+                    ->columnSpan(4),
                 Components\TextInput::make('pause_duration')
                     ->label(__('pauseDuration'))
                     ->numeric()
                     ->step(.01)
                     ->minValue(0)
                     ->default(0)
-                    ->columnSpan(6),
+                    ->suffix('h')
+                    ->suffixIcon('tabler-coffee')
+                    ->columnSpan(4),
                 Components\Textarea::make('description')
                     ->label(__('description'))
                     ->autosize()
@@ -107,18 +108,15 @@ class PositionResource extends Resource
             ->filters([
                 Filters\SelectFilter::make('invoice')
                     ->label(trans_choice('invoice', 1))
-                    ->native(false)
                     ->relationship('invoice', 'title', fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderByDesc('created_at'))
                     ->searchable()
                     ->preload(),
                 Filters\Filter::make('created_at')
                     ->form([
                         Components\DatePicker::make('earliest')
-                            ->label(__('earliest'))
-                            ->native(false),
+                            ->label(__('earliest')),
                         Components\DatePicker::make('latest')
-                            ->label(__('latest'))
-                            ->native(false),
+                            ->label(__('latest')),
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
@@ -133,8 +131,7 @@ class PositionResource extends Resource
                             );
                     }),
                 Filters\TernaryFilter::make('remote')
-                    ->nullable()
-                    ->native(false),
+                    ->nullable(),
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(3)
             ->actions(

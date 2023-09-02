@@ -14,7 +14,6 @@ use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Filters;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
 
 class ClientResource extends Resource
@@ -55,7 +54,6 @@ class ClientResource extends Resource
                             ->columnSpan(6)
                             ->suffixIcon('tabler-language')
                             ->options(LanguageCode::class)
-                            ->native(false)
                             ->required(),
                         Components\TextInput::make('email')
                             ->label(__('email'))
@@ -111,8 +109,7 @@ class ClientResource extends Resource
             ->filters([
                 Filters\SelectFilter::make('language')
                     ->label(__('language'))
-                    ->options(LanguageCode::class)
-                    ->native(false),
+                    ->options(LanguageCode::class),
             ])
             ->actions(Actions\ActionGroup::make([
                 Actions\EditAction::make()->icon('tabler-edit'),

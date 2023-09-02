@@ -6,6 +6,11 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Assets\Js;
@@ -31,8 +36,23 @@ class AppServiceProvider extends ServiceProvider
         // Filament only saves valid data to models so the models can be unguarded safely
         Model::unguard();
 
-        Action::configureUsing(function (Action $action): void {
-            $action->iconSize(IconSize::Large);
+        Action::configureUsing(function (Action $obj): void {
+            $obj->iconSize(IconSize::Large);
+        });
+        Select::configureUsing(function (Select $obj): void {
+            $obj->native(false);
+        });
+        DatePicker::configureUsing(function (DatePicker $obj): void {
+            $obj->native(false);
+        });
+        DateTimePicker::configureUsing(function (DateTimePicker $obj): void {
+            $obj->native(false);
+        });
+        TernaryFilter::configureUsing(function (TernaryFilter $obj): void {
+            $obj->native(false);
+        });
+        SelectFilter::configureUsing(function (SelectFilter $obj): void {
+            $obj->native(false);
         });
 
         // Register assets

@@ -24,26 +24,38 @@ class GiftResource extends Resource
     {
         return $form
             ->schema([
-                Components\DatePicker::make('received_at')
-                    ->label(__('receivedAt'))
-                    ->native(false)
-                    ->weekStartsOnMonday()
-                    ->required(),
-                Components\TextInput::make('subject')
-                    ->label(__('subject'))
-                    ->required(),
-                Components\TextInput::make('name')
-                    ->label(__('name')),
-                Components\TextInput::make('email')
-                    ->label(__('email'))
-                    ->email(),
-                Components\TextInput::make('amount')
-                    ->label(__('amount'))
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->suffix('EUR')
-                    ->required(),
+                Components\Section::make()
+                    ->columns(12)
+                    ->schema([
+                        Components\DatePicker::make('received_at')
+                            ->label(__('receivedAt'))
+                            ->columnSpan(3)
+                            ->weekStartsOnMonday()
+                            ->suffixIcon('tabler-calendar-heart')
+                            ->required(),
+                        Components\TextInput::make('amount')
+                            ->label(__('amount'))
+                            ->columnSpan(3)
+                            ->numeric()
+                            ->step(0.01)
+                            ->minValue(0.01)
+                            ->suffixIcon('tabler-currency-euro')
+                            ->required(),
+                        Components\TextInput::make('subject')
+                            ->label(__('subject'))
+                            ->columnSpan(6)
+                            ->suffixIcon('tabler-sticker')
+                            ->required(),
+                        Components\TextInput::make('name')
+                            ->label(__('name'))
+                            ->columnSpan(6)
+                            ->suffixIcon('tabler-id'),
+                        Components\TextInput::make('email')
+                            ->label(__('email'))
+                            ->columnSpan(6)
+                            ->email()
+                            ->suffixIcon('tabler-mail'),
+                    ])
             ]);
     }
 

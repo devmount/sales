@@ -24,7 +24,6 @@ class EstimateResource extends Resource
                 Components\Select::make('project_id')
                     ->label(trans_choice('project', 1))
                     ->relationship('project', 'title')
-                    ->native(false)
                     ->searchable()
                     ->suffixIcon('tabler-package')
                     ->required(),
@@ -34,17 +33,20 @@ class EstimateResource extends Resource
                 Components\Textarea::make('description')
                     ->label(__('description'))
                     ->autosize()
+                    ->columnSpanFull()
                     ->maxLength(65535),
                 Components\TextInput::make('amount')
-                    ->label(__('amount'))
+                    ->label(trans_choice('estimate', 1))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)
+                    ->suffix('h')
                     ->suffixIcon('tabler-clock-exclamation'),
                 Components\TextInput::make('weight')
                     ->label(__('weight'))
                     ->numeric()
                     ->step(1)
+                    ->helperText(__('definesEstimateSorting'))
                     ->suffixIcon('tabler-arrows-sort'),
             ]);
     }

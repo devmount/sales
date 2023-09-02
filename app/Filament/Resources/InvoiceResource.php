@@ -35,7 +35,6 @@ class InvoiceResource extends Resource
                             ->label(trans_choice('project', 1))
                             ->columnSpan(6)
                             ->relationship('project', 'title')
-                            ->native(false)
                             ->searchable()
                             ->preload()
                             ->suffixIcon('tabler-package')
@@ -71,7 +70,6 @@ class InvoiceResource extends Resource
                             ->label(__('pricingUnit'))
                             ->columnSpan(3)
                             ->options(PricingUnit::class)
-                            ->native(false)
                             ->suffixIcon('tabler-clock-2')
                             ->required(),
                         Components\TextInput::make('discount')
@@ -101,19 +99,18 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->step(0.01)
                             ->minValue(0.01)
+                            ->default(0.19)
                             ->suffixIcon('tabler-receipt-tax')
                             ->hidden(fn (Get $get): bool => ! $get('taxable')),
                         Components\DatePicker::make('invoiced_at')
                             ->label(__('invoicedAt'))
                             ->columnSpan(3)
                             ->columnStart(7)
-                            ->native(false)
                             ->weekStartsOnMonday()
                             ->suffixIcon('tabler-calendar-up'),
                         Components\DatePicker::make('paid_at')
                             ->label(__('paidAt'))
                             ->columnSpan(3)
-                            ->native(false)
                             ->weekStartsOnMonday()
                             ->suffixIcon('tabler-calendar-down'),
                     ])
