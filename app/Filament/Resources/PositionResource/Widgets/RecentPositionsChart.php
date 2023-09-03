@@ -14,10 +14,10 @@ class RecentPositionsChart extends ChartWidget
     protected static ?string $maxHeight = '180px';
     public ?string $filter = '60';
 
-        public function getHeading(): string
-        {
-            return __('productiveHours');
-        }
+    public function getHeading(): string
+    {
+        return __('productiveHours');
+    }
 
     protected function getData(): array
     {
