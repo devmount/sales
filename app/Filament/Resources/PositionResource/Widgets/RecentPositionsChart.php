@@ -15,7 +15,7 @@ class RecentPositionsChart extends ChartWidget
     protected int | string | array $columnSpan = 'full';
     protected static ?string $pollingInterval = null;
     protected static ?string $maxHeight = '300px';
-    public ?string $filter = '30';
+    public ?string $filter = '60';
 
         public function getHeading(): string
         {
@@ -25,22 +25,33 @@ class RecentPositionsChart extends ChartWidget
     protected function getData(): array
     {
         $labels = [];
-        $data = [];
+        $datasets = [];
         $period = CarbonPeriod::create(Carbon::now()->subDays((int)$this->filter), '1 day', 'now');
-        foreach ($period as $date) {
-            $labels[] = $date->format('m-d');
+        foreach ($period as $i => $date) {
+            $labels[] = $date->isoFormat('D. MMM');
             $positions = Position::where('started_at', 'like', $date->format('Y-m-d') . '%')->get();
-            $data[] = array_sum($positions->map(fn ($p) => $p->duration)->toArray());
+            foreach ($positions as $p) {
+                $project = $p->invoice->project;
+                if (isset($datasets[$project->id])) {
+                    if (isset($datasets[$project->id][$i])) {
+                        $datasets[$project->id]['data'][$i] += $p->duration;
+                    } else {
+                        $datasets[$project->id]['data'][$i] = $p->duration;
+                    }
+                } else {
+                    $datasets[$project->id] = [
+                        'label' => $project->title,
+                        'data' =>  array_fill(0, count($period), 0),
+                        'backgroundColor' => $project->client->color,
+                    ];
+                    $datasets[$project->id]['data'][$i] = $p->duration;
+                }
+            }
+            // $datasets[] = array_sum($positions->map(fn ($p) => $p->duration)->toArray());
         }
+        // dump($datasets);
         return [
-            'datasets' => [
-                [
-                    'label' => __('productiveHours'),
-                    'data' => $data,
-                    'backgroundColor' => 'rgb(' . Color::Blue[500] . ')',
-                    'borderColor' => 'transparent',
-                ],
-            ],
+            'datasets' => array_values($datasets),
             'labels' => $labels,
         ];
     }
@@ -74,9 +85,18 @@ class RecentPositionsChart extends ChartWidget
                     ticks: {
                         callback: (value) => value + 'h',
                     },
+                    stacked: true
                 },
+                x: {
+                    stacked: true
+                }
             },
+            elements: {
+                bar: {
+                    borderWidth: 0
+                }
+            }
         }
-    JS);
+        JS);
     }
 }
