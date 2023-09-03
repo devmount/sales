@@ -4,17 +4,14 @@ namespace App\Filament\Resources\PositionResource\Widgets;
 
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
-use Filament\Support\Colors\Color;
 use App\Models\Position;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
 class RecentPositionsChart extends ChartWidget
 {
-    // protected static ?string $heading = 'chart';
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $pollingInterval = null;
-    protected static ?string $maxHeight = '300px';
+    protected static ?string $maxHeight = '180px';
     public ?string $filter = '60';
 
         public function getHeading(): string
@@ -47,9 +44,7 @@ class RecentPositionsChart extends ChartWidget
                     $datasets[$project->id]['data'][$i] = $p->duration;
                 }
             }
-            // $datasets[] = array_sum($positions->map(fn ($p) => $p->duration)->toArray());
         }
-        // dump($datasets);
         return [
             'datasets' => array_values($datasets),
             'labels' => $labels,

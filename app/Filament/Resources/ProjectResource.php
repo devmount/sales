@@ -11,7 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class ProjectResource extends Resource
 {
