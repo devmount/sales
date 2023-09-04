@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
+use App\Models\Invoice;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\PositionResource\Widgets\RecentPositionsChart;
 use Filament\Actions;
@@ -14,7 +15,13 @@ class EditInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\Action::make('download')
+                ->label(__('download'))
+                ->icon('tabler-file-type-pdf')
+                ->url(fn (Invoice $record): string => static::$resource::getUrl('download', ['record' => $record]))
+                ->openUrlInNewTab(),
+            Actions\DeleteAction::make()
+                ->icon('tabler-trash'),
         ];
     }
 

@@ -171,7 +171,9 @@ class InvoiceResource extends Resource
             ->actions(
                 Actions\ActionGroup::make([
                     Actions\EditAction::make()->icon('tabler-edit'),
-                    Actions\ReplicateAction::make()->icon('tabler-copy'),
+                    Actions\ReplicateAction::make()
+                        ->icon('tabler-copy')
+                        ->excludeAttributes(['invoiced_at', 'paid_at']),
                     Actions\Action::make('download')
                         ->label(__('download'))
                         ->icon('tabler-file-type-pdf')

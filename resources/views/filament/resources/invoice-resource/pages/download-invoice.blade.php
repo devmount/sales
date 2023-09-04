@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         invoiceNumber + '_{{ trans_choice("invoice", 1) }}_devmount.pdf'.toLowerCase(),
         { returnPromise: true }
     ).then(() => {
-        // setTimeout(() => { window.close() }, 100);
+        setTimeout(() => { window.close() }, 100);
     });
 });
 </script>
