@@ -16,6 +16,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Tabs;
 use Carbon\Carbon;
+use NumberFormatter;
 
 class TaxOverview extends Widget implements HasForms, HasInfolists
 {
@@ -59,7 +60,8 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->state($netIncome)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
-                ->copyable(),
+                ->copyable()
+                ->copyableState(fn (string $state): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::DECIMAL))->format((float)$state)),
             TextEntry::make('vatExpenses')
                 ->label(__('vatExpenses'))
                 ->columnSpan(3)
@@ -68,7 +70,8 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->state($vatExpenses)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
-                ->copyable(),
+                ->copyable()
+                ->copyableState(fn (string $state): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::DECIMAL))->format((float)$state)),
             TextEntry::make('totalVat')
                 ->label(__('totalVat'))
                 ->columnSpan(3)
@@ -77,8 +80,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->state($totalVat)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
-                ->copyable(),
-        ];
+                ->copyable()
+                ->copyableState(fn (string $state): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::DECIMAL))->format((float)$state)),
+            ];
     }
 
     private function getMonthData(): array
