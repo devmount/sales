@@ -25,7 +25,7 @@ class RecentPositionsChart extends ChartWidget
         $datasets = [];
         $period = CarbonPeriod::create(Carbon::now()->subDays((int)$this->filter), '1 day', 'now');
         foreach ($period as $i => $date) {
-            $labels[] = $date->isoFormat('D. MMM');
+            $labels[] = $date->isoFormat('dd, D. MMM');
             $positions = Position::where('started_at', 'like', $date->format('Y-m-d') . '%')->get();
             foreach ($positions as $p) {
                 $project = $p->invoice->project;

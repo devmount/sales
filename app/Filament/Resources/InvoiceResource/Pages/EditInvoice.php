@@ -29,6 +29,7 @@ class EditInvoice extends EditRecord
     {
         return [
             RecentPositionsChart::class,
+            InvoiceResource\Widgets\ActiveInvoices::class,
         ];
     }
 

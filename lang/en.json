@@ -63,6 +63,7 @@
     "name": "Name",
     "net": "Net",
     "netIncome": "Net income",
+    "invoicesInProgress": "Invoices in progress",
     "page": "Page",
     "paidAt": "Paid at",
     "pauseDuration": "Pause duration",

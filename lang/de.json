@@ -64,6 +64,7 @@
     "name": "Name",
     "net": "Netto",
     "netIncome": "Netto Einkommen",
+    "invoicesInProgress": "Rechnungen in Arbeit",
     "page": "Seite",
     "paidAt": "Beglichen am",
     "pauseDuration": "Dauer der Pause",
