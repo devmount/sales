@@ -44,4 +44,16 @@ class Project extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    /**
+     * Number of hours worked for this project
+     */
+    public function getHoursAttribute()
+    {
+        $hours = 0;
+        foreach ($this->invoices as $invoice) {
+            $hours += $invoice->hours;
+        }
+        return $hours;
+    }
 }
