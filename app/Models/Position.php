@@ -20,15 +20,16 @@ class Position extends Model
     }
 
     /**
-     * Total duration of the position
+     * Total duration of the position in hours
      */
     public function getDurationAttribute()
     {
-        return Carbon::parse($this->started_at)->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration;
+        return Carbon::parse($this->started_at)
+            ->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration;
     }
 
     /**
-     * Total duration of the position
+     * Human readable time range
      */
     public function getTimeRangeAttribute()
     {

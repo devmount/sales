@@ -52,6 +52,7 @@
     "invoice.explanation": "Thank you for your cooperation and trust. The total amount of {0} is to be transferred to the bank account mentioned below within 14 days from receipt of this invoice, quoting the invoice number {1}. Please do not hesitate to contact me if you have any questions.",
     "invoice.onlyTransitory": "This invoice only contains transitory items.",
     "invoiceDate": "Invoice Date",
+    "invoiceDates": "Invoice dates",
     "invoiceNumber": "Invoice Number",
     "invoicedAt": "Invoiced at",
     "language": "Language",

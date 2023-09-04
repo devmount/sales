@@ -53,6 +53,7 @@
     "invoice.explanation": "Vielen Dank für die Kooperation und das damit verbundene Vertrauen. Der Gesamtbetrag von {0} ist unter Angabe der Rechnungsnummer {1} ab Erhalt dieser Rechnung innerhalb von 14 Tagen auf das unten genannte Bankkonto zu überweisen. Für Rückfragen stehe ich jederzeit gern zur Verfügung.",
     "invoice.onlyTransitory": "Diese Rechnung enthält nur durchlaufende Posten.",
     "invoiceDate": "Rechnungsdatum",
+    "invoiceDates": "Rechnungsdaten",
     "invoiceNumber": "Rechnungsnummer",
     "invoicedAt": "Rechnung gestellt am",
     "language": "Sprache",

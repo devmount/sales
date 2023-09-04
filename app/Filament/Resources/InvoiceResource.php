@@ -15,7 +15,7 @@ use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Columns\Summarizers;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
 use NumberFormatter;
 
 class InvoiceResource extends Resource
@@ -147,6 +147,13 @@ class InvoiceResource extends Resource
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->final)
                     ->description(fn (Invoice $record): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY))->formatCurrency($record->vat, 'eur') . ' ' . __('vat')),
+                Columns\TextColumn::make('invoiced_at')
+                    ->label(__('invoiceDates'))
+                    ->date('j. F Y')
+                    ->description(fn (Invoice $record): string => $record->paid_at
+                        ? Carbon::parse($record->paid_at)->isoFormat('LL')
+                        : ''
+                    ),
                 Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')

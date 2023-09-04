@@ -96,6 +96,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->where('paid_at', '<=', $dt->endOfMonth()->toDateString())
                 ->get();
             $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
+            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
             $netIncome[] = $netEarned;
             $expenses = Expense::query()
                 ->where('expended_at', '>=', $dt->startOfMonth()->toDateString())
@@ -104,7 +105,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->get();
             $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
-            $totalVat[] = round($netEarned*0.19, 2) - $vatExpended;
+            $totalVat[] = $vatEarned - $vatExpended;
             $dt->subMonthsNoOverflow();
         }
         return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
@@ -125,6 +126,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->where('paid_at', '<=', $dt->endOfQuarter()->toDateString())
                 ->get();
             $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
+            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
             $netIncome[] = $netEarned;
             $expenses = Expense::query()
                 ->where('expended_at', '>=', $dt->startOfQuarter()->toDateString())
@@ -133,7 +135,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->get();
             $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
-            $totalVat[] = round($netEarned*0.19, 2) - $vatExpended;
+            $totalVat[] = $vatEarned - $vatExpended;
             $dt->subQuarterNoOverflow();
         }
         return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
@@ -154,6 +156,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->where('paid_at', '<=', $dt->endOfYear()->toDateString())
                 ->get();
             $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
+            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
             $netIncome[] = $netEarned;
             $expenses = Expense::query()
                 ->where('expended_at', '>=', $dt->startOfYear()->toDateString())
@@ -162,7 +165,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->get();
             $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
-            $totalVat[] = round($netEarned*0.19, 2) - $vatExpended;
+            $totalVat[] = $vatEarned - $vatExpended;
             $dt->subYearNoOverflow();
         }
         return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
