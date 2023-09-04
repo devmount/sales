@@ -63,7 +63,7 @@ class Invoice extends Model
                 PricingUnit::Day => 8,
             };
         }
-        return $net - $this->discount;
+        return round($net, 2) - $this->discount;
     }
 
     /**
@@ -71,7 +71,7 @@ class Invoice extends Model
      */
     public function getVatAttribute()
     {
-        return $this->net * $this->vat_rate;
+        return round($this->net * $this->vat_rate, 2);
     }
 
     /**

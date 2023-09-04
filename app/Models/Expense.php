@@ -33,7 +33,7 @@ class Expense extends Model
     public function getVatAttribute()
     {
         return $this->taxable
-            ? $this->price - ($this->price / ($this->vat_rate+1))
+            ? round($this->price * $this->quantity * (1 - 1 / (1 + $this->vat_rate)), 2)
             : 0;
     }
 }

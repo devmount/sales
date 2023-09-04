@@ -23,6 +23,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
     use InteractsWithForms;
 
     protected static string $view = 'filament.widgets.tax-overview';
+    protected static int $entryCount = 6;
 
     public function taxInfolist(Infolist $infolist): Infolist
     {
@@ -41,6 +42,45 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
         ]);
     }
 
+    private function generateEntries($labels, $netIncome, $vatExpenses, $totalVat): array
+    {
+        return [
+            TextEntry::make('month')
+                ->label(__('month'))
+                ->columnSpan(3)
+                ->fontFamily(FontFamily::Mono)
+                ->state($labels)
+                ->listWithLineBreaks(),
+            TextEntry::make('netIncome')
+                ->label(__('netIncome'))
+                ->columnSpan(3)
+                ->money('eur')
+                ->fontFamily(FontFamily::Mono)
+                ->state($netIncome)
+                ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
+                ->listWithLineBreaks()
+                ->copyable(),
+            TextEntry::make('vatExpenses')
+                ->label(__('vatExpenses'))
+                ->columnSpan(3)
+                ->money('eur')
+                ->fontFamily(FontFamily::Mono)
+                ->state($vatExpenses)
+                ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
+                ->listWithLineBreaks()
+                ->copyable(),
+            TextEntry::make('totalVat')
+                ->label(__('totalVat'))
+                ->columnSpan(3)
+                ->money('eur')
+                ->fontFamily(FontFamily::Mono)
+                ->state($totalVat)
+                ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
+                ->listWithLineBreaks()
+                ->copyable(),
+        ];
+    }
+
     private function getMonthData(): array
     {
         $labels = [];
@@ -49,8 +89,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
         $totalVat = [];
 
         $dt = Carbon::today();
-        $n = 6;
-        for ($i=0; $i < $n; $i++) {
+        for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->locale(app()->getLocale())->monthName;
             $invoices = Invoice::query()
                 ->where('paid_at', '>=', $dt->startOfMonth()->toDateString())
@@ -63,56 +102,69 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
                 ->where('expended_at', '<=', $dt->endOfMonth()->toDateString())
                 ->where('taxable', '=', '1')
                 ->get();
-            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->price*$e->vat_rate)->toArray());
+            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
-            $totalVat[] = $netEarned*0.19 - $vatExpended;
+            $totalVat[] = round($netEarned*0.19, 2) - $vatExpended;
             $dt->subMonthsNoOverflow();
         }
-        return [
-            TextEntry::make('month')
-                ->label(__('month'))
-                ->columnSpan(3)
-                ->fontFamily(FontFamily::Mono)
-                // ->alignment(Alignment::End)
-                ->state($labels)
-                ->listWithLineBreaks(),
-            TextEntry::make('netIncome')
-                ->label(__('netIncome'))
-                ->columnSpan(3)
-                ->money('eur')
-                ->fontFamily(FontFamily::Mono)
-                // ->alignment(Alignment::End)
-                ->state($netIncome)
-                ->listWithLineBreaks()
-                ->copyable(),
-            TextEntry::make('vatExpenses')
-                ->label(__('vatExpenses'))
-                ->columnSpan(3)
-                ->money('eur')
-                ->fontFamily(FontFamily::Mono)
-                // ->alignment(Alignment::End)
-                ->state($vatExpenses)
-                ->listWithLineBreaks()
-                ->copyable(),
-            TextEntry::make('totalVat')
-                ->label(__('totalVat'))
-                ->columnSpan(3)
-                ->money('eur')
-                ->fontFamily(FontFamily::Mono)
-                // ->alignment(Alignment::End)
-                ->state($totalVat)
-                ->listWithLineBreaks()
-                ->copyable(),
-        ];
+        return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
     }
 
     private function getQuarterData(): array
     {
-        return [];
+        $labels = [];
+        $netIncome = [];
+        $vatExpenses = [];
+        $totalVat = [];
+
+        $dt = Carbon::today();
+        for ($i=0; $i < static::$entryCount; $i++) {
+            $labels[] = "$dt->year Q$dt->quarter";
+            $invoices = Invoice::query()
+                ->where('paid_at', '>=', $dt->startOfQuarter()->toDateString())
+                ->where('paid_at', '<=', $dt->endOfQuarter()->toDateString())
+                ->get();
+            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
+            $netIncome[] = $netEarned;
+            $expenses = Expense::query()
+                ->where('expended_at', '>=', $dt->startOfQuarter()->toDateString())
+                ->where('expended_at', '<=', $dt->endOfQuarter()->toDateString())
+                ->where('taxable', '=', '1')
+                ->get();
+            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
+            $vatExpenses[] = $vatExpended;
+            $totalVat[] = round($netEarned*0.19, 2) - $vatExpended;
+            $dt->subQuarterNoOverflow();
+        }
+        return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
     }
 
     private function getYearData(): array
     {
-        return [];
+        $labels = [];
+        $netIncome = [];
+        $vatExpenses = [];
+        $totalVat = [];
+
+        $dt = Carbon::today();
+        for ($i=0; $i < static::$entryCount; $i++) {
+            $labels[] = $dt->year;
+            $invoices = Invoice::query()
+                ->where('paid_at', '>=', $dt->startOfYear()->toDateString())
+                ->where('paid_at', '<=', $dt->endOfYear()->toDateString())
+                ->get();
+            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
+            $netIncome[] = $netEarned;
+            $expenses = Expense::query()
+                ->where('expended_at', '>=', $dt->startOfYear()->toDateString())
+                ->where('expended_at', '<=', $dt->endOfYear()->toDateString())
+                ->where('taxable', '=', '1')
+                ->get();
+            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
+            $vatExpenses[] = $vatExpended;
+            $totalVat[] = round($netEarned*0.19, 2) - $vatExpended;
+            $dt->subYearNoOverflow();
+        }
+        return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
     }
 }
