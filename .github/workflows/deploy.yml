@@ -14,21 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Setup Node.js 17
-      uses: actions/setup-node@v3
-      with:
-        node-version: 17.x
-    - name: Cache node_modules
-      uses: actions/cache@v3
-      id: node_modules-cache
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-build-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/package-lock.json') }}
-    - name: Install node packages
-      if: steps.node_modules-cache.outputs.cache-hit != 'true'
-      run: npm ci
-    - name: Build frontend
-      run: npm run build
     - name: Push project files to testing environment
       uses: burnett01/rsync-deployments@5.2
       with:
