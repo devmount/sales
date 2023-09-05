@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources\InvoiceResource\Widgets;
 
-use App\Models\Invoice;
 use App\Filament\Resources\InvoiceResource;
-use Filament\Tables\Columns;
+use App\Models\Invoice;
 use Filament\Tables\Actions;
+use Filament\Tables\Columns;
 use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Widgets\TableWidget;
 
-class ActiveInvoices extends BaseWidget
+class ActiveInvoices extends TableWidget
 {
     // protected int | string | array $columnSpan = '2';
     public ?Invoice $record = null;

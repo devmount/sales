@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\PositionResource\Widgets;
 
-use Filament\Support\RawJs;
-use Filament\Widgets\ChartWidget;
 use App\Models\Position;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Filament\Support\RawJs;
+use Filament\Widgets\ChartWidget;
 
 class RecentPositionsChart extends ChartWidget
 {
