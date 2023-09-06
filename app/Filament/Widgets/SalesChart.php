@@ -64,11 +64,13 @@ class SalesChart extends ChartWidget
                 [
                     'data' => $invoiceData,
                     'fill' => 'start',
+                    'backgroundColor' => '#3b82f622',
+                    'borderColor' => '#3b82f6',
                 ],
                 [
                     'data' => $expenseData,
                     'fill' => 'start',
-                    'backgroundColor' => '#f43f5e1f',
+                    'backgroundColor' => '#f43f5e22',
                     'borderColor' => '#f43f5e',
                 ],
             ],
@@ -103,7 +105,7 @@ class SalesChart extends ChartWidget
                     intersect: false,
                     multiKeyBackground: '#000',
                     callbacks: {
-                        // label: (context) => ' ' + context.formattedValue + ' ' + context.dataset.label,
+                        label: (context) => ' ' + context.formattedValue + ' €',
                         labelColor: (context) => ({
                             borderWidth: 2,
                             borderColor: context.dataset.borderColor,
@@ -125,6 +127,7 @@ class SalesChart extends ChartWidget
             datasets: {
                 line: {
                     pointRadius: 0,
+                    pointHoverRadius: 0,
                 }
             },
             elements: {
