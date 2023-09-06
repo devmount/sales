@@ -23,6 +23,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
     use InteractsWithForms;
 
     protected static string $view = 'filament.widgets.tax-overview';
+    protected static ?string $maxHeight = '200px';
     protected static int $entryCount = 6;
 
     public function taxInfolist(Infolist $infolist): Infolist
