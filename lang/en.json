@@ -85,6 +85,7 @@
     "progress": "Progress",
     "project": "Project|Projects",
     "quantity": "Quantity",
+    "quarter": "Quarter",
     "receivedAt": "Received at",
     "remote": "Remote",
     "scope": "Scope",
@@ -117,5 +118,6 @@
     "waitingForPayment": "Waiting for payment",
     "website": "Website",
     "weight": "Weight",
-    "withKindRegards": "With kind regards"
+    "withKindRegards": "With kind regards",
+    "year": "Year"
 }

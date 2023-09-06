@@ -42,11 +42,11 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
         ]);
     }
 
-    private function generateEntries($labels, $netIncome, $vatExpenses, $totalVat): array
+    private function generateEntries($heading, $labels, $netIncome, $vatExpenses, $totalVat): array
     {
         return [
-            TextEntry::make('month')
-                ->label(__('month'))
+            TextEntry::make('timeUnit')
+                ->label($heading)
                 ->columnSpan(3)
                 ->fontFamily(FontFamily::Mono)
                 ->state($labels)
@@ -111,7 +111,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subMonthsNoOverflow();
         }
-        return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
+        return $this->generateEntries(__('month'), $labels, $netIncome, $vatExpenses, $totalVat);
     }
 
     private function getQuarterData(): array
@@ -141,7 +141,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subQuarterNoOverflow();
         }
-        return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
+        return $this->generateEntries(__('quarter'), $labels, $netIncome, $vatExpenses, $totalVat);
     }
 
     private function getYearData(): array
@@ -171,6 +171,6 @@ class TaxOverview extends Widget implements HasForms, HasInfolists
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subYearNoOverflow();
         }
-        return $this->generateEntries($labels, $netIncome, $vatExpenses, $totalVat);
+        return $this->generateEntries(__('year'), $labels, $netIncome, $vatExpenses, $totalVat);
     }
 }
