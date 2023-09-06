@@ -60,7 +60,8 @@ class ExpenseResource extends Resource
                         Components\Toggle::make('taxable')
                             ->label(__('taxable'))
                             ->inline(false)
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->live(),
                         Components\TextInput::make('vat_rate')
                             ->label(__('vatRate'))
                             ->numeric()

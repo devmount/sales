@@ -56,4 +56,41 @@ class Project extends Model
         }
         return $hours;
     }
+
+    /**
+     * Labeled Number of hours
+     */
+    public function getHoursWithLabelAttribute()
+    {
+        return $this->hours . ' ' . trans_choice('hour', $this->hours);
+    }
+
+    /**
+     * Show either scope or range from minimum to project limit in hours
+     */
+    public function getScopeRangeAttribute()
+    {
+        return $this->minimum != $this->scope
+            ? (int)$this->minimum . ' - ' . (int)$this->scope . ' ' . trans_choice('hour', 2)
+            : (int)$this->scope . ' ' . trans_choice('hour', (int)$this->scope);
+    }
+
+    /**
+     * Show price per pricing unit
+     */
+    public function getPricePerUnitAttribute()
+    {
+        return $this->price . ' € / ' . match($this->pricing_unit) {
+            PricingUnit::Hour => trans_choice('hour', 1),
+            PricingUnit::Project => trans_choice('project', 1),
+        };
+    }
+
+    /**
+     * Show current progress based on worked hours in relation to scope in percent
+     */
+    public function getProgressPercentAttribute()
+    {
+        return round($this->hours/$this->scope*100, 1) . ' %';
+    }
 }

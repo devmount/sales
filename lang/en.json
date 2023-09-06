@@ -65,6 +65,7 @@
     "name": "Name",
     "net": "Net",
     "netIncome": "Net income",
+    "numExhausted": ":n exhausted",
     "page": "Page",
     "paidAt": "Paid at",
     "pauseDuration": "Pause duration",

@@ -6,6 +6,7 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Invoice;
+use Carbon\Carbon;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -15,7 +16,7 @@ use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Columns\Summarizers;
 use Filament\Tables\Table;
-use Carbon\Carbon;
+use Illuminate\Support\HtmlString;
 use NumberFormatter;
 
 class InvoiceResource extends Resource
@@ -27,8 +28,10 @@ class InvoiceResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(10)
             ->schema([
                 Components\Section::make()
+                    ->columnSpan(['lg' => fn (?Invoice $obj) => !$obj?->project ? 10 : 8])
                     ->columns(12)
                     ->schema([
                         Components\Select::make('project_id')
@@ -43,12 +46,12 @@ class InvoiceResource extends Resource
                             ->label(__('transitory'))
                             ->columnSpan(3)
                             ->inline(false)
-                            ->helperText(__('invoice.onlyTransitory')),
+                            ->hintIcon('tabler-info-circle', tooltip: __('invoice.onlyTransitory')),
                         Components\Toggle::make('undated')
                             ->label(__('undated'))
                             ->columnSpan(3)
                             ->inline(false)
-                            ->helperText(__('hidePositionsDate')),
+                            ->hintIcon('tabler-info-circle', tooltip: __('hidePositionsDate')),
                         Components\TextInput::make('title')
                             ->label(__('title'))
                             ->columnSpan(6)
@@ -92,7 +95,8 @@ class InvoiceResource extends Resource
                             ->label(__('taxable'))
                             ->columnSpan(3)
                             ->inline(false)
-                            ->default(true),
+                            ->default(true)
+                            ->live(),
                         Components\TextInput::make('vat_rate')
                             ->label(__('vatRate'))
                             ->columnSpan(3)
@@ -113,7 +117,21 @@ class InvoiceResource extends Resource
                             ->columnSpan(3)
                             ->weekStartsOnMonday()
                             ->suffixIcon('tabler-calendar-down'),
-                    ])
+                    ]),
+                Components\Section::make()
+                    ->columnSpan(['lg' => 2])
+                    ->hidden(fn (?Invoice $obj) => !$obj?->project)
+                    ->columns(2)
+                    ->schema([
+                        Components\Placeholder::make('project')
+                            ->label(trans_choice('project', 1))
+                            ->content(fn (Invoice $obj) => new HtmlString(
+                                $obj->project?->hours
+                                . ' / ' . $obj->project?->scope_range
+                                . '<br />' . __('numExhausted', ['n' => $obj->project?->progress_percent])
+                            ))
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 

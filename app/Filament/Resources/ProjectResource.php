@@ -113,18 +113,12 @@ class ProjectResource extends Resource
                     ),
                 Columns\TextColumn::make('scope')
                     ->label(__('scope'))
-                    ->state(fn (Project $record): string => $record->minimum != $record->scope
-                        ? (int)$record->minimum . ' - ' . (int)$record->scope . ' ' . trans_choice('hour', 2)
-                        : (int)$record->scope . ' ' . trans_choice('hour', (int)$record->scope)
-                    )
-                    ->description(fn (Project $record): string => $record->price . ' € / ' . match($record->pricing_unit) {
-                        PricingUnit::Hour => trans_choice('hour', 1),
-                        PricingUnit::Project => trans_choice('project', 1),
-                    }),
+                    ->state(fn (Project $record): string => $record->scope_range)
+                    ->description(fn (Project $record): string => $record->price_per_unit),
                 Columns\TextColumn::make('progress')
                     ->label(__('progress'))
-                    ->state(fn (Project $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours))
-                    ->description(fn (Project $record): string => round($record->hours/$record->scope*100, 1) . '%'),
+                    ->state(fn (Project $record): string => $record->hours_with_label)
+                    ->description(fn (Project $record): string => $record->progress_percent),
                 Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')

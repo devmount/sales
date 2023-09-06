@@ -66,6 +66,7 @@
     "name": "Name",
     "net": "Netto",
     "netIncome": "Netto Einkommen",
+    "numExhausted": ":n ausgeschöpft",
     "page": "Seite",
     "paidAt": "Beglichen am",
     "pauseDuration": "Dauer der Pause",
