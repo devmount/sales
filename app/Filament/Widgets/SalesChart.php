@@ -2,8 +2,10 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
@@ -12,6 +14,7 @@ class SalesChart extends ChartWidget
     // protected int | string | array $columnSpan = 'full';
     protected static ?string $maxHeight = '180px';
     public ?string $filter = 'y';
+    protected static ?string $pollingInterval = null;
 
     public function getHeading(): string
     {
@@ -20,29 +23,56 @@ class SalesChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = [];
-        $invoices = Invoice::whereNotNull('paid_at')->oldest('paid_at')->get();
-        foreach ($invoices as $i) {
-            $d = Carbon::parse($i->paid_at);
-            $x = match($this->filter) {
-                'y' => $d->year,
-                'q' => $d->year . ' Q' . $d->quarter,
-                'm' => $d->year . ' ' . $d->locale(app()->getLocale())->shortMonthName,
-            };
-            if (!array_key_exists($x, $data)) {
-                $data[$x] = $i->net;
-            } else {
-                $data[$x] += $i->net;
+        $invoices = Invoice::whereNotNull('paid_at')
+            ->whereNot('transitory')
+            ->oldest('paid_at')
+            ->get();
+        $expenses = Expense::whereNotNull('expended_at')
+            ->where('taxable', 1)
+            ->oldest('expended_at')
+            ->get();
+        $period = match($this->filter) {
+            'y' => Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear()),
+            'q' => Carbon::parse($invoices[0]->paid_at)->startOfQuarter()->quartersUntil(now()->addQuarter()),
+            'm' => Carbon::parse($invoices[0]->paid_at)->startOfMonth()->monthsUntil(now()->addMonth()),
+        };
+        $labels = iterator_to_array($period->map(fn(Carbon $date) => match($this->filter) {
+            'y' => $date->format('Y'),
+            'q' => $date->isoFormat('YYYY [Q]Q'),
+            'm' => $date->isoFormat('YYYY MMM'),
+        }));
+        array_pop($labels);
+        $period = $period->toArray();
+        $invoiceData = array_fill(0, count($period)-1, 0);
+        $expenseData = array_fill(0, count($period)-1, 0);
+        foreach ($period as $i => $date) {
+            if ($i == count($period)-1) break;
+            foreach ($invoices as $obj) {
+                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->paid_at)) {
+                    $invoiceData[$i] += $obj->net;
+                }
+            }
+            foreach ($expenses as $obj) {
+                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->expended_at)) {
+                    $expenseData[$i] += $obj->net;
+                }
             }
         }
 
         return [
             'datasets' => [
                 [
-                    'data' => $data,
+                    'data' => $invoiceData,
                     'fill' => 'start',
                 ],
+                [
+                    'data' => $expenseData,
+                    'fill' => 'start',
+                    'backgroundColor' => '#f43f5e1f',
+                    'borderColor' => '#f43f5e',
+                ],
             ],
+            'labels' => $labels
         ];
     }
 
@@ -67,7 +97,23 @@ class SalesChart extends ChartWidget
             plugins: {
                 legend: {
                     display: false
-                }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    multiKeyBackground: '#000',
+                    callbacks: {
+                        // label: (context) => ' ' + context.formattedValue + ' ' + context.dataset.label,
+                        labelColor: (context) => ({
+                            borderWidth: 2,
+                            borderColor: context.dataset.borderColor,
+                            backgroundColor: context.dataset.borderColor + '33',
+                        }),
+                    },
+                },
+            },
+            hover: {
+                mode: 'index',
             },
             scales: {
                 y: {

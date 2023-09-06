@@ -28,12 +28,28 @@ class Expense extends Model
     }
 
     /**
+     * Gross amount of this expense
+     */
+    public function getGrossAttribute()
+    {
+        return round($this->price * $this->quantity);
+    }
+
+    /**
      * Vat amount of this expense
      */
     public function getVatAttribute()
     {
         return $this->taxable
-            ? round($this->price * $this->quantity * (1 - 1 / (1 + $this->vat_rate)), 2)
+            ? round($this->gross * (1 - 1 / (1 + $this->vat_rate)), 2)
             : 0;
+    }
+
+    /**
+     * Net amount of this expense
+     */
+    public function getNetAttribute()
+    {
+        return $this->gross - $this->vat;
     }
 }
