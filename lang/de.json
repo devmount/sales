@@ -12,6 +12,7 @@
     "chart": "Dia",
     "client": "Kunde|Kunden",
     "client.name.hint": "Person oder Firmentitel",
+    "clientsProfitDistribution": "Verteilung des Gewinns pro Kunde",
     "color": "Farbe",
     "content": "Inhalt",
     "coreData": "Stammdaten",

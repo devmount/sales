@@ -11,6 +11,7 @@
     "category": "Category",
     "client": "Client|Clients",
     "client.name.hint": "Person or company title",
+    "clientsProfitDistribution": "Distribution of profit per client",
     "color": "Color",
     "content": "Content",
     "coreData": "Core data",
