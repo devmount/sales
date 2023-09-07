@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\PricingUnit;
 use App\Filament\Resources\ProjectResource\Pages;
+use App\Filament\Resources\ProjectResource\RelationManagers;
 use App\Models\Project;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
@@ -158,7 +159,7 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\InvoicesRelationManager::class,
         ];
     }
 

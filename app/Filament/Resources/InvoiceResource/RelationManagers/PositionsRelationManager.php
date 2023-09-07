@@ -81,6 +81,7 @@ class PositionsRelationManager extends RelationManager
     {
         return $table
             ->recordTitle(trans_choice('position', 1))
+            ->heading(trans_choice('position', 2))
             ->defaultSort('started_at', 'asc')
             ->columns([
                 TextColumn::make('description')
