@@ -12,7 +12,7 @@ use Filament\Widgets\ChartWidget;
 class SalesChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 6;
-    protected static ?string $maxHeight = '185px';
+    protected static ?string $maxHeight = '238px';
     public ?string $filter = 'y';
     protected static ?string $pollingInterval = null;
 
