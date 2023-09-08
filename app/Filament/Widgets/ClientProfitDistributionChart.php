@@ -5,13 +5,12 @@ namespace App\Filament\Widgets;
 use App\Models\Client;
 use App\Models\Invoice;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
 class ClientProfitDistributionChart extends ChartWidget
 {
-    // protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 4;
     protected static ?string $maxHeight = '185px';
     public ?string $filter = '';
     protected static ?string $pollingInterval = null;
@@ -36,14 +35,15 @@ class ClientProfitDistributionChart extends ChartWidget
                 ? $profit[$id] + $obj->net
                 : $obj->net;
         }
-        $labels = array_map(fn ($p) => Client::find($p)->name, array_keys($profit));
-        $colors = array_map(fn ($p) => Client::find($p)->color, array_keys($profit));
+        $sum = array_sum($profit);
+        $labels = array_map(fn ($id, $p) => '(' . round($p/$sum*100, 1) . '%) ' . Client::find($id)->name, array_keys($profit), $profit);
+        $colors = array_map(fn ($id) => Client::find($id)->color, array_keys($profit));
 
         return [
             'datasets' => [
                 [
-                    'label' => 'My First Dataset',
                     'data' => array_values($profit),
+                    'borderColor' => $colors,
                     'backgroundColor' => $colors,
                     'hoverOffset' => 4
                 ],
@@ -73,46 +73,32 @@ class ClientProfitDistributionChart extends ChartWidget
     {
         return RawJs::make(<<<JS
         {
-            // plugins: {
-            //     legend: {
-            //         display: false
-            //     },
-            //     tooltip: {
-            //         mode: 'index',
-            //         intersect: false,
-            //         multiKeyBackground: '#000',
-            //         callbacks: {
-            //             label: (context) => ' ' + context.formattedValue + ' €',
-            //             labelColor: (context) => ({
-            //                 borderWidth: 2,
-            //                 borderColor: context.dataset.borderColor,
-            //                 backgroundColor: context.dataset.borderColor + '33',
-            //             }),
-            //         },
-            //     },
-            // },
-            // hover: {
-            //     mode: 'index',
-            // },
-            // scales: {
-            //     y: {
-            //         ticks: {
-            //             callback: (value) => value/1000 + ' k€',
-            //         },
-            //     },
-            // },
-            // datasets: {
-            //     line: {
-            //         pointRadius: 0,
-            //         pointHoverRadius: 0,
-            //     }
-            // },
-            // elements: {
-            //     line: {
-            //         borderWidth: 2,
-            //         tension: 0.15,
-            //     }
-            // }
+            borderWidth: 0,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    multiKeyBackground: '#000',
+                    callbacks: {
+                        label: (context) => ' ' + context.formattedValue + ' €' + ' ' + context.label,
+                        labelColor: (context) => ({
+                            borderWidth: 2,
+                            borderColor: context.dataset.borderColor[context.dataIndex],
+                            backgroundColor: context.dataset.borderColor[context.dataIndex] + '33',
+                        }),
+                    },
+                },
+            },
+            scales: {
+                y: {
+                    display: false,
+                },
+                x: {
+                    display: false,
+                }
+            },
         }
         JS);
     }
