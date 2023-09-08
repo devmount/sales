@@ -31,6 +31,10 @@ class SalesChart extends ChartWidget
             ->where('taxable', 1)
             ->oldest('expended_at')
             ->get();
+        $taxes = Expense::whereNotNull('expended_at')
+            ->where('taxable', 0)
+            ->oldest('expended_at')
+            ->get();
         $period = match($this->filter) {
             'y' => Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear()),
             'q' => Carbon::parse($invoices[0]->paid_at)->startOfQuarter()->quartersUntil(now()->addQuarter()),
@@ -45,6 +49,7 @@ class SalesChart extends ChartWidget
         $period = $period->toArray();
         $invoiceData = array_fill(0, count($period)-1, 0);
         $expenseData = array_fill(0, count($period)-1, 0);
+        $taxData = array_fill(0, count($period)-1, 0);
         foreach ($period as $i => $date) {
             if ($i == count($period)-1) break;
             foreach ($invoices as $obj) {
@@ -57,21 +62,35 @@ class SalesChart extends ChartWidget
                     $expenseData[$i] += $obj->net;
                 }
             }
+            foreach ($taxes as $obj) {
+                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->expended_at)) {
+                    $taxData[$i] += $obj->net;
+                }
+            }
         }
 
         return [
             'datasets' => [
                 [
+                    'label' => __('income'),
                     'data' => $invoiceData,
                     'fill' => 'start',
                     'backgroundColor' => '#3b82f622',
                     'borderColor' => '#3b82f6',
                 ],
                 [
+                    'label' => trans_choice('expense', 2),
                     'data' => $expenseData,
                     'fill' => 'start',
                     'backgroundColor' => '#f43f5e22',
                     'borderColor' => '#f43f5e',
+                ],
+                [
+                    'label' => __('taxes'),
+                    'data' => $taxData,
+                    'fill' => 'start',
+                    'backgroundColor' => '#f9731622',
+                    'borderColor' => '#f97316',
                 ],
             ],
             'labels' => $labels
@@ -105,7 +124,7 @@ class SalesChart extends ChartWidget
                     intersect: false,
                     multiKeyBackground: '#000',
                     callbacks: {
-                        label: (context) => ' ' + context.formattedValue + ' €',
+                        label: (context) => ' ' + context.formattedValue + ' € ' + context.dataset.label,
                         labelColor: (context) => ({
                             borderWidth: 2,
                             borderColor: context.dataset.borderColor,
