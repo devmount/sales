@@ -123,6 +123,7 @@
     "vatExpenses": "USt. Ausgaben",
     "vatId": "USt-IdNr.",
     "vatRate": "Umsatzsteuersatz",
+    "vatTax": "Umsatzsteuer",
     "waitingForPayment": "Warten auf Bezahlung",
     "website": "Webseite",
     "weight": "Gewicht",

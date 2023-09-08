@@ -122,6 +122,7 @@
     "vatExpenses": "VAT expenses",
     "vatId": "VAT Id",
     "vatRate": "Vat rate",
+    "vatTax": "VAT",
     "waitingForPayment": "Waiting for payment",
     "website": "Website",
     "weight": "Weight",

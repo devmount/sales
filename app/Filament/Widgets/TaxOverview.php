@@ -32,24 +32,33 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
     protected static string $view = 'filament.widgets.tax-overview';
     protected static ?string $maxHeight = '265px';
     protected static int $entryCount = 6;
+    public ?string $filter = 'm';
+
+    public function getHeading(): string
+    {
+        return __('vatTax');
+    }
 
     public function taxInfolist(Infolist $infolist): Infolist
     {
         return $infolist
             ->name('taxOverview')
             ->schema([
-                Components\Tabs::make('taxOverviewNavigation')->tabs([
-                    Components\Tabs\Tab::make('perMonth')
-                        ->translateLabel()
-                        ->schema([ Components\Grid::make(12)->schema($this->getMonthData()) ]),
-                    Components\Tabs\Tab::make('perQuarter')
-                        ->translateLabel()
-                        ->schema([ Components\Grid::make(12)->schema($this->getQuarterData()) ]),
-                    Components\Tabs\Tab::make('perYear')
-                        ->translateLabel()
-                        ->schema([ Components\Grid::make(12)->schema($this->getYearData()) ]),
-            ]),
-        ]);
+                match($this->filter) {
+                    'm' => Components\Grid::make(12)->schema($this->getMonthData()),
+                    'q' => Components\Grid::make(12)->schema($this->getQuarterData()),
+                    'y' => Components\Grid::make(12)->schema($this->getYearData()),
+                }
+            ]);
+    }
+
+    protected function getFilters(): ?array
+    {
+        return [
+            'm' => __('perMonth'),
+            'q' => __('perQuarter'),
+            'y' => __('perYear'),
+        ];
     }
 
     private function generateEntries($heading, $labels, $netIncome, $vatExpenses, $totalVat): array
