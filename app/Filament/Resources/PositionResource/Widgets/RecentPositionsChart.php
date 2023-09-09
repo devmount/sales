@@ -40,6 +40,7 @@ class RecentPositionsChart extends ChartWidget
                         'label' => $project->title,
                         'data' =>  array_fill(0, count($period), 0),
                         'backgroundColor' => $project->client->color,
+                        'barPercentage' => 0.75,
                     ];
                     $datasets[$project->id]['data'][$i] = $p->duration;
                 }
@@ -73,7 +74,22 @@ class RecentPositionsChart extends ChartWidget
             plugins: {
                 legend: {
                     display: false
-                }
+                },
+                tooltip: {
+                    intersect: true,
+                    multiKeyBackground: '#000',
+                    callbacks: {
+                        label: (context) => ' ' + context.formattedValue + ' h ' + context.dataset.label,
+                        labelColor: (context) => ({
+                            borderWidth: 2,
+                            borderColor: context.dataset.backgroundColor,
+                            backgroundColor: context.dataset.backgroundColor + '33',
+                        }),
+                    },
+                },
+            },
+            hover: {
+                mode: 'index',
             },
             scales: {
                 y: {
