@@ -2,21 +2,24 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ExpenseCategory;
+use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
-class HourlyRateChart extends ChartWidget
+class MonthlyIncomeChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 4;
     // protected static ?string $maxHeight = '238px';
+    public ?string $filter = 'net';
     protected static ?string $pollingInterval = null;
 
     public function getHeading(): string
     {
-        return __('averageHourlyRate');
+        return __('monthlyIncome');
     }
 
     protected function getData(): array
@@ -25,33 +28,47 @@ class HourlyRateChart extends ChartWidget
             ->whereNot('transitory')
             ->oldest('paid_at')
             ->get();
+        $taxes = Expense::whereNotNull('expended_at')
+            ->where('taxable', 0)
+            ->oldest('expended_at')
+            ->get();
         $period = Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear());
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
         $period = $period->toArray();
-        $count = array_fill(0, count($period)-1, 0);
-        $rates = array_fill(0, count($period)-1, 0);
+        $invoiceData = array_fill(0, count($period)-1, 0);
         foreach ($period as $i => $date) {
             if ($i == count($period)-1) break;
             foreach ($invoices as $obj) {
                 if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->paid_at)) {
-                    $rates[$i] += $obj->net;
-                    $count[$i] += $obj->hours;
+                    $invoiceData[$i] += match($this->filter) {
+                        'net' => $obj->net,
+                        'gross' => $obj->gross,
+                    };
                 }
             }
-        }
-        // dump($rates, $count);
-        foreach ($rates as $i => $rate) {
-            $rates[$i] = round($rate/$count[$i]);
+            foreach ($taxes as $obj) {
+                if (
+                    CarbonPeriod::create($date, $period[$i+1])->contains(Carbon::parse($obj->expended_at)->subYear()) &&
+                    $this->filter === 'net' &&
+                    $obj->category === ExpenseCategory::Tax
+                ) {
+                    $invoiceData[$i] -= $obj->net;
+                }
+            }
         }
 
         return [
             'datasets' => [
                 [
-                    'data' => $rates,
+                    'label' => match($this->filter) {
+                        'net' => __('netIncome'),
+                        'gross' => __('grossIncome'),
+                    },
+                    'data' => array_map(fn ($i) => $i/12, $invoiceData),
                     'fill' => 'start',
-                    'backgroundColor' => '#3b82f6',
-                    'barPercentage' => 0.75,
+                    'backgroundColor' => '#3b82f622',
+                    'borderColor' => '#3b82f6',
                 ],
             ],
             'labels' => $labels
@@ -60,9 +77,16 @@ class HourlyRateChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'bar';
+        return 'line';
     }
 
+    protected function getFilters(): ?array
+    {
+        return [
+            'net' => __('net'),
+            'gross' => __('gross'),
+        ];
+    }
 
     protected function getOptions(): RawJs
     {
@@ -77,11 +101,11 @@ class HourlyRateChart extends ChartWidget
                     intersect: false,
                     multiKeyBackground: '#000',
                     callbacks: {
-                        label: (context) => ' ' + context.formattedValue + ' €/h',
+                        label: (context) => ' ' + context.formattedValue + ' € ' + context.dataset.label,
                         labelColor: (context) => ({
                             borderWidth: 2,
-                            borderColor: context.dataset.backgroundColor,
-                            backgroundColor: context.dataset.backgroundColor + '33',
+                            borderColor: context.dataset.borderColor,
+                            backgroundColor: context.dataset.borderColor + '33',
                         }),
                     },
                 },
@@ -92,13 +116,20 @@ class HourlyRateChart extends ChartWidget
             scales: {
                 y: {
                     ticks: {
-                        callback: (value) => value + ' €',
+                        callback: (value) => value/1000 + ' k€',
                     },
                 },
             },
+            datasets: {
+                line: {
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                }
+            },
             elements: {
-                bar: {
-                    borderWidth: 0,
+                line: {
+                    borderWidth: 2,
+                    tension: 0.15,
                 }
             }
         }

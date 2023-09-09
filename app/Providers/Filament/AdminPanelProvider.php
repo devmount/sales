@@ -44,6 +44,7 @@ class AdminPanelProvider extends PanelProvider
                 AppWidgets\TaxOverview::class,
                 AppWidgets\ClientProfitDistributionChart::class,
                 AppWidgets\HourlyRateChart::class,
+                AppWidgets\MonthlyIncomeChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

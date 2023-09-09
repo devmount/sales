@@ -11,7 +11,7 @@ use Filament\Widgets\ChartWidget;
 class ClientProfitDistributionChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 4;
-    protected static ?string $maxHeight = '185px';
+    protected static ?string $maxHeight = '170px';
     public ?string $filter = '';
     protected static ?string $pollingInterval = null;
 
