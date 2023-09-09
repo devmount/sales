@@ -65,7 +65,7 @@ class MonthlyIncomeChart extends ChartWidget
                         'net' => __('netIncome'),
                         'gross' => __('grossIncome'),
                     },
-                    'data' => array_map(fn ($i) => $i/12, $invoiceData),
+                    'data' => array_map(fn ($i) => round($i/12, 2), $invoiceData),
                     'fill' => 'start',
                     'backgroundColor' => '#3b82f622',
                     'borderColor' => '#3b82f6',

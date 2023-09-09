@@ -64,6 +64,7 @@ class RecentPositionsChart extends ChartWidget
             '60' => '60 ' . __('days'),
             '90' => '90 ' . __('days'),
             '120' => '120 ' . __('days'),
+            '365' => '365 ' . __('days'),
         ];
     }
 
