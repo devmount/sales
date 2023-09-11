@@ -13,7 +13,6 @@ use Filament\Widgets\ChartWidget;
 class MonthlyIncomeChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 4;
-    // protected static ?string $maxHeight = '238px';
     public ?string $filter = 'net';
     protected static ?string $pollingInterval = null;
 

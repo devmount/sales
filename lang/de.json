@@ -7,6 +7,7 @@
     "amount": "Betrag",
     "amountNet": "Betrag (netto)",
     "averageHourlyRate": "Durchschnittlicher Stundensatz",
+    "averageWeeklyHours": "Durchschnittliche Arbeitsstunden/Woche",
     "bank": "Kreditinstitut",
     "bic": "BIC",
     "category": "Kategorie",
@@ -50,6 +51,7 @@
     "hidePositionsDate": "Das Datum einzelner Leistungspositionen in der Rechnung verbergen.",
     "holder": "Inhaber",
     "hour": "Stunde|Stunden",
+    "hours/week": "Stunden/Woche",
     "iban": "IBAN",
     "inHours": "In Stunden",
     "inProgress": "In Arbeit",
@@ -129,6 +131,7 @@
     "vatTax": "Umsatzsteuer",
     "waitingForPayment": "Warten auf Bezahlung",
     "website": "Webseite",
+    "weeksWithWorkingDays": "Wochen mit Arbeitstagen",
     "weight": "Gewicht",
     "withKindRegards": "Mit freundlichen Grüßen",
     "year": "Jahr"

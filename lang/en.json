@@ -7,6 +7,7 @@
     "amount": "Amount",
     "amountNet": "Amount (net)",
     "averageHourlyRate": "Average hourly rate",
+    "averageWeeklyHours": "Average weekly working hours",
     "bank": "Credit Institution",
     "bic": "BIC",
     "category": "Category",
@@ -49,6 +50,7 @@
     "hidePositionsDate": "Hide date of positions in invoice.",
     "holder": "Holder",
     "hour": "Hour|Hours",
+    "hours/week": "Hours/Week",
     "iban": "IBAN",
     "inHours": "In hours",
     "inProgress": "In progress",
@@ -128,6 +130,7 @@
     "vatTax": "VAT",
     "waitingForPayment": "Waiting for payment",
     "website": "Website",
+    "weeksWithWorkingDays": "Weeks with working days",
     "weight": "Weight",
     "withKindRegards": "With kind regards",
     "year": "Year"
