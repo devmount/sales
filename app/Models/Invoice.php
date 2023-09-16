@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use NumberFormatter;
 
 class Invoice extends Model
 {
@@ -50,6 +51,14 @@ class Invoice extends Model
     }
 
     /**
+     * Number of hours worked for this invoice formatted
+     */
+    public function getHoursFormattedAttribute()
+    {
+        return $this->hours . ' ' . trans_choice('hour', $this->hours);
+    }
+
+    /**
      * Net amount of all assigned positions
      */
     public function getNetAttribute()
@@ -64,6 +73,14 @@ class Invoice extends Model
             };
         }
         return round($net, 2) - $this->discount;
+    }
+
+    /**
+     * Net amount of all assigned positions formatted
+     */
+    public function getNetFormattedAttribute()
+    {
+        return (new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY))->formatCurrency($this->net, 'eur');
     }
 
     /**

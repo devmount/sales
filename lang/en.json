@@ -21,6 +21,7 @@
     "createLatestVatExpense": "Create latest VAT expense",
     "createdAt": "Created at",
     "credit": "Credit",
+    "currentState": "Current State",
     "dateAndDescription": "Date and description",
     "dateRange": "Date range",
     "days": "Days",

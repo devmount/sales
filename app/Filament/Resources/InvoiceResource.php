@@ -119,8 +119,9 @@ class InvoiceResource extends Resource
                             ->suffixIcon('tabler-calendar-down'),
                     ]),
                 Components\Section::make()
-                    ->columnSpan(['lg' => 2])
+                    ->heading(__('currentState'))
                     ->hidden(fn (?Invoice $obj) => !$obj?->project)
+                    ->columnSpan(['lg' => 2])
                     ->columns(2)
                     ->schema([
                         Components\Placeholder::make('project')
@@ -129,6 +130,14 @@ class InvoiceResource extends Resource
                                 $obj->project?->hours
                                 . ' / ' . $obj->project?->scope_range
                                 . '<br />' . __('numExhausted', ['n' => $obj->project?->progress_percent])
+                            ))
+                            ->columnSpanFull(),
+                        Components\Placeholder::make('invoice')
+                            ->label(trans_choice('invoice', 1))
+                            ->content(fn (Invoice $obj) => new HtmlString(
+                                count($obj->positions) . ' ' . trans_choice('position', count($obj->positions))
+                                . '<br />' . $obj->hours_formatted
+                                . '<br />' . $obj->net_formatted . ' ' . __('net')
                             ))
                             ->columnSpanFull(),
                     ]),

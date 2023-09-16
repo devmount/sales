@@ -22,6 +22,7 @@
     "createLatestVatExpense": "Letzte USt. Ausgabe erzeugen",
     "createdAt": "Registriert",
     "credit": "Gutschrift",
+    "currentState": "Aktueller Stand",
     "dateAndDescription": "Datum und Beschreibung",
     "dateRange": "Zeitraum",
     "days": "Tage",
