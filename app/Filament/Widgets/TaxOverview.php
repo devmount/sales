@@ -12,7 +12,6 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components as FormComponents;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
@@ -20,7 +19,8 @@ use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
-use NumberFormatter;
+
+use function Filament\Support\format_number;
 
 class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
 {
@@ -79,7 +79,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->copyable()
-                ->copyableState(fn (string $state): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::DECIMAL))->format((float)$state)),
+                ->copyableState(fn (string $state): string => format_number((float)$state)),
             Components\TextEntry::make('vatExpenses')
                 ->label(__('vatExpenses'))
                 ->columnSpan(3)
@@ -89,7 +89,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->copyable()
-                ->copyableState(fn (string $state): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::DECIMAL))->format((float)$state)),
+                ->copyableState(fn (string $state): string => format_number((float)$state)),
             Components\TextEntry::make('totalVat')
                 ->label(__('totalVat'))
                 ->columnSpan(3)
@@ -99,7 +99,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->copyable()
-                ->copyableState(fn (string $state): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::DECIMAL))->format((float)$state)),
+                ->copyableState(fn (string $state): string => format_number((float)$state)),
             Components\Actions::make([
                 Components\Actions\Action::make('add_latest_vat_expense')
                     ->label(__('createLatestVatExpense'))

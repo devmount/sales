@@ -39,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
+                AppWidgets\StatsOverview::class,
                 ResourceWidgets\RecentPositionsChart::class,
                 AppWidgets\SalesChart::class,
                 AppWidgets\TaxOverview::class,

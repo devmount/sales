@@ -17,7 +17,8 @@ use Filament\Tables\Columns;
 use Filament\Tables\Columns\Summarizers;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use NumberFormatter;
+
+use function Filament\Support\format_money;
 
 class InvoiceResource extends Resource
 {
@@ -173,7 +174,7 @@ class InvoiceResource extends Resource
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->final)
-                    ->description(fn (Invoice $record): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY))->formatCurrency($record->vat, 'eur') . ' ' . __('vat')),
+                    ->description(fn (Invoice $record): string => format_money($record->vat, 'eur') . ' ' . __('vat')),
                 Columns\TextColumn::make('invoiced_at')
                     ->label(__('invoiceDates'))
                     ->date('j. F Y')

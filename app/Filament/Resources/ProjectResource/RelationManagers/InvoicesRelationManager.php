@@ -12,8 +12,9 @@ use Filament\Tables\Columns;
 use Filament\Forms\Components;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\Summarizers;
-use NumberFormatter;
 use Carbon\Carbon;
+
+use function Filament\Support\format_money;
 
 class InvoicesRelationManager extends RelationManager
 {
@@ -96,7 +97,7 @@ class InvoicesRelationManager extends RelationManager
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->final)
-                    ->description(fn (Invoice $record): string => (new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY))->formatCurrency($record->vat, 'eur') . ' ' . __('vat')),
+                    ->description(fn (Invoice $record): string => format_money($record->vat, 'eur') . ' ' . __('vat')),
             ])
             ->filters([
                 //

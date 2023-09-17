@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PricingUnit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,23 @@ class Position extends Model
     {
         return Carbon::parse($this->started_at)
             ->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration;
+    }
+
+    /**
+     * Total net of the position
+     */
+    public function getNetAttribute()
+    {
+        $net = 0;
+        if ($this->invoice->pricing_unit === PricingUnit::Project) {
+            $net = $this->invoice->hours/$this->invoice->net * $this->duration;
+        } else {
+            $net += $this->duration * $this->invoice->price / match ($this->invoice->pricing_unit) {
+                PricingUnit::Hour => 1,
+                PricingUnit::Day => 8,
+            };
+        }
+        return round($net, 2);
     }
 
     /**
