@@ -23,10 +23,11 @@ class SumProductiveHoursChart extends ChartWidget
     protected function getData(): array
     {
         $positions = Position::oldest('started_at')->get();
+        $start = $positions[0]->started_at;
         $period = match($this->filter) {
-            'y' => Carbon::parse($positions[0]->started_at)->startOfYear()->yearsUntil(now()->addYear()),
-            'q' => Carbon::parse($positions[0]->started_at)->startOfQuarter()->quartersUntil(now()->addQuarter()),
-            'm' => Carbon::parse($positions[0]->started_at)->startOfMonth()->monthsUntil(now()->addMonth()),
+            'y' => Carbon::parse($start)->startOfYear()->yearsUntil(now()->addYear()),
+            'q' => Carbon::parse($start)->startOfQuarter()->quartersUntil(now()->addQuarter()),
+            'm' => Carbon::parse($start)->startOfMonth()->monthsUntil(now()->addMonth()),
         };
         $labels = iterator_to_array($period->map(fn(Carbon $date) => match($this->filter) {
             'y' => $date->format('Y'),

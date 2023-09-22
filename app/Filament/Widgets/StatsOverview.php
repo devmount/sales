@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Position;
+use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -45,8 +46,8 @@ class StatsOverview extends BaseWidget
 
     protected function getData(): array
     {
-        $positions = Position::where('started_at', '>', now()->subWeeks(7)->startOfWeek())->get();
-        $period = now()->subWeeks(7)->startOfWeek()->weeksUntil(now()->endOfWeek())->toArray();
+        $positions = Position::where('started_at', '>', now()->subWeeks(7)->startOfWeek(Carbon::MONDAY))->get();
+        $period = now()->subWeeks(8)->startOfWeek()->weeksUntil(now()->addWeek()->endOfWeek(Carbon::SUNDAY))->toArray();
         $revenue = array_fill(0, count($period)-1, 0);
         $hours = array_fill(0, count($period)-1, 0);
         foreach ($period as $i => $date) {
