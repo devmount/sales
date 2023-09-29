@@ -17,14 +17,16 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         [$revenue, $hours] = $this->getData();
+        $previousRevenue = $revenue[count($revenue)-2];
         $revenueStat = format_money($revenue[count($revenue)-1], 'eur');
-        $revenueDiff = $revenue[count($revenue)-1] - $revenue[count($revenue)-2];
+        $revenueDiff = $revenue[count($revenue)-1] - $previousRevenue;
         $revenueIncrease = $revenueDiff >= 0;
-        $revenueDiffPercent = round(abs($revenueDiff)/$revenue[count($revenue)-2]*100);
+        $revenueDiffPercent = $previousRevenue ? round(abs($revenueDiff)/$previousRevenue*100) : 0;
+        $previousHours = $hours[count($hours)-2];
         $hoursStat = $hours[count($hours)-1];
-        $hoursDiff = $hours[count($hours)-1] - $hours[count($hours)-2];
+        $hoursDiff = $hours[count($hours)-1] - $previousHours;
         $hoursIncrease = $hoursDiff >= 0;
-        $hoursDiffPercent = round(abs($hoursDiff)/$hours[count($hours)-2]*100);
+        $hoursDiffPercent = $previousHours ? round(abs($hoursDiff)/$previousHours*100) : 0;
         return [
             Stat::make('weeklyRevenue', $revenueStat)
                 ->label(__('weeklyRevenue'))

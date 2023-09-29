@@ -13,7 +13,6 @@ use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
-use Filament\Tables\Columns\Summarizers;
 use Filament\Tables\Table;
 
 class ExpenseResource extends Resource
@@ -97,8 +96,7 @@ class ExpenseResource extends Resource
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->alignment(Alignment::End)
-                    ->sortable()
-                    ->summarize(Summarizers\Sum::make()->money('eur')),
+                    ->sortable(),
                 Columns\IconColumn::make('taxable')
                     ->label(__('taxable'))
                     ->boolean()
@@ -116,8 +114,7 @@ class ExpenseResource extends Resource
                     ->label(__('quantity'))
                     ->numeric()
                     // ->hidden(fn ($record): bool => in_array($record?->category, ExpenseCategory::taxCategories()))
-                    ->sortable()
-                    ->summarize(Summarizers\Sum::make()),
+                    ->sortable(),
                 Columns\TextColumn::make('category')
                     ->label(__('category'))
                     ->badge()
