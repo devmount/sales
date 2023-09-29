@@ -14,7 +14,6 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
-use Filament\Tables\Columns\Summarizers;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 
@@ -161,8 +160,7 @@ class InvoiceResource extends Resource
                     ->label(__('price'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel())
-                    ->summarize(Summarizers\Average::make()->money('eur')),
+                    ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel()),
                 Columns\TextColumn::make('net')
                     ->label(__('net'))
                     ->money('eur')
