@@ -1,8 +1,8 @@
 # Sales
 
-A service sales manager for freelancer.
+A service sales manager especially for freelancers. Built in German, available in English too.
 
-## Feature
+## Features
 
 - A dashboard showing current trends and tax data
 - Keep track of clients
@@ -11,6 +11,8 @@ A service sales manager for freelancer.
 - PDF export invoices from projects
 - Keep track of expenses
 - Keep track of gifts/donations (e.g. if you're an OS maintainer)
+
+![sales_demo](https://github.com/devmount/sales/assets/5441654/3f7c919b-a2e0-46db-8cbc-5e711c75dd25)
 
 ## Setup
 
