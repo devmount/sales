@@ -46,12 +46,12 @@ class InvoiceResource extends Resource
                             ->label(__('transitory'))
                             ->columnSpan(3)
                             ->inline(false)
-                            ->hintIcon('tabler-info-circle', tooltip: __('invoice.onlyTransitory')),
+                            ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory')),
                         Components\Toggle::make('undated')
                             ->label(__('undated'))
                             ->columnSpan(3)
                             ->inline(false)
-                            ->hintIcon('tabler-info-circle', tooltip: __('hidePositionsDate')),
+                            ->hintIcon('tabler-info-circle', __('hidePositionsDate')),
                         Components\TextInput::make('title')
                             ->label(__('title'))
                             ->columnSpan(6)

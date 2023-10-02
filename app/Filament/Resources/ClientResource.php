@@ -6,6 +6,7 @@ use App\Enums\LanguageCode;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Mail\ContactClient;
 use App\Models\Client;
+use App\Models\Setting;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -122,7 +123,10 @@ class ClientResource extends Resource
                         Components\RichEditor::make('content')
                             ->label(__('content'))
                             ->required()
-                            ->default(__("email.template.contact.body", ['name' => $record->name])),
+                            ->default(__("email.template.contact.body", [
+                                'name' => $record->name,
+                                'sender' => Setting::get('name')
+                            ])),
                     ])
                     ->action(function (Client $record, array $data) {
                         Mail::to($record->email)->send(
