@@ -12,7 +12,7 @@ A service sales manager especially for freelancers. Built in German, available i
 - Keep track of expenses
 - Keep track of gifts/donations (e.g. if you're an OS maintainer)
 
-![sales_demo](https://github.com/devmount/sales/assets/5441654/3f7c919b-a2e0-46db-8cbc-5e711c75dd25)
+![sales_demo](https://github.com/devmount/sales/assets/5441654/037e8b6b-e673-430f-91c2-39146cc54d1b)
 
 ## Setup
 
