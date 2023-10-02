@@ -109,4 +109,12 @@ class Invoice extends Model
     {
         return $this->gross - $this->deduction;
     }
+
+    /**
+     * Calculate the current invoice number of format YYYYMMDD##ID
+     */
+    public function getCurrentNumberAttribute()
+    {
+        return now()->format('Ymd') . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+    }
 }

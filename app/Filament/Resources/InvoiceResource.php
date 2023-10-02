@@ -205,6 +205,12 @@ class InvoiceResource extends Resource
                         ->icon('tabler-file-type-pdf')
                         ->url(fn (Invoice $record): string => static::getUrl('download', ['record' => $record]))
                         ->openUrlInNewTab(),
+                    Actions\Action::make('send')
+                        ->label(__('send'))
+                        ->icon('tabler-mail-forward')
+                        ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
+                            . '?subject=' . rawurlencode(trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
+                            . '&body=' . rawurlencode(__('email.template.invoicing.body.url', ['title' => $record->project?->title], $record->project?->client?->language))),
                     Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
