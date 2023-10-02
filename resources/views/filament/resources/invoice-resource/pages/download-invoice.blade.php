@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let page = 1;
     const totalPageCount = paginatedPositions(positions).length + 1;
     const today = new Date();
-    const invoiceNumber = isodate(new Date()) + '{{ $this->record->id }}'.padStart(4, '0');
+    const invoiceNumber = '{{ $this->record->current_number }}';
     const billedPerProject = {{ $this->record->pricing_unit === 'p' ? 'true' : 'false' }};
     const discount = {{ (int)$this->record->discount }};
 
