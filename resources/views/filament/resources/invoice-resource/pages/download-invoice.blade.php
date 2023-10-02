@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const config = {
         name:          '{{ $this->settings["name"] }}',
+        company:       '{{ $this->settings["company"] }}',
         address:       '{{ $this->settings["address"] }}',
         email:         '{{ $this->settings["email"] }}',
         phone:         '{{ $this->settings["phone"] }}',
@@ -322,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // serve document
     doc.save(
-        invoiceNumber + '_{{ trans_choice("invoice", 1) }}_devmount.pdf'.toLowerCase(),
+        `${invoiceNumber}_{{ trans_choice("invoice", 1, [], $this->record->project->client->language) }}_${config.company}.pdf`.toLowerCase(),
         { returnPromise: true }
     ).then(() => {
         setTimeout(() => { window.close() }, 100);

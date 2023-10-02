@@ -22,6 +22,10 @@ class Setting extends Model
         'attributes' => 'array',
     ];
 
+    public static function get(string $key) {
+        return self::find($key)?->value;
+    }
+
     /**
      * Translated setting label
      */
