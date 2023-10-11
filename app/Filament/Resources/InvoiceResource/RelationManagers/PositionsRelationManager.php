@@ -25,7 +25,6 @@ class PositionsRelationManager extends RelationManager
             ->schema([
                 Components\DateTimePicker::make('started_at')
                     ->label(__('startedAt'))
-                    ->native(true)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
@@ -48,7 +47,6 @@ class PositionsRelationManager extends RelationManager
                     ->columnSpan(4),
                 Components\DateTimePicker::make('finished_at')
                     ->label(__('finishedAt'))
-                    ->native(true)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
