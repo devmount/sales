@@ -36,6 +36,13 @@ const percent = (n, locale = 'de-DE') => {
     return nDigit(n*100, 2, locale) + ' %';
 };
 
+// decoding HTML characters
+const decodeHtml = (html) => {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+};
+
 // replace all marker of format {i}
 const markerReplace = (s, list) => {
     list.forEach((element, i) => {
@@ -148,11 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.setTextColor(colors.gray).setFont('FiraSansExtraLight').setFontSize(8)
         .text(config.address, 10, 50)
         .setFontSize(9).text('{{ __("to", [], $lang) }}', 10, 62)
-        .setTextColor(colors.main).setFontSize(15).text('{{ $this->record->project->client->name }}'.toUpperCase(), 10, 69)
+        .setTextColor(colors.main).setFontSize(15).text(decodeHtml('{{ $this->record->project->client->name }}').toUpperCase(), 10, 69)
         .setDrawColor(colors.line).setLineWidth(0.4).line(0, 73, 70, 73).line(140, 73, 210, 73)
         .setTextColor(colors.gray)
             .setFontSize(10)
-                .setLineHeightFactor(1.5).text('{{ str_replace("\n", "\\n", $this->record->project->client->address) }}', 10, 79)
+                .setLineHeightFactor(1.5).text(decodeHtml('{{ str_replace("\n", "\\n", $this->record->project->client->address) }}'), 10, 79)
                 .text('{{ __("invoiceNumber", [], $lang) }}', 144, 62.8)
                 .text('{{ __("invoiceDate", [], $lang) }}', 144, 68.8)
             .setFont('FiraSansRegular').setTextColor(colors.main)
