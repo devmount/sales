@@ -42,12 +42,6 @@ class AppServiceProvider extends ServiceProvider
         Select::configureUsing(function (Select $obj): void {
             $obj->native(false);
         });
-        DatePicker::configureUsing(function (DatePicker $obj): void {
-            $obj->native(false);
-        });
-        DateTimePicker::configureUsing(function (DateTimePicker $obj): void {
-            $obj->native(false);
-        });
         TernaryFilter::configureUsing(function (TernaryFilter $obj): void {
             $obj->native(false);
         });
