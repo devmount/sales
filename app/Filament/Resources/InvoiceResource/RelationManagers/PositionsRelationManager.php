@@ -3,29 +3,16 @@
 namespace App\Filament\Resources\InvoiceResource\RelationManagers;
 
 use App\Models\Position;
-use Filament\Forms;
+use Carbon\Carbon;
+use Filament\Forms\Components;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Support\Enums\IconSize;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ReplicateAction;
-use Filament\Tables\Columns\ColorColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use Filament\Tables\Actions;
+use Filament\Tables\Columns;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PositionsRelationManager extends RelationManager
 {
@@ -36,25 +23,41 @@ class PositionsRelationManager extends RelationManager
         return $form
             ->columns(12)
             ->schema([
-                DateTimePicker::make('started_at')
+                Components\DateTimePicker::make('started_at')
                     ->label(__('startedAt'))
+                    ->native(true)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
                     ->default(now()->setHour(9)->setMinute(0))
+                    ->live()
+                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+                        $previous = Carbon::parse($old);
+                        $started = Carbon::parse($state);
+                        $finished = Carbon::parse($get('finished_at'));
+                        // handle start is set after finish or day change
+                        if ($started >= $finished || !$started->isSameDay($finished)) {
+                            $set(
+                                'finished_at',
+                                $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
+                            );
+                        }
+                    })
                     ->required()
                     ->suffixIcon('tabler-clock-play')
                     ->columnSpan(4),
-                DateTimePicker::make('finished_at')
+                Components\DateTimePicker::make('finished_at')
                     ->label(__('finishedAt'))
+                    ->native(true)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
                     ->default(now()->setHour(17)->setMinute(0))
+                    ->after('started_at')
                     ->required()
                     ->suffixIcon('tabler-clock-pause')
                     ->columnSpan(4),
-                TextInput::make('pause_duration')
+                Components\TextInput::make('pause_duration')
                     ->label(__('pauseDuration'))
                     ->numeric()
                     ->step(.01)
@@ -63,12 +66,12 @@ class PositionsRelationManager extends RelationManager
                     ->suffix('h')
                     ->suffixIcon('tabler-coffee')
                     ->columnSpan(3),
-                Toggle::make('remote')
+                Components\Toggle::make('remote')
                     ->label(__('remote'))
                     ->inline(false)
                     ->default(true)
                     ->columnSpan(1),
-                Textarea::make('description')
+                Components\Textarea::make('description')
                     ->label(__('description'))
                     ->autosize()
                     ->maxLength(65535)
@@ -84,38 +87,38 @@ class PositionsRelationManager extends RelationManager
             ->heading(trans_choice('position', 2))
             ->defaultSort('started_at', 'asc')
             ->columns([
-                TextColumn::make('description')
+                Columns\TextColumn::make('description')
                     ->label(__('description'))
                     ->copyable()
                     ->formatStateUsing(fn (string $state): string => nl2br($state))
                     ->html(),
-                TextColumn::make('amount')
+                Columns\TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->state(fn (Position $record): float => $record->duration)
                     ->weight(FontWeight::ExtraBold)
                     ->description(fn (Position $record): string => $record->time_range),
-                ToggleColumn::make('remote')
+                Columns\ToggleColumn::make('remote')
                     ->label(__('remote')),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->actions([
-                EditAction::make()->icon('tabler-edit')->label(''),
-                ReplicateAction::make()->icon('tabler-copy')->label(''),
-                DeleteAction::make()->icon('tabler-trash')->label(''),
+                Actions\EditAction::make()->icon('tabler-edit')->label(''),
+                Actions\ReplicateAction::make()->icon('tabler-copy')->label(''),
+                Actions\DeleteAction::make()->icon('tabler-trash')->label(''),
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                Actions\BulkActionGroup::make([
+                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus'),
             ])
             ->paginated(false);
     }

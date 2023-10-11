@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PositionResource\Pages;
 use App\Models\Position;
+use Carbon\Carbon;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions;
@@ -38,21 +41,37 @@ class PositionResource extends Resource
                     ->inline(false)
                     ->default(true)
                     ->columnSpan(4),
-                Components\DateTimePicker::make('started_at')
+                    Components\DateTimePicker::make('started_at')
                     ->label(__('startedAt'))
+                    ->native(true)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
                     ->default(now()->setHour(9)->setMinute(0))
+                    ->live()
+                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+                        $previous = Carbon::parse($old);
+                        $started = Carbon::parse($state);
+                        $finished = Carbon::parse($get('finished_at'));
+                        // handle start is set after finish or day change
+                        if ($started >= $finished || !$started->isSameDay($finished)) {
+                            $set(
+                                'finished_at',
+                                $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
+                            );
+                        }
+                    })
                     ->required()
                     ->suffixIcon('tabler-clock-play')
                     ->columnSpan(4),
                 Components\DateTimePicker::make('finished_at')
                     ->label(__('finishedAt'))
+                    ->native(true)
                     ->weekStartsOnMonday()
                     ->seconds(false)
                     ->minutesStep(30)
                     ->default(now()->setHour(17)->setMinute(0))
+                    ->after('started_at')
                     ->required()
                     ->suffixIcon('tabler-clock-pause')
                     ->columnSpan(4),
