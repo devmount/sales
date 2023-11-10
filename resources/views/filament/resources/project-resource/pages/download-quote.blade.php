@@ -53,42 +53,26 @@ const markerReplace = (s, list) => {
 
 const undated = {{ $record->undated ? 'true' : 'false' }};
 
-// sort positions depending on invoice positions being flagged undated
-const sortedPositions = (positions) => {
-    return undated
-        // if undated, sort by positions creation date
-        ? positions.slice().sort(
-            (a, b) => (new Date(a.created_at)).getTime() - (new Date(b.created_at)).getTime()
-        )
-        // if dated, sort by positions starting date
-        : positions.slice().sort(
-            (a, b) => (new Date(a.started_at)).getTime() - (new Date(b.started_at)).getTime()
-        );
+// sort estimates by weight
+const sortedEstimates = (estimates) => {
+    return estimates.slice().sort((a, b) => a.weight - b.weight);
 };
 
-// get positions by page, one page has space for 50 lines (I know. Let me have my magic number.)
-const paginatedPositions = (positions) => {
+// get estimates by page, one page has space for 50 lines (I know. Let me have my magic number.)
+const paginatedEstimates = (estimates) => {
     const paginated = [];
     let linesProcessed = 0;
-    sortedPositions(positions).forEach((p) => {
-        const lineCount = p.description.split('\n').length + 2;
+    sortedEstimates(estimates).forEach((e) => {
+        const lineCount = e.description.split('\n').length + 2;
         linesProcessed += lineCount;
         const i = Math.floor(linesProcessed/50);
         if (i in paginated) {
-            paginated[i].push(p);
+            paginated[i].push(e);
         } else {
-            paginated[i] = [p];
+            paginated[i] = [e];
         };
     });
     return paginated;
-};
-
-// calculate duration of given position from start to end minus pause
-// return duration in hours
-const positionDuration = (position) => {
-	return (
-		((new Date(position.finished_at)).getTime() - (new Date(position.started_at)).getTime()) / (1000 * 60 * 60)
-	) - position.pause_duration;
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -162,10 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
         vat:                '{{ __("vat", [], $lang) }}',
         vatId:              '{{ __("vatId", [], $lang) }}',
     };
-    const positions = JSON.parse("{{ $record->positions }}".replaceAll('&quot;', '"').replaceAll("\n", "\\n"));
+    const estimates = JSON.parse("{{ $record->estimates }}".replaceAll('&quot;', '"').replaceAll("\n", "\\n"));
     const page = {
         current:   1,
-        total:     paginatedPositions(positions).length + 1,
+        total:     paginatedEstimates(estimates).length + 1,
         rowHeight: 3.5,
     };
     const today = new Date();
@@ -293,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // handle next page
     page.current++;
     // add position pages for activity confirmation
-    paginatedPositions(positions).forEach(positions => {
+    paginatedEstimates(positions).forEach(positions => {
         const totalHeight = positions.reduce((p, c) => p + c.description.split('\n').length + 2, 0)*page.rowHeight + 32;
         doc.addPage();
         // page header
