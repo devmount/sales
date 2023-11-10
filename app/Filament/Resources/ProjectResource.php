@@ -138,6 +138,11 @@ class ProjectResource extends Resource
                 Actions\ActionGroup::make([
                     Actions\EditAction::make()->icon('tabler-edit'),
                     Actions\ReplicateAction::make()->icon('tabler-copy'),
+                    Actions\Action::make('download')
+                        ->label(__('quote'))
+                        ->icon('tabler-file-type-pdf')
+                        ->url(fn (Project $record): string => static::getUrl('download', ['record' => $record]))
+                        ->openUrlInNewTab(),
                     Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
