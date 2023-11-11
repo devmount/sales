@@ -11,7 +11,7 @@ const hdate = (d, locale = 'de-DE') => {
     return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-// short iso date for invoice number, e.g. '20220102'
+// short iso date, e.g. '20220102'
 const isodate = (d) => {
     return d.toISOString().replace(/-/g, '').slice(0, 8);
 };
@@ -50,8 +50,6 @@ const markerReplace = (s, list) => {
     });
     return s;
 };
-
-const undated = {{ $record->undated ? 'true' : 'false' }};
 
 // sort estimates by weight
 const sortedEstimates = (estimates) => {
@@ -106,10 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
         accountHolder: '{{ $this->settings["accountHolder"] }}',
         taxOffice:     '{{ $this->settings["taxOffice"] }}',
         vatId:         '{{ $this->settings["vatId"] }}',
+        vatRate:       '{{ $this->settings["vatRate"] }}',
         logo:          '{{ $this->settings["logo"] }}',
         signature:     '{{ $this->settings["signature"] }}',
     };
     const lang = '{{ $lang }}';
+    const billedPerProject = {{ $this->record->pricing_unit->value === 'p' ? 'true' : 'false' }};
     const client = {
         name:    decodeHtml('{{ $this->record->client->name }}'),
         address: decodeHtml('{{ str_replace("\n", "\\n", $this->record->client->address) }}'),
@@ -118,31 +118,30 @@ document.addEventListener('DOMContentLoaded', () => {
         amountNet:          '{{ __("amountNet", [], $lang) }}',
         bank:               '{{ __("bank", [], $lang) }}',
         bic:                '{{ __("bic", [], $lang) }}',
-        creadit:            '{{ __("credit", [], $lang) }}',
-        dateAndDescription: '{{ __("dateAndDescription", [], $lang) }}',
-        deliverables:       '{{ __("deliverables", [], $lang) }}',
+        billing:            '{{ __("hourBasedBilling", [], $lang) }}',
+        credit:             '{{ __("credit", [], $lang) }}',
+        costEstimate:       '{{ __("costEstimate", [], $lang) }}',
         description:        '{{ __("description", [], $lang) }}',
-        explanation:        '{{ __("invoice.explanation", [], $lang) }}',
-        flatRate:           '{{ __("flatRate", [], $lang) }}',
         holder:             '{{ __("holder", [], $lang) }}',
         iban:               '{{ __("iban", [], $lang) }}',
         inHours:            '{{ __("inHours", [], $lang) }}',
-        invoice:            '{{ trans_choice("invoice", 1, [], $lang) }}',
-        invoiceDate:        '{{ __("invoiceDate", [], $lang) }}',
-        invoiceNumber:      '{{ __("invoiceNumber", [], $lang) }}',
+        inquiries:          '{{ __("inquiries", [], $lang) }}',
+        otherClients:       '{{ __("otherClients", [], $lang) }}',
         page:               '{{ __("page", [], $lang) }} ',
         perHour:            '{{ __("perHour", [], $lang) }}',
         position:           '{{ trans_choice("position", 1, [], $lang) }}',
         price:              '{{ __("price", [], $lang) }}',
         quantity:           '{{ __("quantity", [], $lang) }}',
+        quote:              '{{ __("quote", [], $lang) }}',
         regards:            '{{ __("withKindRegards", [], $lang) }}',
+        scopeTimeRange:     billedPerProject ? '{{ __("projectScopeTimeRange", [], $lang) }}' : '{{ __("hourlyScopeTimeRange", [], $lang) }}',
         statementOfWork:    '{{ __("statementOfWork", [], $lang) }}',
         sum:                '{{ __("sum", [], $lang) }}',
-        sumOfAllPositions:  '{{ __("sumOfAllPositions", [], $lang) }}',
         taxOffice:          '{{ __("taxOffice", [], $lang) }}',
         to:                 '{{ __("to", [], $lang) }}',
         total:              '{{ __("total", [], $lang) }}',
         totalAmount:        '{{ __("totalAmount", [], $lang) }}',
+        totalQuote:         '{{ __("totalQuote", [], $lang) }}',
         vat:                '{{ __("vat", [], $lang) }}',
         vatId:              '{{ __("vatId", [], $lang) }}',
     };
@@ -153,18 +152,17 @@ document.addEventListener('DOMContentLoaded', () => {
         rowHeight: 3.5,
     };
     const today = new Date();
-    const billedPerProject = {{ $this->record->pricing_unit === 'p' ? 'true' : 'false' }};
-    const invoice = {
-        number:      '{{ $this->record->current_number }}',
+    const quote = {
         title:       '{{ $this->record->title }}',
         description: '{{ str_replace("\n", "\\n", $this->record->description) }}',
-        hours:       nDigit(billedPerProject ? 1 : {{ $this->record->hours }}, 1, lang),
-        price:       {{ $this->record->price }},
-        net:         euro({{ $this->record->net }}, lang),
-        vatRate:     percent({{ $this->record->vat_rate }}, lang),
-        vat:         euro({{ $this->record->vat }}, lang),
-        gross:       euro({{ $this->record->gross }}, lang),
-        discount:    {{ (int)$this->record->discount }},
+        start:       new Date('{{ $this->record->start_at }}'),
+        due:         new Date('{{ $this->record->due_at }}'),
+        hours:       nDigit(billedPerProject ? {{ $this->record->scope }} : {{ $this->record->estimated_hours }}, 1, lang),
+        price:       billedPerProject ? {{ $this->record->price/$this->record->scope }} : {{ $this->record->price }},
+        net:         euro({{ $this->record->estimated_net }}, lang),
+        vatRate:     percent(config.vatRate, lang),
+        vat:         euro({{ $this->record->estimated_vat }}, lang),
+        gross:       euro({{ $this->record->estimated_gross }}, lang),
     };
 
     const { jsPDF } = window.jspdf;
@@ -178,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.setFillColor(colors.main).rect(0, 9, 210, 30, 'F');
     doc.addImage(config.logo, 'JPEG', 12, 13, 22, 22);
     doc.setTextColor(colors.light).setFont('FiraSansExtraLight')
-        .setFontSize(26).text(label.invoice.toUpperCase(), 105, 27, { align: 'center' })
+        .setFontSize(26).text(label.quote.toUpperCase(), 105, 27, { align: 'center' })
         .setFontSize(9)
             .text(config.email, 202, 25, { align: 'right' })
             .text(config.phone, 202, 19, { align: 'right' })
@@ -189,15 +187,12 @@ document.addEventListener('DOMContentLoaded', () => {
         .setFontSize(9).text(label.to, 10, 62)
         .setTextColor(colors.main).setFontSize(15).text(client.name.toUpperCase(), 10, 69)
         .setDrawColor(colors.line).setLineWidth(0.4).line(0, 73, 70, 73).line(140, 73, 210, 73)
-        .setTextColor(colors.gray)
-            .setFontSize(10)
-                .setLineHeightFactor(1.5).text(client.address, 10, 79)
-                .text(label.invoiceNumber, 144, 62.8)
-                .text(label.invoiceDate, 144, 68.8)
-            .setFont('FiraSansRegular').setTextColor(colors.main)
-                .text(invoice.number, 202, 62.8, { align: 'right' })
+        .setTextColor(colors.main)
+            .setFontSize(10).setLineHeightFactor(1.5)
+                .text(client.address, 10, 79)
+            .setFont('FiraSansRegular')
                 .text(hdate(today, lang), 202, 68.8, { align: 'right' });
-    // invoice table content
+    // quote table content
     doc.setLineWidth(0.8)
         .setFillColor(colors.col3).rect(10, 105, 90, 56, 'F').setDrawColor(colors.col2).line(10, 133, 100, 133)
         .setFillColor(colors.col2).rect(100, 105, 31, 56, 'F').setDrawColor(colors.col1).line(100, 133, 131, 133)
@@ -209,57 +204,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 .text(label.quantity, 115, 118, { align: 'center' })
                 .text(label.price, 146, 118, { align: 'center' })
             .setFont('FiraSansRegular').setTextColor(colors.light)
-                .text(label.total, 182, 118, { align: 'center' })
+                .text(label.sum, 182, 118, { align: 'center' })
         .setFontSize(8)
             .setFont('FiraSansExtraLight').setTextColor(colors.dark)
                 .text(label.statementOfWork, 15, 124)
-                .text(billedPerProject ? label.flatRate : label.inHours, 115, 124, { align: 'center' })
-                .text(billedPerProject ? label.flatRate : label.perHour, 146, 124, { align: 'center' })
+                .text(label.inHours, 115, 124, { align: 'center' })
+                .text(label.perHour, 146, 124, { align: 'center' })
             .setTextColor(colors.light)
-                .text(billedPerProject ? label.sum : label.sumOfAllPositions, 182, 124, { align: 'center' })
-        .setTextColor(colors.dark).setFont('FiraSansRegular').setFontSize(9).text(invoice.title, 15, 141)
+                .text(label.totalQuote, 182, 124, { align: 'center' })
+        .setTextColor(colors.dark).setFont('FiraSansRegular').setFontSize(9).text(quote.title, 15, 141)
         .setFont('FiraSansExtraLight')
             .setFontSize(8)
-                .text(invoice.description, 15, 147)
+                .text(quote.description, 15, 147)
             .setFontSize(16)
-                .text(invoice.hours, 115, 148, { align: 'center' })
-                .text(euro(invoice.price, lang), 146, 148, { align: 'center' })
+                .text(quote.hours, 115, 148, { align: 'center' })
+                .text(euro(quote.price, lang), 146, 148, { align: 'center' })
             .setTextColor(colors.light)
-                .text(invoice.net, 182, 148, { align: 'center' });
-    // invoice table total without discount
-    if (!invoice.discount) {
-        doc.setFillColor(colors.main).rect(0, 165, 210, 50, 'F').setDrawColor(colors.line3).setLineWidth(0.3).line(124, 196, 194, 196)
-            .setTextColor(colors.text)
-                .setFont('FiraSansExtraLight').setFontSize(13)
-                    .text(label.amountNet, 160, 181, { align: 'right' })
-                    .text(`${invoice.vatRate} ${label.vat}`, 160, 190, { align: 'right' })
-                    .text(invoice.net, 194, 181, { align: 'right' })
-                    .text(invoice.vat, 194, 190, { align: 'right' })
-            .setTextColor(colors.light)
-                .setFont('FiraSansRegular').setFontSize(16)
-                    .text(label.totalAmount, 160, 205, { align: 'right' })
-                    .text(invoice.gross, 194, 205, { align: 'right' });
-    }
-    // invoice table total with discount
-    else {
-        doc.setFillColor(colors.main).rect(0, 165, 210, 50, 'F').setDrawColor(colors.line3).setLineWidth(0.3).line(124, 198, 194, 198)
-            .setTextColor(colors.text)
-                .setFont('FiraSansExtraLight').setFontSize(13)
-                    .text(label.amountNet, 160, 177, { align: 'right' })
-                    .text(label.credit, 160, 185, { align: 'right' })
-                    .text(`${invoice.vatRate} ${label.vat}`, 160, 193, { align: 'right' })
-                    .text(invoice.net, 194, 177, { align: 'right' })
-                    .text(`– ${euro(invoice.discount, lang)}`, 194, 185, { align: 'right' })
-                    .text(invoice.vat, 194, 193, { align: 'right' })
-            .setTextColor(colors.light)
-                .setFont('FiraSansRegular').setFontSize(16)
-                    .text(label.totalAmount, 160, 207, { align: 'right' })
-                    .text(invoice.gross, 194, 207, { align: 'right' });
-    }
+                .text(quote.net, 182, 148, { align: 'center' });
+    // quote table total
+    doc.setFillColor(colors.col3).rect(0, 165, 210, 50, 'F').setDrawColor(colors.col1).setLineWidth(0.3).line(124, 196, 194, 196)
+        .setTextColor(colors.dark)
+            .setFont('FiraSansExtraLight').setFontSize(13)
+                .text(label.amountNet, 160, 181, { align: 'right' })
+                .text(`${quote.vatRate} ${label.vat}`, 160, 190, { align: 'right' })
+                .text(quote.net, 194, 181, { align: 'right' })
+                .text(quote.vat, 194, 190, { align: 'right' })
+            .setFont('FiraSansRegular').setFontSize(16)
+                .text(label.totalAmount, 160, 205, { align: 'right' })
+                .text(quote.gross, 194, 205, { align: 'right' });
     // terms
-    doc.setFontSize(10).setFont('FiraSansExtraLight').setTextColor(colors.dark)
-        .text(markerReplace(label.explanation, [invoice.gross, invoice.number]), 10, 225, { maxWidth: 180 })
-        .text([label.regards, config.name], 10, 244);
+    doc.setFont('FiraSansExtraLight').setTextColor(colors.dark)
+        .setFontSize(8).text(
+            `${markerReplace(label.scopeTimeRange, [hdate(quote.start), hdate(quote.due)])} ${label.billing} ${label.otherClients} ${label.inquiries}`, 10, 225, { maxWidth: 180 }
+        )
+        .setFontSize(10).text([label.regards, config.name], 10, 244);
     // footer
     doc.setDrawColor(colors.line).setLineWidth(0.4).line(10, 272, 202, 272)
         .addImage(config.signature, 'PNG', 13, 255, 24, 18)
@@ -273,23 +251,23 @@ document.addEventListener('DOMContentLoaded', () => {
             .text([config.vatId, config.taxOffice], 172, 277);
     // document guides
     doc.setDrawColor(colors.line).line(0, 105, 3, 105).line(0, 148, 5, 148)
-        .setDrawColor(colors.line4).line(0, 210, 3, 210)
+        .setDrawColor(colors.col1).line(0, 210, 3, 210)
     // handle next page
     page.current++;
-    // add position pages for activity confirmation
-    paginatedEstimates(positions).forEach(positions => {
-        const totalHeight = positions.reduce((p, c) => p + c.description.split('\n').length + 2, 0)*page.rowHeight + 32;
+    // add estimate pages for activity confirmation
+    paginatedEstimates(estimates).forEach(estimates => {
+        const totalHeight = estimates.reduce((p, c) => p + c.description.split('\n').length + 2, 0)*page.rowHeight + 32;
         doc.addPage();
         // page header
         doc.setFillColor(colors.main).rect(0, 9, 210, 30, 'F');
         doc.addImage(config.logo, 'JPEG', 12, 13, 22, 22);
         doc.setTextColor(colors.light).setFont('FiraSansExtraLight')
-            .setFontSize(26).text(label.deliverables.toUpperCase(), 105, 27, { align: 'center' })
+            .setFontSize(26).text(label.costEstimate.toUpperCase(), 105, 27, { align: 'center' })
             .setFontSize(9)
                 .text(config.email, 202, 25, { align: 'right' })
                 .text(config.phone, 202, 19, { align: 'right' })
                 .text(config.website, 202, 31, { align: 'right' });
-        // position table content
+        // estimate table content
         doc.setLineWidth(0.8)
             .setFillColor(colors.col3)
                 .rect(10, 50, 113, totalHeight, 'F')
@@ -312,41 +290,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     .text(billedPerProject ? '' : label.total, 189, 63, { align: 'center' })
             .setFontSize(8)
                 .setFont('FiraSansExtraLight').setTextColor(colors.dark)
-                    .text(undated ? label.description : label.dateAndDescription, 15, 69)
+                    .text(label.description, 15, 69)
                     .text(billedPerProject ? '' : label.inHours, 136, 69, { align: 'center' })
                     .text(billedPerProject ? '' : label.perHour, 162, 69, { align: 'center' })
                 .setTextColor(colors.light)
                     .text(billedPerProject ? '' : label.price, 189, 69, { align: 'center' });
-        // draw positions
+        // draw estimates
         let linesProcessed = 0;
-        positions.forEach((p, i) => {
-            const posdate = hdate(new Date(p.started_at), lang);
-            const poshours = positionDuration(p);
-            const lineCount = p.description.split('\n').length + 2;
+        estimates.forEach((e, i) => {
+            const lineCount = e.description.split('\n').length + 2;
             doc.setTextColor(colors.dark)
                 .setFont('FiraSansRegular')
                     .setFontSize(9)
-                        .text(
-                            undated ? `${i+1}. ${label.position}` : posdate,
-                            15,
-                            (84+page.rowHeight*linesProcessed)
-                        )
+                        .text(e.title, 15, (84+page.rowHeight*linesProcessed))
                 .setFont('FiraSansExtraLight')
                     .setFontSize(8)
-                        .text(p.description, 15, (88+page.rowHeight*linesProcessed))
+                        .text(e.description, 15, (88+page.rowHeight*linesProcessed))
                     .setFontSize(11)
+                        .text(nDigit(e.amount, 1, lang), 136, (87+page.rowHeight*linesProcessed), { align: 'center' })
                         .text(
-                            billedPerProject ? '' : nDigit(poshours, 1, lang),
-                            136,
-                            (87+page.rowHeight*linesProcessed), { align: 'center' }
-                        ).text(
-                            billedPerProject ? '' : euro(invoice.price, lang),
+                            billedPerProject ? '' : euro(quote.price, lang),
                             162,
                             (87+page.rowHeight*linesProcessed), { align: 'center' }
                         )
                     .setTextColor(colors.light)
                         .text(
-                            billedPerProject ? '' : euro(poshours*invoice.price, lang),
+                            billedPerProject ? '' : euro(e.amount * quote.price, lang),
                             189,
                             (87+page.rowHeight*linesProcessed), { align: 'center' }
                         );
@@ -370,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // serve document
     doc.save(
-        `${invoice.number}_${label.invoice}_${config.company}.pdf`.toLowerCase(),
+        `${isodate(today)}_${label.quote}_${config.company}.pdf`.toLowerCase(),
         { returnPromise: true }
     ).then(() => {
         setTimeout(() => { window.close() }, 100);
