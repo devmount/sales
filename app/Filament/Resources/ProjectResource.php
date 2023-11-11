@@ -138,6 +138,11 @@ class ProjectResource extends Resource
                 Actions\ActionGroup::make([
                     Actions\EditAction::make()->icon('tabler-edit'),
                     Actions\ReplicateAction::make()->icon('tabler-copy'),
+                    Actions\Action::make('download')
+                        ->label(__('quote'))
+                        ->icon('tabler-file-type-pdf')
+                        ->url(fn (Project $record): string => static::getUrl('download', ['record' => $record]))
+                        ->openUrlInNewTab(),
                     Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
@@ -159,6 +164,7 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
+            RelationManagers\EstimatesRelationManager::class,
             RelationManagers\InvoicesRelationManager::class,
         ];
     }
@@ -169,6 +175,7 @@ class ProjectResource extends Resource
             'index' => Pages\ListProjects::route('/'),
             'create' => Pages\CreateProject::route('/create'),
             'edit' => Pages\EditProject::route('/{record}/edit'),
+            'download' => Pages\DownloadQuote::route('/{record}/download'),
         ];
     }
 

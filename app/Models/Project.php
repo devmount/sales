@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PricingUnit;
+use App\Models\Setting;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -92,5 +93,50 @@ class Project extends Model
     public function getProgressPercentAttribute()
     {
         return round($this->hours/$this->scope*100, 1) . ' %';
+    }
+
+    /**
+     * Number of hours estimated for this project
+     */
+    public function getEstimatedHoursAttribute()
+    {
+        $hours = 0;
+        foreach ($this->estimates as $estimate) {
+            $hours += $estimate->amount;
+        }
+        return $hours;
+    }
+
+    /**
+     * Net amount of all assigned estimates
+     */
+    public function getEstimatedNetAttribute()
+    {
+        $net = 0;
+        if ($this->pricing_unit === PricingUnit::Project) {
+            $net = $this->price;
+        } else {
+            $net += $this->estimated_hours * $this->price / match ($this->pricing_unit) {
+                PricingUnit::Hour => 1,
+                PricingUnit::Day => 8,
+            };
+        }
+        return round($net, 2);
+    }
+
+    /**
+     * Vat amount of estimated net amount
+     */
+    public function getEstimatedVatAttribute()
+    {
+        return round($this->estimated_net * Setting::get('vatRate'), 2);
+    }
+
+    /**
+     * Gross amount of all assigned estimates
+     */
+    public function getEstimatedGrossAttribute()
+    {
+        return $this->estimated_net + $this->estimated_vat;
     }
 }
