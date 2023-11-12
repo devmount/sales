@@ -73,114 +73,151 @@ const paginatedEstimates = (estimates) => {
     return paginated;
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    // document configuration
-    const colors = {
-        main:   '#002033',
-        accent: '#3c88b8',
-        text:   '#c5d6e0',
-        gray:   '#5c666d',
-        dark:   '#222222',
-        light:  '#ffffff',
-        line:   '#eeeeee',
-        line2:  '#265d7f',
-        line3:  '#66808e',
-        line4:  '#062D42',
-        col1:   '#cccccc',
-        col2:   '#dddddd',
-        col3:   '#eeeeee',
-        col4:   '#bbbbbb'
-    };
-    const config = {
-        name:          '{{ $this->settings["name"] }}',
-        company:       '{{ $this->settings["company"] }}',
-        address:       '{{ $this->settings["address"] }}',
-        email:         '{{ $this->settings["email"] }}',
-        phone:         '{{ $this->settings["phone"] }}',
-        website:       '{{ $this->settings["website"] }}',
-        iban:          '{{ $this->settings["iban"] }}',
-        bic:           '{{ $this->settings["bic"] }}',
-        bank:          '{{ $this->settings["bank"] }}',
-        accountHolder: '{{ $this->settings["accountHolder"] }}',
-        taxOffice:     '{{ $this->settings["taxOffice"] }}',
-        vatId:         '{{ $this->settings["vatId"] }}',
-        vatRate:       '{{ $this->settings["vatRate"] }}',
-        logo:          '{{ $this->settings["logo"] }}',
-        signature:     '{{ $this->settings["signature"] }}',
-    };
-    const lang = '{{ $lang }}';
-    const billedPerProject = {{ $this->record->pricing_unit->value === 'p' ? 'true' : 'false' }};
-    const client = {
-        name:    decodeHtml('{{ $this->record->client->name }}'),
-        address: decodeHtml('{{ str_replace("\n", "\\n", $this->record->client->address) }}'),
-    };
-    const label = {
-        amountNet:          '{{ __("amountNet", [], $lang) }}',
-        bank:               '{{ __("bank", [], $lang) }}',
-        bic:                '{{ __("bic", [], $lang) }}',
-        billing:            '{{ __("hourBasedBilling", [], $lang) }}',
-        credit:             '{{ __("credit", [], $lang) }}',
-        costEstimate:       '{{ __("costEstimate", [], $lang) }}',
-        description:        '{{ __("description", [], $lang) }}',
-        holder:             '{{ __("holder", [], $lang) }}',
-        iban:               '{{ __("iban", [], $lang) }}',
-        inHours:            '{{ __("inHours", [], $lang) }}',
-        inquiries:          '{{ __("inquiries", [], $lang) }}',
-        otherClients:       '{{ __("otherClients", [], $lang) }}',
-        page:               '{{ __("page", [], $lang) }} ',
-        perHour:            '{{ __("perHour", [], $lang) }}',
-        position:           '{{ trans_choice("position", 1, [], $lang) }}',
-        price:              '{{ __("price", [], $lang) }}',
-        quantity:           '{{ __("quantity", [], $lang) }}',
-        quote:              '{{ __("quote", [], $lang) }}',
-        regards:            '{{ __("withKindRegards", [], $lang) }}',
-        scopeTimeRange:     billedPerProject ? '{{ __("projectScopeTimeRange", [], $lang) }}' : '{{ __("hourlyScopeTimeRange", [], $lang) }}',
-        statementOfWork:    '{{ __("statementOfWork", [], $lang) }}',
-        sum:                '{{ __("sum", [], $lang) }}',
-        taxOffice:          '{{ __("taxOffice", [], $lang) }}',
-        to:                 '{{ __("to", [], $lang) }}',
-        total:              '{{ __("total", [], $lang) }}',
-        totalAmount:        '{{ __("totalAmount", [], $lang) }}',
-        totalQuote:         '{{ __("totalQuote", [], $lang) }}',
-        vat:                '{{ __("vat", [], $lang) }}',
-        vatId:              '{{ __("vatId", [], $lang) }}',
-    };
-    const estimates = JSON.parse("{{ $record->estimates }}".replaceAll('&quot;', '"').replaceAll("\n", "\\n"));
-    const page = {
-        current:   1,
-        total:     paginatedEstimates(estimates).length + 1,
-        rowHeight: 3.5,
-    };
-    const today = new Date();
-    const quote = {
-        title:       '{{ $this->record->title }}',
-        description: '{{ str_replace("\n", "\\n", $this->record->description) }}',
-        start:       new Date('{{ $this->record->start_at }}'),
-        due:         new Date('{{ $this->record->due_at }}'),
-        hours:       nDigit(billedPerProject ? {{ $this->record->scope }} : {{ $this->record->estimated_hours }}, 1, lang),
-        price:       billedPerProject ? {{ $this->record->price/$this->record->scope }} : {{ $this->record->price }},
-        net:         euro({{ $this->record->estimated_net }}, lang),
-        vatRate:     percent(config.vatRate, lang),
-        vat:         euro({{ $this->record->estimated_vat }}, lang),
-        gross:       euro({{ $this->record->estimated_gross }}, lang),
-    };
+// document configuration
+const colors = {
+    main:   '#002033',
+    accent: '#3c88b8',
+    text:   '#c5d6e0',
+    gray:   '#5c666d',
+    dark:   '#222222',
+    light:  '#ffffff',
+    line:   '#eeeeee',
+    line2:  '#265d7f',
+    line3:  '#66808e',
+    line4:  '#062D42',
+    col1:   '#cccccc',
+    col2:   '#dddddd',
+    col3:   '#eeeeee',
+    col4:   '#bbbbbb'
+};
+const config = {
+    name:          '{{ $this->settings["name"] }}',
+    company:       '{{ $this->settings["company"] }}',
+    address:       '{{ $this->settings["address"] }}',
+    email:         '{{ $this->settings["email"] }}',
+    phone:         '{{ $this->settings["phone"] }}',
+    website:       '{{ $this->settings["website"] }}',
+    iban:          '{{ $this->settings["iban"] }}',
+    bic:           '{{ $this->settings["bic"] }}',
+    bank:          '{{ $this->settings["bank"] }}',
+    accountHolder: '{{ $this->settings["accountHolder"] }}',
+    taxOffice:     '{{ $this->settings["taxOffice"] }}',
+    vatId:         '{{ $this->settings["vatId"] }}',
+    vatRate:       '{{ $this->settings["vatRate"] }}',
+    logo:          '{{ $this->settings["logo"] }}',
+    signature:     '{{ $this->settings["signature"] }}',
+};
+const lang = '{{ $lang }}';
+const billedPerProject = {{ $this->record->pricing_unit->value === 'p' ? 'true' : 'false' }};
+const client = {
+    name:    decodeHtml('{{ $this->record->client->name }}'),
+    address: decodeHtml('{{ str_replace("\n", "\\n", $this->record->client->address) }}'),
+};
+const label = {
+    amountNet:         '{{ __("amountNet", [], $lang) }}',
+    bank:              '{{ __("bank", [], $lang) }}',
+    bic:               '{{ __("bic", [], $lang) }}',
+    credit:            '{{ __("credit", [], $lang) }}',
+    costEstimate:      '{{ __("costEstimate", [], $lang) }}',
+    description:       '{{ __("description", [], $lang) }}',
+    holder:            '{{ __("holder", [], $lang) }}',
+    iban:              '{{ __("iban", [], $lang) }}',
+    inHours:           '{{ __("inHours", [], $lang) }}',
+    inquiries:         '{{ __("inquiries", [], $lang) }}',
+    otherClients:      '{{ __("otherClients", [], $lang) }}',
+    page:              '{{ __("page", [], $lang) }} ',
+    perHour:           '{{ __("perHour", [], $lang) }}',
+    position:          '{{ trans_choice("position", 1, [], $lang) }}',
+    price:             '{{ __("price", [], $lang) }}',
+    quantity:          '{{ __("quantity", [], $lang) }}',
+    quote:             '{{ __("quote", [], $lang) }}',
+    regards:           '{{ __("withKindRegards", [], $lang) }}',
+    servicePeriod:     '{{ __("servicePeriod", [], $lang) }}',
+    servicePeriodText: '{{ __("servicePeriodText", [], $lang) }}',
+    invoicing:         '{{ __("invoicing", [], $lang) }}',
+    invoicingText:     '{{ __("invoicingText", [], $lang) }}',
+    disclaimer:        '{{ __("disclaimer", [], $lang) }}',
+    disclaimerText:    '{{ __("disclaimerText", [], $lang) }}',
+    servicePlace:      '{{ __("servicePlace", [], $lang) }}',
+    servicePlaceText:  '{{ __("servicePlaceText", [], $lang) }}',
+    referenceUse:      '{{ __("referenceUse", [], $lang) }}',
+    referenceUseText:  '{{ __("referenceUseText", [], $lang) }}',
+    validity:          '{{ __("validity", [], $lang) }}',
+    validityText:      '{{ __("validityText", [], $lang) }}',
+    statementOfWork:   '{{ __("statementOfWork", [], $lang) }}',
+    sum:               '{{ __("sum", [], $lang) }}',
+    taxOffice:         '{{ __("taxOffice", [], $lang) }}',
+    to:                '{{ __("to", [], $lang) }}',
+    total:             '{{ __("total", [], $lang) }}',
+    totalAmount:       '{{ __("totalAmount", [], $lang) }}',
+    totalQuote:        '{{ __("totalQuote", [], $lang) }}',
+    vat:               '{{ __("vat", [], $lang) }}',
+    vatId:             '{{ __("vatId", [], $lang) }}',
+};
+const estimates = JSON.parse("{{ $record->estimates }}".replaceAll('&quot;', '"').replaceAll("\n", "\\n"));
+const page = {
+    current:   1,
+    total:     paginatedEstimates(estimates).length + 2,
+    rowHeight: 3.5,
+};
+const today = new Date();
+const valid = new Date();
+valid.setDate(valid.getDate() + 21); // 3 weeks offer validity
+const quote = {
+    title:       '{{ $this->record->title }}',
+    description: '{{ str_replace("\n", "\\n", $this->record->description) }}',
+    start:       new Date('{{ $this->record->start_at }}'),
+    due:         new Date('{{ $this->record->due_at }}'),
+    hours:       nDigit(billedPerProject ? {{ $this->record->scope }} : {{ $this->record->estimated_hours }}, 1, lang),
+    price:       billedPerProject ? {{ $this->record->price/$this->record->scope }} : {{ $this->record->price }},
+    net:         euro({{ $this->record->estimated_net }}, lang),
+    vatRate:     percent(config.vatRate, lang),
+    vat:         euro({{ $this->record->estimated_vat }}, lang),
+    gross:       euro({{ $this->record->estimated_gross }}, lang),
+};
 
+// add header to a given document
+const pageHeader = (doc, title) => {
+    return doc.setFillColor(colors.main).rect(0, 9, 210, 30, 'F')
+        .addImage(config.logo, 'JPEG', 12, 13, 22, 22)
+        .setTextColor(colors.light).setFont('FiraSansExtraLight')
+            .setFontSize(26).text(title, 105, 27, { align: 'center' })
+            .setFontSize(9)
+                .text(config.email, 202, 25, { align: 'right' })
+                .text(config.phone, 202, 19, { align: 'right' })
+                .text(config.website, 202, 31, { align: 'right' });
+};
+
+// add footer to a given document
+const pageFooter = (doc, showSignature=false) => {
+    doc.setDrawColor(colors.line).setLineWidth(0.4).line(10, 277, 202, 277);
+    if (showSignature) {
+        doc.addImage(config.signature, 'PNG', 13, 262, 24, 18)
+    }
+    doc.setLineHeightFactor(1.3).setFontSize(9).setTextColor(colors.gray)
+        .text(`${page.current}/${page.total}`, 103, 274, { align: 'right' })
+        .text([config.name, 'Berlin, ' + hdate(today, lang)], 10, 282)
+        .text([label.iban, label.bic, label.bank], 90, 282, { align: 'right' })
+        .text([label.vatId, label.taxOffice], 170, 282, { align: 'right' })
+        .setFont('FiraSansRegular')
+            .text([config.iban, config.bic, config.bank], 92, 282)
+            .text([config.vatId, config.taxOffice], 172, 282);
+    return doc;
+};
+
+document.addEventListener('DOMContentLoaded', () => {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    let doc = new jsPDF();
 
     // fonts
     doc.addFont('/fonts/FiraSans-Regular.ttf', 'FiraSansRegular', 'normal');
     doc.addFont('/fonts/FiraSans-ExtraLight.ttf', 'FiraSansExtraLight', 'normal');
     doc.addFont('/fonts/FiraSans-ExtraBold.ttf', 'FiraSansExtraBold', 'normal');
-    // page header
-    doc.setFillColor(colors.main).rect(0, 9, 210, 30, 'F');
-    doc.addImage(config.logo, 'JPEG', 12, 13, 22, 22);
-    doc.setTextColor(colors.light).setFont('FiraSansExtraLight')
-        .setFontSize(26).text(label.quote.toUpperCase(), 105, 27, { align: 'center' })
-        .setFontSize(9)
-            .text(config.email, 202, 25, { align: 'right' })
-            .text(config.phone, 202, 19, { align: 'right' })
-            .text(config.website, 202, 31, { align: 'right' });
+
+    /**
+     * Cover Page
+     */
+    doc = pageHeader(doc, label.quote.toUpperCase());
     // address header
     doc.setTextColor(colors.gray).setFont('FiraSansExtraLight').setFontSize(8)
         .text(config.address, 10, 50)
@@ -233,40 +270,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 .text(label.totalAmount, 160, 205, { align: 'right' })
                 .text(quote.gross, 194, 205, { align: 'right' });
     // terms
-    doc.setFont('FiraSansExtraLight').setTextColor(colors.dark)
-        .setFontSize(8).text(
-            `${markerReplace(label.scopeTimeRange, [hdate(quote.start), hdate(quote.due)])} ${label.billing} ${label.otherClients} ${label.inquiries}`, 10, 225, { maxWidth: 180 }
+    doc.setTextColor(colors.dark).setFontSize(10)
+        .setFont('FiraSansRegular').text(label.servicePeriod, 10, 228)
+        .setFont('FiraSansExtraLight').text(
+            markerReplace(label.servicePeriodText, [hdate(quote.start), hdate(quote.due)]), 10, 235, { maxWidth: 160 }
         )
-        .setFontSize(10).text([label.regards, config.name], 10, 244);
+        // .setFontSize(10).text([label.regards, config.name], 10, 244);
     // footer
-    doc.setDrawColor(colors.line).setLineWidth(0.4).line(10, 272, 202, 272)
-        .addImage(config.signature, 'PNG', 13, 255, 24, 18)
-        .setLineHeightFactor(1.3).setFontSize(9).setTextColor(colors.gray)
-            .text(`${label.page} ${page.current}/${page.total}`, 202, 290, { align: 'right' })
-            .text('Berlin, ' + hdate(today, lang), 10, 277)
-            .text([label.iban, label.bic, label.bank, label.holder], 90, 277, { align: 'right' })
-            .text([label.vatId, label.taxOffice], 170, 277, { align: 'right' })
-        .setFont('FiraSansRegular')
-            .text([config.iban, config.bic, config.bank, config.accountHolder], 92, 277)
-            .text([config.vatId, config.taxOffice], 172, 277);
+    doc = pageFooter(doc);
     // document guides
     doc.setDrawColor(colors.line).line(0, 105, 3, 105).line(0, 148, 5, 148)
         .setDrawColor(colors.col1).line(0, 210, 3, 210)
-    // handle next page
+    // go to next page
     page.current++;
-    // add estimate pages for activity confirmation
+
+    /**
+     * Next Page with more legal stuff
+     */
+    doc.addPage();
+    doc = pageHeader(doc, label.quote.toUpperCase());
+    // more terms
+    doc.setTextColor(colors.dark).setFontSize(10)
+    .setFont('FiraSansRegular').text(label.invoicing, 10, 60)
+    .setFont('FiraSansExtraLight').text(label.invoicingText, 10, 67, { maxWidth: 160 })
+    .setFont('FiraSansRegular').text(label.disclaimer, 10, 98)
+    .setFont('FiraSansExtraLight').text(label.disclaimerText, 10, 105, { maxWidth: 160 })
+    .setFont('FiraSansRegular').text(label.servicePlace, 10, 150)
+    .setFont('FiraSansExtraLight').text(label.servicePlaceText, 10, 157, { maxWidth: 160 })
+    .setFont('FiraSansRegular').text(label.referenceUse, 10, 171)
+    .setFont('FiraSansExtraLight').text(label.referenceUseText, 10, 178, { maxWidth: 160 })
+    .setFont('FiraSansRegular').text(label.validity, 10, 195)
+    .setFont('FiraSansExtraLight').text(markerReplace(label.validityText, [hdate(valid, lang)]), 10, 202, { maxWidth: 160 })
+    .setFontSize(10).text([label.inquiries, '', label.regards, config.name], 10, 235, { maxWidth: 160 });
+    // footer
+    doc = pageFooter(doc, true);
+    // document guides
+    doc.setDrawColor(colors.line).line(0, 105, 3, 105).line(0, 148, 5, 148)
+        .setDrawColor(colors.col1).line(0, 210, 3, 210)
+    // go to next page
+    page.current++;
+
+    /**
+     * Estimate pages for activity confirmation
+     */
     paginatedEstimates(estimates).forEach(estimates => {
         const totalHeight = estimates.reduce((p, c) => p + c.description.split('\n').length + 2, 0)*page.rowHeight + 32;
         doc.addPage();
         // page header
-        doc.setFillColor(colors.main).rect(0, 9, 210, 30, 'F');
-        doc.addImage(config.logo, 'JPEG', 12, 13, 22, 22);
-        doc.setTextColor(colors.light).setFont('FiraSansExtraLight')
-            .setFontSize(26).text(label.costEstimate.toUpperCase(), 105, 27, { align: 'center' })
-            .setFontSize(9)
-                .text(config.email, 202, 25, { align: 'right' })
-                .text(config.phone, 202, 19, { align: 'right' })
-                .text(config.website, 202, 31, { align: 'right' });
+        doc = pageHeader(doc, label.costEstimate.toUpperCase());
         // estimate table content
         doc.setLineWidth(0.8)
             .setFillColor(colors.col3)
@@ -322,16 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
             linesProcessed += lineCount;
         })
         // footer
-        doc.setDrawColor(colors.line).setLineWidth(0.4).line(10, 272, 202, 272)
-            .addImage(config.signature, 'PNG', 13, 255, 24, 18)
-            .setLineHeightFactor(1.3).setFontSize(9).setTextColor(colors.gray)
-                .text(`${label.page} ${page.current}/${page.total}`, 202, 290, { align: 'right' })
-                .text('Berlin, ' + hdate(today, lang), 10, 277)
-                .text([label.iban, label.bic, label.bank, label.holder], 90, 277, { align: 'right' })
-                .text([label.vatId, label.taxOffice], 170, 277, { align: 'right' })
-            .setFont('FiraSansRegular')
-                .text([config.iban, config.bic, config.bank, config.accountHolder], 92, 277)
-                .text([config.vatId, config.taxOffice], 172, 277);
+        doc = pageFooter(doc, page.current==page.total);
         // document guides
         doc.setDrawColor(colors.line).line(0, 105, 3, 105).line(0, 148, 5, 148).line(0, 210, 3, 210)
         // handle next page
