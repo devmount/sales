@@ -61,7 +61,7 @@ const paginatedEstimates = (estimates) => {
     const paginated = [];
     let linesProcessed = 0;
     sortedEstimates(estimates).forEach((e) => {
-        const lineCount = e.description.split('\n').length + 2;
+        const lineCount = e.description.trim().split('\n').length + 2;
         linesProcessed += lineCount;
         const i = Math.floor(linesProcessed/50);
         if (i in paginated) {
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     page.current++;
 
     /**
-     * Estimate pages for activity confirmation
+     * Pages for estimated positions
      */
     paginatedEstimates(estimates).forEach(estimates => {
         const totalHeight = estimates.reduce((p, c) => p + c.description.split('\n').length + 2, 0)*page.rowHeight + 32;
@@ -349,14 +349,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // draw estimates
         let linesProcessed = 0;
         estimates.forEach((e, i) => {
-            const lineCount = e.description.split('\n').length + 2;
+            const lineCount = e.description.trim().split('\n').length + 2;
             doc.setTextColor(colors.dark)
                 .setFont('FiraSansRegular')
                     .setFontSize(9)
                         .text(e.title, 15, (84+page.rowHeight*linesProcessed))
                 .setFont('FiraSansExtraLight')
                     .setFontSize(8)
-                        .text(e.description, 15, (88+page.rowHeight*linesProcessed))
+                        .text(e.description.trim(), 15, (88+page.rowHeight*linesProcessed))
                     .setFontSize(11)
                         .text(nDigit(e.amount, 1, lang), 136, (87+page.rowHeight*linesProcessed), { align: 'center' })
                         .text(
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         doc = pageFooter(doc, page.current==page.total);
         // document guides
         doc.setDrawColor(colors.line).line(0, 105, 3, 105).line(0, 148, 5, 148).line(0, 210, 3, 210)
-        // handle next page
+        // go to next page
         page.current++;
     });
     // serve document
