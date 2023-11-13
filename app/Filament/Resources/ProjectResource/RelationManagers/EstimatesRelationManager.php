@@ -24,13 +24,7 @@ class EstimatesRelationManager extends RelationManager
             ->schema([
                 Components\TextInput::make('title')
                     ->label(__('title'))
-                    ->columnSpanFull()
                     ->required(),
-                Components\Textarea::make('description')
-                    ->label(__('description'))
-                    ->autosize()
-                    ->columnSpanFull()
-                    ->maxLength(65535),
                 Components\TextInput::make('amount')
                     ->label(trans_choice('estimate', 1))
                     ->numeric()
@@ -38,12 +32,11 @@ class EstimatesRelationManager extends RelationManager
                     ->minValue(0.1)
                     ->suffix('h')
                     ->suffixIcon('tabler-clock-exclamation'),
-                Components\TextInput::make('weight')
-                    ->label(__('weight'))
-                    ->numeric()
-                    ->step(1)
-                    ->helperText(__('definesEstimateSorting'))
-                    ->suffixIcon('tabler-arrows-sort'),
+                Components\Textarea::make('description')
+                    ->label(__('description'))
+                    ->autosize()
+                    ->columnSpanFull()
+                    ->maxLength(65535),
             ]);
     }
 
@@ -53,6 +46,7 @@ class EstimatesRelationManager extends RelationManager
             ->recordTitle(trans_choice('estimate', 1))
             ->heading(trans_choice('estimate', 2))
             ->defaultSort('weight', 'asc')
+            ->reorderable('weight')
             ->columns([
                 Columns\TextColumn::make('title')
                     ->label(__('title')),
