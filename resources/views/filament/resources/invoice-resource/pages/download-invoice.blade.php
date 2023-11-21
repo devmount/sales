@@ -109,20 +109,23 @@ const colors = {
     col4:   '#bbbbbb'
 };
 const config = {
-    name:          '{{ $this->settings["name"] }}',
-    company:       '{{ $this->settings["company"] }}',
-    address:       '{{ $this->settings["address"] }}',
-    email:         '{{ $this->settings["email"] }}',
-    phone:         '{{ $this->settings["phone"] }}',
-    website:       '{{ $this->settings["website"] }}',
-    iban:          '{{ $this->settings["iban"] }}',
-    bic:           '{{ $this->settings["bic"] }}',
-    bank:          '{{ $this->settings["bank"] }}',
     accountHolder: '{{ $this->settings["accountHolder"] }}',
+    bank:          '{{ $this->settings["bank"] }}',
+    bic:           '{{ $this->settings["bic"] }}',
+    city:          '{{ $this->settings["city"] }}',
+    company:       '{{ $this->settings["company"] }}',
+    country:       '{{ $this->settings["country"] }}',
+    email:         '{{ $this->settings["email"] }}',
+    iban:          '{{ $this->settings["iban"] }}',
+    logo:          '{{ $this->settings["logo"] }}',
+    name:          '{{ $this->settings["name"] }}',
+    phone:         '{{ $this->settings["phone"] }}',
+    signature:     '{{ $this->settings["signature"] }}',
+    street:        '{{ $this->settings["street"] }}',
     taxOffice:     '{{ $this->settings["taxOffice"] }}',
     vatId:         '{{ $this->settings["vatId"] }}',
-    logo:          '{{ $this->settings["logo"] }}',
-    signature:     '{{ $this->settings["signature"] }}',
+    website:       '{{ $this->settings["website"] }}',
+    zip:           '{{ $this->settings["zip"] }}',
 };
 const lang = '{{ $lang }}';
 const client = {
@@ -202,7 +205,7 @@ const pageFooter = (doc, showSignature=false) => {
     }
     doc.setLineHeightFactor(1.3).setFontSize(9).setTextColor(colors.gray)
         .text(`${page.current}/${page.total}`, 103, 274, { align: 'right' })
-        .text([config.name, 'Berlin, ' + hdate(today, lang)], 10, 282)
+        .text([config.name, `${config.city}, ${hdate(today, lang)}`], 10, 282)
         .text([label.iban, label.bic, label.bank], 90, 282, { align: 'right' })
         .text([label.vatId, label.taxOffice], 170, 282, { align: 'right' })
         .setFont('FiraSansRegular')
@@ -226,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     doc = pageHeader(doc, label.invoice.toUpperCase());
     // address header
     doc.setTextColor(colors.gray).setFont('FiraSansExtraLight').setFontSize(8)
-        .text(config.address, 10, 50)
+        .text(`${config.name}, ${config.street}, ${config.zip} ${config.city}`, 10, 50)
         .setFontSize(9).text(label.to, 10, 62)
         .setTextColor(colors.main).setFontSize(15).text(client.name.toUpperCase(), 10, 69)
         .setDrawColor(colors.line).setLineWidth(0.4).line(0, 73, 70, 73).line(140, 73, 210, 73)

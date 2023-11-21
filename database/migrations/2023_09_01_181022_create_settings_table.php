@@ -21,7 +21,10 @@ return new class extends Migration
             $table->timestamps();
         });
         Setting::create(['field' => 'accountHolder', 'type' => 'text',     'weight' => 100]);
-        Setting::create(['field' => 'address',       'type' => 'textarea', 'weight' =>  30]);
+        Setting::create(['field' => 'street',        'type' => 'text',     'weight' =>  30]);
+        Setting::create(['field' => 'zip',           'type' => 'text',     'weight' =>  30]);
+        Setting::create(['field' => 'city',          'type' => 'text',     'weight' =>  30]);
+        Setting::create(['field' => 'country',       'type' => 'text',     'weight' =>  30]);
         Setting::create(['field' => 'bank',          'type' => 'text',     'weight' =>  90]);
         Setting::create(['field' => 'bic',           'type' => 'text',     'weight' =>  80]);
         Setting::create(['field' => 'company',       'type' => 'text',     'weight' =>  20]);
