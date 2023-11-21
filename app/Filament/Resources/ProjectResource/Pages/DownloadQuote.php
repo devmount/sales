@@ -19,6 +19,6 @@ class DownloadQuote extends Page
     public function mount(Project $record)
     {
         $this->record = $record;
-        $this->settings = Setting::pluck('value', 'key');
+        $this->settings = Setting::pluck('value', 'field');
     }
 }

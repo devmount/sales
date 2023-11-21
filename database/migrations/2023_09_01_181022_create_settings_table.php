@@ -13,27 +13,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('settings', function (Blueprint $table) {
-            $table->string('key')->primary();
+            $table->string('field')->primary();
             $table->text('value')->nullable();
             $table->string('type');
             $table->json('attributes')->nullable();
-            $table->integer('sort')->default(0);
+            $table->integer('weight')->default(0);
             $table->timestamps();
         });
-        Setting::create(['key' => 'name',          'type' => 'text',     'sort' =>  10]);
-        Setting::create(['key' => 'company',       'type' => 'text',     'sort' =>  20]);
-        Setting::create(['key' => 'address',       'type' => 'textarea', 'sort' =>  30]);
-        Setting::create(['key' => 'email',         'type' => 'email',    'sort' =>  40]);
-        Setting::create(['key' => 'phone',         'type' => 'tel',      'sort' =>  50]);
-        Setting::create(['key' => 'website',       'type' => 'url',      'sort' =>  60]);
-        Setting::create(['key' => 'iban',          'type' => 'text',     'sort' =>  70]);
-        Setting::create(['key' => 'bic',           'type' => 'text',     'sort' =>  80]);
-        Setting::create(['key' => 'bank',          'type' => 'text',     'sort' =>  90]);
-        Setting::create(['key' => 'accountHolder', 'type' => 'text',     'sort' => 100]);
-        Setting::create(['key' => 'taxOffice',     'type' => 'text',     'sort' => 110]);
-        Setting::create(['key' => 'vatId',         'type' => 'text',     'sort' => 120]);
-        Setting::create(['key' => 'logo',          'type' => 'textarea', 'sort' => 130]);
-        Setting::create(['key' => 'signature',     'type' => 'textarea', 'sort' => 140]);
+        Setting::create(['field' => 'name',          'type' => 'text',     'weight' =>  10]);
+        Setting::create(['field' => 'company',       'type' => 'text',     'weight' =>  20]);
+        Setting::create(['field' => 'address',       'type' => 'textarea', 'weight' =>  30]);
+        Setting::create(['field' => 'email',         'type' => 'email',    'weight' =>  40]);
+        Setting::create(['field' => 'phone',         'type' => 'tel',      'weight' =>  50]);
+        Setting::create(['field' => 'website',       'type' => 'url',      'weight' =>  60]);
+        Setting::create(['field' => 'iban',          'type' => 'text',     'weight' =>  70]);
+        Setting::create(['field' => 'bic',           'type' => 'text',     'weight' =>  80]);
+        Setting::create(['field' => 'bank',          'type' => 'text',     'weight' =>  90]);
+        Setting::create(['field' => 'accountHolder', 'type' => 'text',     'weight' => 100]);
+        Setting::create(['field' => 'taxOffice',     'type' => 'text',     'weight' => 110]);
+        Setting::create(['field' => 'vatId',         'type' => 'text',     'weight' => 120]);
+        Setting::create(['field' => 'logo',          'type' => 'textarea', 'weight' => 130]);
+        Setting::create(['field' => 'signature',     'type' => 'textarea', 'weight' => 140]);
     }
 
     /**
