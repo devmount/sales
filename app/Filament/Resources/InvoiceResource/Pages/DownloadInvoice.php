@@ -19,6 +19,6 @@ class DownloadInvoice extends Page
     public function mount(Invoice $record)
     {
         $this->record = $record;
-        $this->settings = Setting::pluck('value', 'key');
+        $this->settings = Setting::pluck('value', 'field');
     }
 }

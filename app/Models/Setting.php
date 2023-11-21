@@ -6,24 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    protected $primaryKey = 'key';
+    protected $primaryKey = 'field';
 
     public $incrementing = false;
 
     protected $fillable = [
-        'key',
+        'field',
         'value',
         'type',
         'attributes',
-        'sort',
+        'weight',
     ];
 
     protected $casts = [
         'attributes' => 'array',
     ];
 
-    public static function get(string $key) {
-        return self::find($key)?->value;
+    public static function get(string $field) {
+        return self::find($field)?->value;
     }
 
     /**
@@ -31,6 +31,6 @@ class Setting extends Model
      */
     public function getLabelAttribute()
     {
-        return __($this->key);
+        return __($this->field);
     }
 }

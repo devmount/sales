@@ -18,8 +18,10 @@ class SettingResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('weight', 'asc')
+            ->reorderable('weight')
             ->columns([
-                Columns\TextColumn::make('key')
+                Columns\TextColumn::make('field')
                     ->label(__('field'))
                     ->state(fn (Setting $record): string => $record->label),
                 Columns\TextColumn::make('value')
@@ -33,12 +35,13 @@ class SettingResource extends Resource
                 Actions\EditAction::make()
                     ->label('')
                     ->form(fn (Setting $record) => match ($record->type) {
-                        'text', 'email', 'tel', 'url' => [
+                        'text', 'email', 'tel', 'url', 'number' => [
                             Components\TextInput::make('value')
                                 ->label($record->label)
                                 ->email($record->type === 'email')
                                 ->tel($record->type === 'tel')
                                 ->url($record->type === 'url')
+                                ->numeric($record->type === 'number')
                                 ->autofocus()
                         ],
                         'textarea' => [
@@ -54,8 +57,7 @@ class SettingResource extends Resource
                         ]
                     }),
             ])
-            ->paginated(false)
-            ->defaultSort('sort', 'asc');
+            ->paginated(false);
     }
 
     public static function getPages(): array
