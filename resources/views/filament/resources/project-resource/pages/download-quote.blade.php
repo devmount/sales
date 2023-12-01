@@ -128,7 +128,6 @@ const label = {
     inHours:           '{{ __("inHours", [], $lang) }}',
     inquiries:         '{{ __("inquiries", [], $lang) }}',
     otherClients:      '{{ __("otherClients", [], $lang) }}',
-    page:              '{{ __("page", [], $lang) }} ',
     perHour:           '{{ __("perHour", [], $lang) }}',
     position:          '{{ trans_choice("position", 1, [], $lang) }}',
     price:             '{{ __("price", [], $lang) }}',
