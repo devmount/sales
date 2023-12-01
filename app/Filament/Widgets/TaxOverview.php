@@ -127,7 +127,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                             'quantity' => 1,
                             'taxable' => false,
                             'vat_rate' => 0,
-                            'description' => 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('DD'),
+                            'description' => 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'),
                         ]);
                         $obj->save();
                         Notification::make()
