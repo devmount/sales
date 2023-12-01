@@ -45,7 +45,7 @@ class ExpenseResource extends Resource
                         Components\TextInput::make('price')
                             ->label(__('price'))
                             ->numeric()
-                            ->step(0.25)
+                            ->step(0.01)
                             ->suffixIcon('tabler-currency-euro')
                             ->required()
                             ->columnSpan(3),
