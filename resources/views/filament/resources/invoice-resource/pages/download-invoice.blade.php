@@ -171,7 +171,7 @@ const page = {
     rowHeight: 3.5,
 };
 const today = new Date();
-const billedPerProject = {{ $this->record->pricing_unit === 'p' ? 'true' : 'false' }};
+const billedPerProject = {{ $this->record->pricing_unit->value === 'p' ? 'true' : 'false' }};
 const invoice = {
     number:      '{{ $this->record->current_number }}',
     title:       '{{ $this->record->title }}',
