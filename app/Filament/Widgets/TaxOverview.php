@@ -115,7 +115,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                     //         ->suffixIcon('tabler-calendar-dollar'),
                     //     FormComponents\Textarea::make('description')
                     //         ->label(__('description'))
-                    //         ->default('UStVA ' . now()->year . '-')
+                    //         ->default('UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'))
                     //         ->maxLength(65535)
                     // ])
                     // ->action(function (array $data) use ($totalVat): void {

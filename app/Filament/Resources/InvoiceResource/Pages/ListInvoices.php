@@ -6,7 +6,7 @@ use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\ListRecords\Tab;
+use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListInvoices extends ListRecords
@@ -22,17 +22,24 @@ class ListInvoices extends ListRecords
 
     public function getTabs(): array
     {
+        $activeCount = Invoice::query()->whereNull('invoiced_at')->whereNull('paid_at')->count();
+        $waitingCount = Invoice::query()->whereNotNull('invoiced_at')->whereNull('paid_at')->count();
+        $finishedCount = Invoice::query()->whereNotNull('invoiced_at')->whereNotNull('paid_at')->count();
+
         return [
             'active' => Tab::make()
                 ->label(__('inProgress'))
-                ->badge(Invoice::query()->whereNull('invoiced_at')->whereNull('paid_at')->count())
+                ->badge($activeCount)
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')),
-            'finished' => Tab::make()
+            'waiting' => Tab::make()
                 ->label(__('waitingForPayment'))
-                ->badge(Invoice::query()->whereNotNull('invoiced_at')->whereNull('paid_at')->count())
+                ->badge($waitingCount)
+                ->badgeColor($waitingCount > 0 ? 'warning' : 'gray')
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNull('paid_at')),
-            'aborted' => Tab::make()
+            'finished' => Tab::make()
                 ->label(__('finished'))
+                ->badge($finishedCount)
+                ->badgeColor('gray')
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNotNull('paid_at')),
             'all' => Tab::make()
                 ->label(__('all')),

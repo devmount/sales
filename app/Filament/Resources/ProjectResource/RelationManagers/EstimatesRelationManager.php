@@ -2,17 +2,14 @@
 
 namespace App\Filament\Resources\ProjectResource\RelationManagers;
 
-use App\Models\Estimate;
-use Carbon\Carbon;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class EstimatesRelationManager extends RelationManager
 {
@@ -43,7 +40,6 @@ class EstimatesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitle(trans_choice('estimate', 1))
             ->heading(trans_choice('estimate', 2))
             ->defaultSort('weight', 'asc')
             ->reorderable('weight')
@@ -84,8 +80,18 @@ class EstimatesRelationManager extends RelationManager
             ->paginated(false);
     }
 
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return trans_choice('estimate', 2);
+    }
+
     public static function getModelLabel(): string
     {
         return trans_choice('estimate', 1);
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans_choice('estimate', 2);
     }
 }
