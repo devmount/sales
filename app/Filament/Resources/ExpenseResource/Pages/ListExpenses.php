@@ -6,7 +6,7 @@ use App\Enums\ExpenseCategory;
 use App\Filament\Resources\ExpenseResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\ListRecords\Tab;
+use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListExpenses extends ListRecords

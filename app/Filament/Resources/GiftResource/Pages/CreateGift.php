@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\GiftResource\Pages;
 
 use App\Filament\Resources\GiftResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateGift extends CreateRecord
