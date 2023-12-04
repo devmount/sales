@@ -144,6 +144,7 @@
     "totalVat": "Total VAT",
     "transitory": "Transitory",
     "undated": "Undated",
+    "upcoming": "Upcoming",
     "updatedAt": "Updated at",
     "validity": "Validity",
     "validityText": "This quote remains valid until {0}.",
