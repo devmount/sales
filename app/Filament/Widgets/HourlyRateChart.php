@@ -40,7 +40,7 @@ class HourlyRateChart extends ChartWidget
             }
         }
         foreach ($rates as $i => $rate) {
-            $rates[$i] = round($rate/$count[$i]);
+            $rates[$i] = $count[$i] != 0 ? round($rate/$count[$i]) : 0;
         }
 
         return [
