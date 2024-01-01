@@ -39,7 +39,7 @@ class WeeklyHoursChart extends ChartWidget
                 }
             }
             $countWeeks[$i] = count($weeks);
-            $avgWeeklyHours[$i] = round($hours/count($weeks));
+            $avgWeeklyHours[$i] = count($weeks) != 0 ? round($hours/count($weeks)) : 0;
         }
 
         return [
