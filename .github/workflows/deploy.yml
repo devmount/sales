@@ -38,12 +38,12 @@ jobs:
           cd ${{ secrets.DEPLOY_PATH }}
           composer update -qn
           composer install -qno --no-ansi --no-scripts --no-progress
-          php8.2 artisan migrate --force
-          php8.2 artisan config:clear
-          php8.2 artisan config:cache
-          php8.2 artisan route:clear
-          php8.2 artisan route:cache
-          php8.2 artisan view:clear
-          php8.2 artisan view:cache
-          php8.2 artisan icons:cache
+          php8.3 artisan migrate --force
+          php8.3 artisan config:clear
+          php8.3 artisan config:cache
+          php8.3 artisan route:clear
+          php8.3 artisan route:cache
+          php8.3 artisan view:clear
+          php8.3 artisan view:cache
+          php8.3 artisan icons:cache
           rm -rf node_modules .git* .editorconfig .env.* *.config.js
