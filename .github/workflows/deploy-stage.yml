@@ -1,0 +1,48 @@
+# This workflow will do a clean install of node dependencies,
+# build the frontend, push files to remote dev and remotely build backend
+# as soon as there are pushes to the main branch
+
+name: Build & Deploy (Stage)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Push project files to testing environment
+      uses: burnett01/rsync-deployments@5.2
+      with:
+        switches: -avzr --exclude={'.git*','node_modules','.editorconfig','.env.*','vendor','storage'}
+        # rsh: uptime
+        path: ./
+        remote_path: ${{ secrets.DEPLOY_PATH_STAGE }}
+        remote_host: ${{ secrets.DEPLOY_HOST }}
+        remote_port: ${{ secrets.DEPLOY_PORT }}
+        remote_user: ${{ secrets.DEPLOY_USER }}
+        remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
+        remote_key_pass: ${{ secrets.DEPLOY_SSH_PHRASE }}
+    - name: Build backend
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        port: ${{ secrets.DEPLOY_PORT }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        passphrase: ${{ secrets.DEPLOY_SSH_PHRASE }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH_STAGE }}
+          composer update -qn
+          composer install -qno --no-ansi --no-scripts --no-progress
+          php8.3 artisan migrate --force
+          php8.3 artisan config:clear
+          php8.3 artisan config:cache
+          php8.3 artisan route:clear
+          php8.3 artisan route:cache
+          php8.3 artisan view:clear
+          php8.3 artisan view:cache
+          php8.3 artisan icons:cache
+          rm -rf node_modules .git* .editorconfig .env.* *.config.js
