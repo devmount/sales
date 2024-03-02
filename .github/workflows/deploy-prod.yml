@@ -36,8 +36,8 @@ jobs:
         passphrase: ${{ secrets.DEPLOY_SSH_PHRASE }}
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
-          composer update -qn
-          composer install -qno --no-ansi --no-scripts --no-progress
+          php8.3 -f /usr/bin/composer update -qn
+          php8.3 -f /usr/bin/composer install -qno --no-ansi --no-scripts --no-progress
           php8.3 artisan migrate --force
           php8.3 artisan config:clear
           php8.3 artisan config:cache
