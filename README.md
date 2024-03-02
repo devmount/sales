@@ -30,7 +30,7 @@ touch database/database.sqlite # create database file (or setup your database of
 php artisan migrate            # create database structure
 php artisan key:generate       # build a secure key for the app
 php artisan db:seed            # create initial admin user
-npm ci
+npm i
 ```
 
 ## Development
