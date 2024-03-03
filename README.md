@@ -11,6 +11,7 @@ A service sales manager especially for freelancers. Built in German, available i
 - PDF export invoices from projects
 - Keep track of expenses
 - Keep track of gifts/donations (e.g. if you're an OS maintainer)
+- Anonymize data in staging/dev environments
 
 ![sales_demo](https://github.com/devmount/sales/assets/5441654/037e8b6b-e673-430f-91c2-39146cc54d1b)
 
@@ -33,13 +34,20 @@ php artisan db:seed            # create initial admin user
 npm i
 ```
 
+## Commands
+
+To anonymize all personal data, run the following command:
+
+```bash
+php artisan db:anonymize
+```
+
 ## Development
 
 To start a local development server, run:
 
 ```bash
-php artisan serve # start dev webserver backend
-npm run dev       # start dev webserver frontend
+php artisan serve # start dev webserver
 ```
 
 Now you can log in on <http://localhost:8000> with the initial admin user credentials (email: `admin@example.com`, password: `Joh.3,16`).
