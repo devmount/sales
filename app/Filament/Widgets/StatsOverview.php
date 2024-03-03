@@ -8,9 +8,7 @@ use Carbon\CarbonPeriod;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Support\Colors\Color;
-
-use function Filament\Support\format_money;
-use function Filament\Support\format_number;
+use Illuminate\Support\Number;
 
 class StatsOverview extends BaseWidget
 {
@@ -18,7 +16,7 @@ class StatsOverview extends BaseWidget
     {
         [$revenue, $hours] = $this->getData();
         $previousRevenue = $revenue[count($revenue)-2];
-        $revenueStat = format_money($revenue[count($revenue)-1], 'eur');
+        $revenueStat = Number::currency($revenue[count($revenue)-1], 'eur');
         $revenueDiff = $revenue[count($revenue)-1] - $previousRevenue;
         $revenueIncrease = $revenueDiff >= 0;
         $revenueDiffPercent = $previousRevenue ? round(abs($revenueDiff)/$previousRevenue*100) : 0;
@@ -34,7 +32,7 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon($revenueIncrease ? 'tabler-trending-up': 'tabler-trending-down')
                 ->chart($revenue)
                 ->color($revenueIncrease ? Color::Blue : Color::Red),
-            Stat::make('weeklyWorkingHours', format_number($hoursStat))
+            Stat::make('weeklyWorkingHours', Number::format($hoursStat))
                 ->label(__('weeklyWorkingHours'))
                 ->description($hoursDiffPercent . '% ' . ($hoursIncrease ? __('increase') : __('decrease')))
                 ->descriptionIcon($hoursIncrease ? 'tabler-trending-up': 'tabler-trending-down')

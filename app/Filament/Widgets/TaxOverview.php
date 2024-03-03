@@ -19,8 +19,7 @@ use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
-
-use function Filament\Support\format_number;
+use Illuminate\Support\Number;
 
 class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
 {
@@ -79,7 +78,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->copyable()
-                ->copyableState(fn (string $state): string => format_number((float)$state)),
+                ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\TextEntry::make('vatExpenses')
                 ->label(__('vatExpenses'))
                 ->columnSpan(3)
@@ -89,7 +88,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->copyable()
-                ->copyableState(fn (string $state): string => format_number((float)$state)),
+                ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\TextEntry::make('totalVat')
                 ->label(__('totalVat'))
                 ->columnSpan(3)
@@ -99,7 +98,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->copyable()
-                ->copyableState(fn (string $state): string => format_number((float)$state)),
+                ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\Actions::make([
                 Components\Actions\Action::make('add_latest_vat_expense')
                     ->label(__('createLatestVatExpense'))
