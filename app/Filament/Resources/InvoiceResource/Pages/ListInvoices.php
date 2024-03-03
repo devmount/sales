@@ -22,9 +22,9 @@ class ListInvoices extends ListRecords
 
     public function getTabs(): array
     {
-        $activeCount = Invoice::query()->whereNull('invoiced_at')->whereNull('paid_at')->count();
-        $waitingCount = Invoice::query()->whereNotNull('invoiced_at')->whereNull('paid_at')->count();
-        $finishedCount = Invoice::query()->whereNotNull('invoiced_at')->whereNotNull('paid_at')->count();
+        $activeCount = Invoice::whereNull('invoiced_at')->whereNull('paid_at')->count();
+        $waitingCount = Invoice::whereNotNull('invoiced_at')->whereNull('paid_at')->count();
+        $finishedCount = Invoice::whereNotNull('invoiced_at')->whereNotNull('paid_at')->count();
 
         return [
             'active' => Tab::make()

@@ -154,15 +154,13 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->locale(app()->getLocale())->monthName;
-            $invoices = Invoice::query()
-                ->where('paid_at', '>=', $dt->startOfMonth()->toDateString())
+            $invoices = Invoice::where('paid_at', '>=', $dt->startOfMonth()->toDateString())
                 ->where('paid_at', '<=', $dt->endOfMonth()->toDateString())
                 ->get();
             $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
             $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
             $netIncome[] = $netEarned;
-            $expenses = Expense::query()
-                ->where('expended_at', '>=', $dt->startOfMonth()->toDateString())
+            $expenses = Expense::where('expended_at', '>=', $dt->startOfMonth()->toDateString())
                 ->where('expended_at', '<=', $dt->endOfMonth()->toDateString())
                 ->where('taxable', '=', '1')
                 ->get();
@@ -184,15 +182,13 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = "$dt->year Q$dt->quarter";
-            $invoices = Invoice::query()
-                ->where('paid_at', '>=', $dt->startOfQuarter()->toDateString())
+            $invoices = Invoice::where('paid_at', '>=', $dt->startOfQuarter()->toDateString())
                 ->where('paid_at', '<=', $dt->endOfQuarter()->toDateString())
                 ->get();
             $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
             $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
             $netIncome[] = $netEarned;
-            $expenses = Expense::query()
-                ->where('expended_at', '>=', $dt->startOfQuarter()->toDateString())
+            $expenses = Expense::where('expended_at', '>=', $dt->startOfQuarter()->toDateString())
                 ->where('expended_at', '<=', $dt->endOfQuarter()->toDateString())
                 ->where('taxable', '=', '1')
                 ->get();
@@ -214,15 +210,13 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->year;
-            $invoices = Invoice::query()
-                ->where('paid_at', '>=', $dt->startOfYear()->toDateString())
+            $invoices = Invoice::where('paid_at', '>=', $dt->startOfYear()->toDateString())
                 ->where('paid_at', '<=', $dt->endOfYear()->toDateString())
                 ->get();
             $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
             $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
             $netIncome[] = $netEarned;
-            $expenses = Expense::query()
-                ->where('expended_at', '>=', $dt->startOfYear()->toDateString())
+            $expenses = Expense::where('expended_at', '>=', $dt->startOfYear()->toDateString())
                 ->where('expended_at', '<=', $dt->endOfYear()->toDateString())
                 ->where('taxable', '=', '1')
                 ->get();
