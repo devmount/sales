@@ -14,7 +14,7 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Support\Assets\Js;
 use Filament\Tables\Actions\Action;
 use Filament\Support\Enums\IconSize;
-
+use Illuminate\Support\Number;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Set default locale for number helper
+        Number::useLocale($this->app->getLocale());
+
         // Filament only saves valid data to models so the models can be unguarded safely
         Model::unguard();
 
