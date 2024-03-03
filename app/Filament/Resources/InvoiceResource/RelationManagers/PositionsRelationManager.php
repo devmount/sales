@@ -31,15 +31,11 @@ class PositionsRelationManager extends RelationManager
                     ->default(now()->setHour(9)->setMinute(0))
                     ->live()
                     ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
-                        $previous = Carbon::parse($old);
                         $started = Carbon::parse($state);
                         $finished = Carbon::parse($get('finished_at'));
                         // handle start is set after finish or day change
                         if ($started >= $finished || !$started->isSameDay($finished)) {
-                            $set(
-                                'finished_at',
-                                $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
-                            );
+                            $set('finished_at', $started->toDateTimeString());
                         }
                     })
                     ->required()
