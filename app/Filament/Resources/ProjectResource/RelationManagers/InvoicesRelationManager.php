@@ -10,8 +10,7 @@ use Filament\Tables\Columns;
 use Filament\Tables\Table;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-
-use function Filament\Support\format_money;
+use Illuminate\Support\Number;
 
 class InvoicesRelationManager extends RelationManager
 {
@@ -48,7 +47,7 @@ class InvoicesRelationManager extends RelationManager
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->final)
-                    ->description(fn (Invoice $record): string => format_money($record->vat, 'eur') . ' ' . __('vat')),
+                    ->description(fn (Invoice $record): string => Number::currency($record->vat, 'eur') . ' ' . __('vat')),
             ])
             ->filters([
                 //

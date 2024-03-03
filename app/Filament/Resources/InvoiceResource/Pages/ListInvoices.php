@@ -8,6 +8,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Number;
 
 class ListInvoices extends ListRecords
 {
@@ -22,17 +23,21 @@ class ListInvoices extends ListRecords
 
     public function getTabs(): array
     {
-        $activeCount = Invoice::query()->whereNull('invoiced_at')->whereNull('paid_at')->count();
-        $waitingCount = Invoice::query()->whereNotNull('invoiced_at')->whereNull('paid_at')->count();
-        $finishedCount = Invoice::query()->whereNotNull('invoiced_at')->whereNotNull('paid_at')->count();
+        $active = Invoice::whereNull('invoiced_at')->whereNull('paid_at');
+        $activeNet = $active->get()->reduce(fn($p, $c) => $p + $c->net, 0);
+        $activeCount = $active->count();
+        $waiting = Invoice::whereNotNull('invoiced_at')->whereNull('paid_at');
+        $waitingCount = $waiting->count();
+        $waitingNet = $waiting->get()->reduce(fn($p, $c) => $p + $c->net, 0);
+        $finishedCount = Invoice::whereNotNull('invoiced_at')->whereNotNull('paid_at')->count();
 
         return [
             'active' => Tab::make()
-                ->label(__('inProgress'))
+                ->label(__('inProgress', ['net' => Number::currency($activeNet, 'eur') ]))
                 ->badge($activeCount)
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')),
             'waiting' => Tab::make()
-                ->label(__('waitingForPayment'))
+                ->label(__('waitingForPayment', ['net' => Number::currency($waitingNet, 'eur') ]))
                 ->badge($waitingCount)
                 ->badgeColor($waitingCount > 0 ? 'warning' : 'gray')
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNull('paid_at')),

@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
-use function Filament\Support\format_money;
+use Illuminate\Support\Number;
 
 class Invoice extends Model
 {
@@ -81,7 +80,7 @@ class Invoice extends Model
      */
     public function getNetFormattedAttribute()
     {
-        return format_money($this->net, 'eur');
+        return Number::currency($this->net, 'eur');
     }
 
     /**
