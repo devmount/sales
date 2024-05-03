@@ -115,6 +115,7 @@ class ClientResource extends Resource
             ->actions(Actions\ActionGroup::make([
                 Actions\EditAction::make()->icon('tabler-edit'),
                 Actions\Action::make('kontaktieren')
+                    ->disabled(fn (Client $record) => !boolval($record->email))
                     ->icon('tabler-mail')
                     ->form(fn (Client $record) => [
                         Components\TextInput::make('subject')
