@@ -28,7 +28,8 @@ class EstimatesRelationManager extends RelationManager
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffix('h')
-                    ->suffixIcon('tabler-clock-exclamation'),
+                    ->suffixIcon('tabler-clock-exclamation')
+                    ->required(),
                 Components\Textarea::make('description')
                     ->label(__('description'))
                     ->autosize()
