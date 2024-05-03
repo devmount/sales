@@ -41,7 +41,8 @@ class EstimateResource extends Resource
                     ->step(0.1)
                     ->minValue(0.1)
                     ->suffix('h')
-                    ->suffixIcon('tabler-clock-exclamation'),
+                    ->suffixIcon('tabler-clock-exclamation')
+                    ->required(),
                 Components\TextInput::make('weight')
                     ->label(__('weight'))
                     ->numeric()
