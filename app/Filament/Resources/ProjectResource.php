@@ -52,6 +52,7 @@ class ProjectResource extends Resource
                             ->label(__('startAt'))
                             ->weekStartsOnMonday()
                             ->suffixIcon('tabler-calendar-plus')
+                            ->required()
                             ->columnSpan(6),
                         Components\DatePicker::make('due_at')
                             ->label(__('dueAt'))
@@ -73,6 +74,7 @@ class ProjectResource extends Resource
                             ->minValue(0.1)
                             ->suffix('h')
                             ->suffixIcon('tabler-clock-exclamation')
+                            ->required()
                             ->columnSpan(6),
                         Components\TextInput::make('price')
                             ->label(__('price'))
@@ -110,7 +112,7 @@ class ProjectResource extends Resource
                         ->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
                     )
                     ->description(fn (Project $record): string => Carbon::parse($record->start_at)
-                        ->isoFormat('ll') . ' - ' . Carbon::parse($record->due_at)->isoFormat('ll')
+                        ->isoFormat('ll') . ' - ' . ($record->due_at ? Carbon::parse($record->due_at)->isoFormat('ll') : '∞')
                     ),
                 Columns\TextColumn::make('scope')
                     ->label(__('scope'))
