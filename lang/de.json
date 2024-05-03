@@ -30,7 +30,7 @@
     "date": "Datum",
     "dateAndDescription": "Datum und Beschreibung",
     "dateRange": "Zeitraum",
-    "days": "Tage",
+    "day": "Tag|Tage",
     "decrease": "Rückgang",
     "deduction": "Abzug",
     "definesEstimateSorting": "Definiert die Reihenfolge der Schätzungen",

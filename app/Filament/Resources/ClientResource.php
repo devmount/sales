@@ -96,7 +96,7 @@ class ClientResource extends Resource
                     ->label(__('payment'))
                     ->numeric(1)
                     ->state(fn (Client $record): float => $record->avg_payment_delay)
-                    ->description(__('days')),
+                    ->description(trans_choice('day', 2)),
                 Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->since()

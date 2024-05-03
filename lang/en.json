@@ -29,7 +29,7 @@
     "date": "Date",
     "dateAndDescription": "Date and description",
     "dateRange": "Date range",
-    "days": "Days",
+    "day": "Day|Days",
     "decrease": "decrease",
     "deduction": "Deduction",
     "definesEstimateSorting": "Defines order of estimate entries",

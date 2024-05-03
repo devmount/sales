@@ -83,6 +83,7 @@ class Project extends Model
     {
         return $this->price . ' € / ' . match($this->pricing_unit) {
             PricingUnit::Hour => trans_choice('hour', 1),
+            PricingUnit::Day => trans_choice('day', 1),
             PricingUnit::Project => trans_choice('project', 1),
         };
     }
