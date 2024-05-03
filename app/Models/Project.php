@@ -92,7 +92,9 @@ class Project extends Model
      */
     public function getProgressPercentAttribute()
     {
-        return round($this->hours/$this->scope*100, 1) . ' %';
+        return $this->scope > 0
+            ? round($this->hours/$this->scope*100, 1) . ' %'
+            : __('n/a');
     }
 
     /**
