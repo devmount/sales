@@ -169,9 +169,9 @@ const quote = {
     title:       '{{ $this->record->title }}',
     description: '{{ str_replace("\n", "\\n", $this->record->description) }}',
     start:       new Date('{{ $this->record->start_at }}'),
-    due:         new Date('{{ $this->record->due_at }}'),
-    hours:       nDigit(billedPerProject ? {{ $this->record->scope }} : {{ $this->record->estimated_hours }}, 1, lang),
-    price:       billedPerProject ? {{ $this->record->price/$this->record->scope }} : {{ $this->record->price }},
+    due:         {!! $this->record->due_at ? "hdate(new Date({$this->record->due_at}))" : "'∞'"!!},
+    hours:       nDigit(billedPerProject ? {{ $this->record->scope ?? '0' }} : {{ $this->record->estimated_hours }}, 1, lang),
+    price:       billedPerProject ? {{ $this->record->scope ? $this->record->price/$this->record->scope : '0' }} : {{ $this->record->price }},
     net:         euro({{ $this->record->estimated_net }}, lang),
     vatRate:     percent(config.vatRate, lang),
     vat:         euro({{ $this->record->estimated_vat }}, lang),
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.setTextColor(colors.dark).setFontSize(10)
         .setFont('FiraSansRegular').text(label.servicePeriod, 10, 228)
         .setFont('FiraSansExtraLight').text(
-            markerReplace(label.servicePeriodText, [hdate(quote.start), hdate(quote.due)]), 10, 235, { maxWidth: 160 }
+            markerReplace(label.servicePeriodText, [hdate(quote.start), quote.due]), 10, 235, { maxWidth: 160 }
         )
         // .setFontSize(10).text([label.regards, config.name], 10, 244);
     // footer
