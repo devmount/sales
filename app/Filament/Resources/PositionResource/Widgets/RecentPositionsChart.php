@@ -60,11 +60,11 @@ class RecentPositionsChart extends ChartWidget
     protected function getFilters(): ?array
     {
         return [
-            '30' => '30 ' . __('days'),
-            '60' => '60 ' . __('days'),
-            '90' => '90 ' . __('days'),
-            '120' => '120 ' . __('days'),
-            '365' => '365 ' . __('days'),
+            '30' => '30 ' . trans_choice('day', 2),
+            '60' => '60 ' . trans_choice('day', 2),
+            '90' => '90 ' . trans_choice('day', 2),
+            '120' => '120 ' . trans_choice('day', 2),
+            '365' => '365 ' . trans_choice('day', 2),
         ];
     }
 

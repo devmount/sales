@@ -83,6 +83,7 @@ class Project extends Model
     {
         return $this->price . ' € / ' . match($this->pricing_unit) {
             PricingUnit::Hour => trans_choice('hour', 1),
+            PricingUnit::Day => trans_choice('day', 1),
             PricingUnit::Project => trans_choice('project', 1),
         };
     }
@@ -92,7 +93,9 @@ class Project extends Model
      */
     public function getProgressPercentAttribute()
     {
-        return round($this->hours/$this->scope*100, 1) . ' %';
+        return $this->scope > 0
+            ? round($this->hours/$this->scope*100, 1) . ' %'
+            : __('n/a');
     }
 
     /**

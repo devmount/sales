@@ -128,7 +128,10 @@ class InvoiceResource extends Resource
                             ->content(fn (Invoice $obj) => new HtmlString(
                                 $obj->project?->hours
                                 . ' / ' . $obj->project?->scope_range
-                                . '<br />' . __('numExhausted', ['n' => $obj->project?->progress_percent])
+                                . ($obj->project?->scope
+                                    ? '<br />' . __('numExhausted', ['n' => $obj->project?->progress_percent])
+                                    : ''
+                                )
                             ))
                             ->columnSpanFull(),
                         Components\Placeholder::make('invoice')
