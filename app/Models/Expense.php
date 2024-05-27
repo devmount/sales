@@ -57,7 +57,7 @@ class Expense extends Model
     /**
      * Sum of net and vat amounts of given time range
      */
-    public static function ofTime(Carbon $d, TimeUnit $u): array
+    public static function ofTime(Carbon $d, TimeUnit $u, ?ExpenseCategory $category = null): array
     {
         $start = match ($u) {
             TimeUnit::MONTH => $d->startOfMonth()->toDateString(),
@@ -69,9 +69,10 @@ class Expense extends Model
             TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
             TimeUnit::YEAR => $d->endOfYear()->toDateString(),
         };
+        $categories = $category ? [$category] : ExpenseCategory::deliverableCategories();
         $records = self::where('expended_at', '>=', $start)
             ->where('expended_at', '<=', $end)
-            ->where('taxable', '=', '1')
+            ->whereIn('category', $categories)
             ->get();
         $net = array_sum($records->map(fn (self $r) => $r->net)->toArray());
         $vat = array_sum($records->map(fn (self $r) => $r->vat)->toArray());

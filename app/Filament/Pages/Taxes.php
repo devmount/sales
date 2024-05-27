@@ -3,7 +3,6 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
-use App\Filament\Resources\PositionResource\Widgets as ResourceWidgets;
 use App\Filament\Widgets as AppWidgets;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -21,6 +20,7 @@ class Taxes extends BaseDashboard
     public function getWidgets(): array
     {
         return [
+            AppWidgets\TaxReportRevenueSurplusCalculation::class,
             AppWidgets\TaxOverview::class,
         ];
     }
