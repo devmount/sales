@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\ExpenseCategory;
+use App\Enums\TimeUnit;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
@@ -16,7 +17,6 @@ use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
 use Filament\Support\Enums\ActionSize;
-use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Number;
@@ -77,6 +77,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->state($netIncome)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
+                ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\TextEntry::make('vatExpenses')
@@ -87,6 +88,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->state($vatExpenses)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
+                ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\TextEntry::make('totalVat')
@@ -97,6 +99,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->state($totalVat)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
+                ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\Actions::make([
@@ -139,7 +142,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                     // ->modalSubmitActionLabel(__('create))
                 ])
                 ->columnSpanFull()
-                ->alignment(Alignment::Right)
+                ->alignRight()
             ];
     }
 
@@ -153,17 +156,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->locale(app()->getLocale())->monthName;
-            $invoices = Invoice::where('paid_at', '>=', $dt->startOfMonth()->toDateString())
-                ->where('paid_at', '<=', $dt->endOfMonth()->toDateString())
-                ->get();
-            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
-            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
+            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::MONTH);
+            [, $vatExpended] = Expense::ofTime($dt, TimeUnit::MONTH);
             $netIncome[] = $netEarned;
-            $expenses = Expense::where('expended_at', '>=', $dt->startOfMonth()->toDateString())
-                ->where('expended_at', '<=', $dt->endOfMonth()->toDateString())
-                ->where('taxable', '=', '1')
-                ->get();
-            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subMonthsNoOverflow();
@@ -181,17 +176,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = "$dt->year Q$dt->quarter";
-            $invoices = Invoice::where('paid_at', '>=', $dt->startOfQuarter()->toDateString())
-                ->where('paid_at', '<=', $dt->endOfQuarter()->toDateString())
-                ->get();
-            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
-            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
+            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::QUARTER);
+            [, $vatExpended] = Expense::ofTime($dt, TimeUnit::QUARTER);
             $netIncome[] = $netEarned;
-            $expenses = Expense::where('expended_at', '>=', $dt->startOfQuarter()->toDateString())
-                ->where('expended_at', '<=', $dt->endOfQuarter()->toDateString())
-                ->where('taxable', '=', '1')
-                ->get();
-            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subQuarterNoOverflow();
@@ -209,17 +196,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->year;
-            $invoices = Invoice::where('paid_at', '>=', $dt->startOfYear()->toDateString())
-                ->where('paid_at', '<=', $dt->endOfYear()->toDateString())
-                ->get();
-            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
-            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
+            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
+            [, $vatExpended] = Expense::ofTime($dt, TimeUnit::YEAR);
             $netIncome[] = $netEarned;
-            $expenses = Expense::where('expended_at', '>=', $dt->startOfYear()->toDateString())
-                ->where('expended_at', '<=', $dt->endOfYear()->toDateString())
-                ->where('taxable', '=', '1')
-                ->get();
-            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subYearNoOverflow();

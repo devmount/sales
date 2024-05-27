@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Enums\PricingUnit;
+use App\Enums\TimeUnit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Number;
+use Carbon\Carbon;
+use DateTime;
 
 class Invoice extends Model
 {
@@ -115,5 +118,48 @@ class Invoice extends Model
     public function getCurrentNumberAttribute()
     {
         return now()->format('Ymd') . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Calculate array holding all years having paid invoices
+     * sorted from current to past
+     *
+     * @return array<int>
+     */
+    public static function getYearList(): array
+    {
+        $firstDate = self::whereNotNull('paid_at')
+            ->whereNot('transitory')
+            ->oldest('paid_at')
+            ->first()
+            ->paid_at;
+        $period = Carbon::parse($firstDate)->startOfYear()->yearsUntil(now());
+        $years = array_reverse(
+            iterator_to_array(
+                $period->map(fn(Carbon $date) => $date->format('Y'))
+            )
+        );
+        return array_combine($years, $years);
+    }
+
+    /**
+     * Sum of net and vat amounts of given time range
+     */
+    public static function ofTime(Carbon $d, TimeUnit $u): array
+    {
+        $start = match ($u) {
+            TimeUnit::MONTH => $d->startOfMonth()->toDateString(),
+            TimeUnit::QUARTER => $d->startOfQuarter()->toDateString(),
+            TimeUnit::YEAR => $d->startOfYear()->toDateString(),
+        };
+        $end = match ($u) {
+            TimeUnit::MONTH => $d->endOfMonth()->toDateString(),
+            TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
+            TimeUnit::YEAR => $d->endOfYear()->toDateString(),
+        };
+        $records = self::where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->get();
+        $net = array_sum($records->map(fn (self $r) => $r->net)->toArray());
+        $vat = array_sum($records->map(fn (self $r) => $r->vat)->toArray());
+        return [$net, $vat];
     }
 }
