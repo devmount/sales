@@ -59,14 +59,7 @@ class ClientProfitDistributionChart extends ChartWidget
 
     protected function getFilters(): ?array
     {
-        $firstDate = Invoice::whereNotNull('paid_at')
-            ->whereNot('transitory')
-            ->oldest('paid_at')
-            ->first()
-            ->paid_at;
-        $period = Carbon::parse($firstDate)->startOfYear()->yearsUntil(now());
-        $years = array_reverse(iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y'))));
-        return array_combine($years, $years);
+        return Invoice::getYearList();
     }
 
     protected function getOptions(): RawJs
