@@ -17,7 +17,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Number;
 
-class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, HasInfolists
+class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
 {
     use InteractsWithInfolists;
     use InteractsWithForms;
@@ -25,7 +25,6 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
     protected int | string | array $columnSpan = 4;
     protected static string $view = 'filament.widgets.tax-report-revenue-surplus-calculation';
     // protected static ?string $maxHeight = '265px';
-    // protected static int $entryCount = 6;
     public ?int $filter = null;
 
     public function __construct()
@@ -36,7 +35,7 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
 
     public function getHeading(): string
     {
-        return __('attachmentRSC');
+        return __('taxReport');
     }
 
     protected function getFilters(): ?array
@@ -53,27 +52,45 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
         $netExpended = $netGoodExpended + $netServiceExpended;
         $vatExpended = $vatGoodExpended + $vatServiceExpended;
         return [
-            '14' => [
+            [
+                'vr' => '22',
+                'rsc' => '14',
                 'value' => $netEarned,
                 'help' => __('formLabels')['rsc14'],
             ],
-            '16' => [
+            [
+                'vr' => null,
+                'rsc' => '16',
                 'value' => $vatEarned,
                 'help' => __('formLabels')['rsc16'],
             ],
-            '26' => [
+            [
+                'vr' => null,
+                'rsc' => '26',
                 'value' => $netGoodExpended,
                 'help' => __('formLabels')['rsc26'],
             ],
-            '27' => [
+            [
+                'vr' => null,
+                'rsc' => '27',
                 'value' => $netServiceExpended,
                 'help' => __('formLabels')['rsc27'],
             ],
-            '55' => [
+            [
+                'vr' => '79',
+                'rsc' => '55',
                 'value' => $vatExpended,
                 'help' => __('formLabels')['rsc55'],
             ],
-            '97' => [
+            [
+                'vr' => '118',
+                'rsc' => null,
+                'value' => $vatEarned - $vatExpended,
+                'help' => __('formLabels')['vr118'],
+            ],
+            [
+                'vr' => null,
+                'rsc' => '97',
                 'value' => $netEarned + $vatEarned - $netExpended - $vatExpended,
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
@@ -84,20 +101,30 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
     private function renderData(): array
     {
         $entries = [];
-        foreach ($this->getData() as $nr => $line) {
-            $entries[] = Components\TextEntry::make('label')
-                ->label('')
+        foreach ($this->getData() as $key => $line) {
+            // VAT return
+            $entries[] = Components\TextEntry::make('vr')
+                ->label($key === 0 ? __('vr') : '')
                 ->fontFamily(FontFamily::Mono)
-                ->state(__('lineN', ['n' => $nr]))
-                ->tooltip($line['help'])
+                ->state($line['vr'] ? __('lineN', ['n' => $line['vr']]) : '')
                 ->color($line['color'] ?? false)
                 ->grow(false);
-            $entries[] = Components\TextEntry::make("$nr.value")
-                ->label('')
+            // Revenue Surplus calculation
+            $entries[] = Components\TextEntry::make('rsc')
+                ->label($key === 0 ? __('rsc') : '')
+                ->fontFamily(FontFamily::Mono)
+                ->state($line['rsc'] ? __('lineN', ['n' => $line['rsc']]) : '')
+                ->color($line['color'] ?? false)
+                ->grow(false);
+            // Values
+            $entries[] = Components\TextEntry::make('value')
+                ->label($key === 0 ? __('value') : '')
                 ->money('eur')
+                ->state($line['value'])
                 ->fontFamily(FontFamily::Mono)
                 ->color($line['color'] ?? false)
                 ->alignRight()
+                ->tooltip($line['help'])
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state)));
         }
@@ -107,7 +134,8 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
-            ->state($this->getData())
-            ->schema($this->renderData())->columns(2)->extraAttributes(['class' => 'data-list']);
+            ->schema($this->renderData())
+            ->columns(3)
+            ->extraAttributes(['class' => 'data-list']);
     }
 }

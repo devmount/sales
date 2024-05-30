@@ -21,7 +21,7 @@ class Taxes extends BaseDashboard
     {
         return [
             AppWidgets\TaxOverview::class,
-            AppWidgets\TaxReportRevenueSurplusCalculation::class,
+            AppWidgets\TaxReturnFormInput::class,
         ];
     }
 
