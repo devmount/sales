@@ -12,6 +12,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Assets\Js;
+use Filament\Support\Assets\Css;
 use Filament\Tables\Actions\Action;
 use Filament\Support\Enums\IconSize;
 use Illuminate\Support\Number;
@@ -53,6 +54,9 @@ class AppServiceProvider extends ServiceProvider
         // Register assets
         FilamentAsset::register([
             Js::make('jspdf-script', asset('js/jspdf.umd.min.js')),
+        ]);
+        FilamentAsset::register([
+            Css::make('app-styles', asset('css/app.css')),
         ]);
 
         // Customize Filament colors

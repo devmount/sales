@@ -53,33 +53,46 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
         $netExpended = $netGoodExpended + $netServiceExpended;
         $vatExpended = $vatGoodExpended + $vatServiceExpended;
         return [
-            '14' => $netEarned,
-            '16' => $vatEarned,
-            '26' => $netGoodExpended,
-            '27' => $netServiceExpended,
-            '55' => $vatExpended,
+            '14' => [
+                'value' => $netEarned,
+                'help' => 'Umsatzsteuerpflichtige Betriebseinnahmen',
+            ],
+            '16' => [
+                'value' => $vatEarned,
+                'help' => 'Vereinnahmte Umsatzsteuer',
+            ],
+            '26' => [
+                'value' => $netGoodExpended,
+                'help' => 'Waren, Rohstoffe und Hilfsstoffe',
+            ],
+            '27' => [
+                'value' => $netServiceExpended,
+                'help' => 'Bezogene Leistungen',
+            ],
+            '55' => [
+                'value' => $vatExpended,
+                'help' => 'Gezahlte Vorsteuerbeträge',
+            ],
         ];
     }
 
     private function renderData(): array
     {
         $entries = [];
-        $lines = array_keys($this->getData());
-        foreach ($lines as $line) {
-            array_push(
-                $entries,
-                Components\TextEntry::make($line)
-                    ->label('')
-                    ->state(__('lineN', ['n' => $line]))
-                    ->grow(false),
-                Components\TextEntry::make($line)
-                    ->label('')
-                    ->money('eur')
-                    ->fontFamily(FontFamily::Mono)
-                    ->alignRight()
-                    ->copyable()
-                    ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
-            );
+        foreach ($this->getData() as $nr => $line) {
+            $entries[] = Components\TextEntry::make('label')
+                ->label('')
+                ->fontFamily(FontFamily::Mono)
+                ->state(__('lineN', ['n' => $nr]))
+                ->tooltip($line['help'])
+                ->grow(false);
+            $entries[] = Components\TextEntry::make("$nr.value")
+                ->label('')
+                ->money('eur')
+                ->fontFamily(FontFamily::Mono)
+                ->alignRight()
+                ->copyable()
+                ->copyableState(fn (string $state): string => Number::format(floatVal($state)));
         }
         return $entries;
     }
@@ -88,8 +101,6 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
     {
         return $infolist
             ->state($this->getData())
-            ->schema([
-                Components\Grid::make(2)->schema($this->renderData()),
-            ]);
+            ->schema($this->renderData())->columns(2)->extraAttributes(['class' => 'data-list']);
     }
 }
