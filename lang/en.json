@@ -54,6 +54,14 @@
     "finished": "Finished",
     "finishedAt": "Finished at",
     "flatRate": "flat-rate",
+    "formLabels": {
+        "rsc14": "Operating income subject to VAT",
+        "rsc16": "Sales tax collected",
+        "rsc26": "Goods, raw materials and auxiliary materials",
+        "rsc27": "Purchased services",
+        "rsc55": "Input tax paid",
+        "rsc97": "Taxable profit/loss"
+    },
     "gift": "Gift|Gifts",
     "good": "Good",
     "gross": "Gross",

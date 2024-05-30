@@ -54,6 +54,14 @@
     "finished": "Beendet",
     "finishedAt": "Beendet am",
     "flatRate": "pauschal",
+    "formLabels": {
+        "rsc14": "Umsatzsteuerpflichtige Betriebseinnahmen",
+        "rsc16": "Vereinnahmte Umsatzsteuer",
+        "rsc26": "Waren, Rohstoffe und Hilfsstoffe",
+        "rsc27": "Bezogene Leistungen",
+        "rsc55": "Gezahlte Vorsteuerbeträge",
+        "rsc97": "Steuerpflichtiger Gewinn/Verlust"
+    },
     "gift": "Schenkung|Schenkungen",
     "good": "Ware",
     "gross": "Brutto",

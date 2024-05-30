@@ -55,23 +55,28 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
         return [
             '14' => [
                 'value' => $netEarned,
-                'help' => 'Umsatzsteuerpflichtige Betriebseinnahmen',
+                'help' => __('formLabels')['rsc14'],
             ],
             '16' => [
                 'value' => $vatEarned,
-                'help' => 'Vereinnahmte Umsatzsteuer',
+                'help' => __('formLabels')['rsc16'],
             ],
             '26' => [
                 'value' => $netGoodExpended,
-                'help' => 'Waren, Rohstoffe und Hilfsstoffe',
+                'help' => __('formLabels')['rsc26'],
             ],
             '27' => [
                 'value' => $netServiceExpended,
-                'help' => 'Bezogene Leistungen',
+                'help' => __('formLabels')['rsc27'],
             ],
             '55' => [
                 'value' => $vatExpended,
-                'help' => 'Gezahlte Vorsteuerbeträge',
+                'help' => __('formLabels')['rsc55'],
+            ],
+            '97' => [
+                'value' => $netEarned + $vatEarned - $netExpended - $vatExpended,
+                'help' => __('formLabels')['rsc97'],
+                'color' => 'gray',
             ],
         ];
     }
@@ -85,11 +90,13 @@ class TaxReportRevenueSurplusCalculation extends Widget implements HasForms, Has
                 ->fontFamily(FontFamily::Mono)
                 ->state(__('lineN', ['n' => $nr]))
                 ->tooltip($line['help'])
+                ->color($line['color'] ?? false)
                 ->grow(false);
             $entries[] = Components\TextEntry::make("$nr.value")
                 ->label('')
                 ->money('eur')
                 ->fontFamily(FontFamily::Mono)
+                ->color($line['color'] ?? false)
                 ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state)));
