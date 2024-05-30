@@ -1,6 +1,5 @@
 @php
     $heading = $this->getHeading();
-    $actions = $this->getFooterActions();
     $filters = $this->getFilters();
 @endphp
 

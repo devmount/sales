@@ -36,23 +36,6 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         return __('vatTax');
     }
 
-    public function getFooterActions()
-    {
-        return [
-            Components\Actions\Action::make('lastAdvanceVat')
-                ->label(__('createLatestVatExpense'))
-                ->icon('tabler-credit-card')
-                ->outlined()
-                ->disabled(Expense::lastAdvanceVatExists())
-                ->action(function (): void {
-                    if (Expense::saveLastAdvanceVat()) {
-                        Notification::make()->title(__('vatExpenseCreated'))->success()->send();
-                        redirect('/expenses?activeTab=tax');
-                    }
-                })
-        ];
-    }
-
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
