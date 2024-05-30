@@ -35,17 +35,17 @@ class ListInvoices extends ListRecords
             'active' => Tab::make()
                 ->label(__('inProgress', ['net' => Number::currency($activeNet, 'eur') ]))
                 ->badge($activeCount)
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderBy('updated_at', 'desc')),
             'waiting' => Tab::make()
                 ->label(__('waitingForPayment', ['net' => Number::currency($waitingNet, 'eur') ]))
                 ->badge($waitingCount)
                 ->badgeColor($waitingCount > 0 ? 'warning' : 'gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNull('paid_at')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNull('paid_at')->orderBy('invoiced_at', 'desc')),
             'finished' => Tab::make()
                 ->label(__('finished'))
                 ->badge($finishedCount)
                 ->badgeColor('gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNotNull('paid_at')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNotNull('paid_at')->orderBy('paid_at', 'desc')),
             'all' => Tab::make()
                 ->label(__('all')),
         ];
