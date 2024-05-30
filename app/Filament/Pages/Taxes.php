@@ -20,8 +20,8 @@ class Taxes extends BaseDashboard
     public function getWidgets(): array
     {
         return [
-            AppWidgets\TaxReportRevenueSurplusCalculation::class,
             AppWidgets\TaxOverview::class,
+            AppWidgets\TaxReportRevenueSurplusCalculation::class,
         ];
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Enums\ExpenseCategory;
 use App\Enums\TimeUnit;
 use App\Models\Expense;
 use App\Models\Invoice;
@@ -16,16 +15,15 @@ use Filament\Notifications\Notification;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
-use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Number;
 
 class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithInfolists;
     use InteractsWithForms;
-    use InteractsWithActions;
 
     protected int | string | array $columnSpan = 6;
     protected static string $view = 'filament.widgets.tax-overview';
@@ -38,7 +36,24 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         return __('vatTax');
     }
 
-    public function taxInfolist(Infolist $infolist): Infolist
+    public function getFooterActions()
+    {
+        return [
+            Components\Actions\Action::make('lastAdvanceVat')
+                ->label(__('createLatestVatExpense'))
+                ->icon('tabler-credit-card')
+                ->outlined()
+                ->disabled(Expense::lastAdvanceVatExists())
+                ->action(function (): void {
+                    if (Expense::saveLastAdvanceVat()) {
+                        Notification::make()->title(__('vatExpenseCreated'))->success()->send();
+                        redirect('/expenses?activeTab=tax');
+                    }
+                })
+        ];
+    }
+
+    public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
             ->name('taxOverview')
@@ -47,7 +62,20 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                     'm' => Components\Grid::make(12)->schema($this->getMonthData()),
                     'q' => Components\Grid::make(12)->schema($this->getQuarterData()),
                     'y' => Components\Grid::make(12)->schema($this->getYearData()),
-                }
+                },
+                Components\Actions::make([
+                    Components\Actions\Action::make('lastAdvanceVat')
+                        ->label(__('createLatestVatExpense'))
+                        ->icon('tabler-credit-card')
+                        ->outlined()
+                        ->disabled(Expense::lastAdvanceVatExists())
+                        ->action(function (): void {
+                            if (Expense::saveLastAdvanceVat()) {
+                                Notification::make()->title(__('vatExpenseCreated'))->success()->send();
+                                redirect('/expenses?activeTab=tax');
+                            }
+                        })
+                ])->alignRight()
             ]);
     }
 
@@ -102,47 +130,6 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
-            Components\Actions::make([
-                Components\Actions\Action::make('add_latest_vat_expense')
-                    ->label(__('createLatestVatExpense'))
-                    ->icon('tabler-credit-card')
-                    ->size(ActionSize::ExtraSmall)
-                    ->outlined()
-                    // ->form([
-                    //     FormComponents\DatePicker::make('expended_at')
-                    //         ->label(__('expendedAt'))
-                    //         ->weekStartsOnMonday()
-                    //         ->required()
-                    //         ->default(now())
-                    //         ->suffixIcon('tabler-calendar-dollar'),
-                    //     FormComponents\Textarea::make('description')
-                    //         ->label(__('description'))
-                    //         ->default('UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'))
-                    //         ->maxLength(65535)
-                    // ])
-                    // ->action(function (array $data) use ($totalVat): void {
-                    ->action(function () use ($totalVat): void {
-                        $obj = new Expense([
-                            'expended_at' => now(),
-                            'category' => ExpenseCategory::Vat,
-                            'price' => $totalVat[1],
-                            'quantity' => 1,
-                            'taxable' => false,
-                            'vat_rate' => 0,
-                            'description' => 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'),
-                        ]);
-                        $obj->save();
-                        Notification::make()
-                            ->title(__('vatExpenseCreated'))
-                            ->success()
-                            ->send();
-                        redirect('/expenses?activeTab=tax');
-                    })
-                    // ->modalHeading('Create VAT expense')
-                    // ->modalSubmitActionLabel(__('create))
-                ])
-                ->columnSpanFull()
-                ->alignRight()
             ];
     }
 

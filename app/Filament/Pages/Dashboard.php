@@ -21,7 +21,6 @@ class Dashboard extends BaseDashboard
             AppWidgets\StatsOverview::class,
             ResourceWidgets\RecentPositionsChart::class,
             AppWidgets\SalesChart::class,
-            AppWidgets\TaxOverview::class,
             AppWidgets\ClientProfitDistributionChart::class,
             AppWidgets\HourlyRateChart::class,
             AppWidgets\MonthlyIncomeChart::class,

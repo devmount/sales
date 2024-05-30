@@ -54,6 +54,28 @@ class Expense extends Model
         return $this->gross - $this->net;
     }
 
+    public static function lastAdvanceVatExists(): bool
+    {
+        $format = 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM');
+        return self::where('description', $format)->first() !== null;
+    }
+
+    public static function saveLastAdvanceVat(): bool
+    {
+        [, $vatIn] = Invoice::ofTime(now()->subMonth(), TimeUnit::MONTH);
+        [, $vatOut] = self::ofTime(now()->subMonth(), TimeUnit::MONTH);
+        $obj = new self([
+            'expended_at' => now(),
+            'category' => ExpenseCategory::Vat,
+            'price' => $vatIn - $vatOut,
+            'quantity' => 1,
+            'taxable' => false,
+            'vat_rate' => 0,
+            'description' => 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'),
+        ]);
+        return $obj->save();
+    }
+
     /**
      * Sum of net and vat amounts of given time range
      */

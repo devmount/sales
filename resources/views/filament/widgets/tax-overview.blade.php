@@ -1,5 +1,6 @@
 @php
     $heading = $this->getHeading();
+    $actions = $this->getFooterActions();
     $filters = $this->getFilters();
 @endphp
 
@@ -25,6 +26,6 @@
                 </x-filament::input.wrapper>
             </x-slot>
         @endif
-        {{ $this->taxInfolist }}
+        {{ $this->infolist }}
     </x-filament::section>
 </x-filament-widgets::widget>

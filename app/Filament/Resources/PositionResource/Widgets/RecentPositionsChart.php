@@ -10,7 +10,7 @@ use Filament\Widgets\ChartWidget;
 
 class RecentPositionsChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 6;
     protected static ?string $maxHeight = '180px';
     public ?string $filter = '60';
 
