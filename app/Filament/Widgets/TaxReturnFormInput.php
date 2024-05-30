@@ -22,9 +22,8 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
     use InteractsWithInfolists;
     use InteractsWithForms;
 
-    protected int | string | array $columnSpan = 4;
+    protected int | string | array $columnSpan = 6;
     protected static string $view = 'filament.widgets.tax-report-revenue-surplus-calculation';
-    // protected static ?string $maxHeight = '265px';
     public ?int $filter = null;
 
     public function __construct()
@@ -53,42 +52,63 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
         $vatExpended = $vatGoodExpended + $vatServiceExpended;
         return [
             [
+                'itr' => '1 (S)',
+                'vr' => null,
+                'rsc' => null,
+                'value' => round($netEarned - $netExpended),
+                'help' => __('formLabels')['itr1'],
+                'color' => 'primary',
+            ],
+            [
+                'itr' => null,
                 'vr' => '22',
                 'rsc' => '14',
                 'value' => $netEarned,
                 'help' => __('formLabels')['rsc14'],
+                'color' => 'primary',
             ],
             [
+                'itr' => null,
                 'vr' => null,
                 'rsc' => '16',
                 'value' => $vatEarned,
                 'help' => __('formLabels')['rsc16'],
+                'color' => 'primary',
             ],
             [
+                'itr' => null,
                 'vr' => null,
                 'rsc' => '26',
                 'value' => $netGoodExpended,
                 'help' => __('formLabels')['rsc26'],
+                'color' => 'danger',
             ],
             [
+                'itr' => null,
                 'vr' => null,
                 'rsc' => '27',
                 'value' => $netServiceExpended,
                 'help' => __('formLabels')['rsc27'],
+                'color' => 'danger',
             ],
             [
+                'itr' => null,
                 'vr' => '79',
                 'rsc' => '55',
                 'value' => $vatExpended,
                 'help' => __('formLabels')['rsc55'],
+                'color' => 'danger',
             ],
             [
+                'itr' => null,
                 'vr' => '118',
                 'rsc' => null,
                 'value' => $vatEarned - $vatExpended,
                 'help' => __('formLabels')['vr118'],
+                'color' => 'danger',
             ],
             [
+                'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
                 'value' => $netEarned + $vatEarned - $netExpended - $vatExpended,
@@ -102,20 +122,21 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
     {
         $entries = [];
         foreach ($this->getData() as $key => $line) {
+            // Income tax return
+            $entries[] = Components\TextEntry::make('itr')
+                ->label($key === 0 ? __('itr') : '')
+                ->fontFamily(FontFamily::Mono)
+                ->state($line['itr'] ? __('lineN', ['n' => $line['itr']]) : '');
             // VAT return
             $entries[] = Components\TextEntry::make('vr')
                 ->label($key === 0 ? __('vr') : '')
                 ->fontFamily(FontFamily::Mono)
-                ->state($line['vr'] ? __('lineN', ['n' => $line['vr']]) : '')
-                ->color($line['color'] ?? false)
-                ->grow(false);
+                ->state($line['vr'] ? __('lineN', ['n' => $line['vr']]) : '');
             // Revenue Surplus calculation
             $entries[] = Components\TextEntry::make('rsc')
                 ->label($key === 0 ? __('rsc') : '')
                 ->fontFamily(FontFamily::Mono)
-                ->state($line['rsc'] ? __('lineN', ['n' => $line['rsc']]) : '')
-                ->color($line['color'] ?? false)
-                ->grow(false);
+                ->state($line['rsc'] ? __('lineN', ['n' => $line['rsc']]) : '');
             // Values
             $entries[] = Components\TextEntry::make('value')
                 ->label($key === 0 ? __('value') : '')
@@ -135,7 +156,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
     {
         return $infolist
             ->schema($this->renderData())
-            ->columns(3)
+            ->columns(4)
             ->extraAttributes(['class' => 'data-list']);
     }
 }

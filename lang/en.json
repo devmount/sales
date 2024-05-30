@@ -54,6 +54,7 @@
     "finishedAt": "Finished at",
     "flatRate": "flat-rate",
     "formLabels": {
+        "itr1": "Profit from freelance work",
         "rsc14": "Operating income subject to VAT",
         "rsc16": "Sales tax collected",
         "rsc26": "Goods, raw materials and auxiliary materials",
@@ -89,6 +90,7 @@
     "invoicesInProgress": "Invoices in progress",
     "invoicing": "Invoicing",
     "invoicingText": "One person day comprises 8 hours. Billing is based on the actual hours worked. The billing cycle is 15 minutes. Unless otherwise agreed, hours worked within a calendar month will be invoiced at the beginning of the following month. Proof of the services provided will be attached to the invoice. The invoice amount is due within 14 days of receipt of the invoice.",
+    "itr": "ITR",
     "language": "Language",
     "latest": "Latest",
     "lineN": "Line :n",
