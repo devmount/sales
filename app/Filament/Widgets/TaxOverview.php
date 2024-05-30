@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Enums\ExpenseCategory;
+use App\Enums\TimeUnit;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
@@ -15,17 +15,15 @@ use Filament\Notifications\Notification;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
-use Filament\Support\Enums\ActionSize;
-use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Number;
 
 class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithInfolists;
     use InteractsWithForms;
-    use InteractsWithActions;
 
     protected int | string | array $columnSpan = 6;
     protected static string $view = 'filament.widgets.tax-overview';
@@ -38,7 +36,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         return __('vatTax');
     }
 
-    public function taxInfolist(Infolist $infolist): Infolist
+    public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
             ->name('taxOverview')
@@ -47,7 +45,20 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                     'm' => Components\Grid::make(12)->schema($this->getMonthData()),
                     'q' => Components\Grid::make(12)->schema($this->getQuarterData()),
                     'y' => Components\Grid::make(12)->schema($this->getYearData()),
-                }
+                },
+                Components\Actions::make([
+                    Components\Actions\Action::make('lastAdvanceVat')
+                        ->label(__('createLatestVatExpense'))
+                        ->icon('tabler-credit-card')
+                        ->outlined()
+                        ->disabled(Expense::lastAdvanceVatExists())
+                        ->action(function (): void {
+                            if (Expense::saveLastAdvanceVat()) {
+                                Notification::make()->title(__('vatExpenseCreated'))->success()->send();
+                                redirect('/expenses?activeTab=tax');
+                            }
+                        })
+                ])->alignRight()
             ]);
     }
 
@@ -77,6 +88,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->state($netIncome)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
+                ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\TextEntry::make('vatExpenses')
@@ -87,6 +99,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->state($vatExpenses)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
+                ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
             Components\TextEntry::make('totalVat')
@@ -97,49 +110,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->state($totalVat)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
+                ->alignRight()
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
-            Components\Actions::make([
-                Components\Actions\Action::make('add_latest_vat_expense')
-                    ->label(__('createLatestVatExpense'))
-                    ->icon('tabler-credit-card')
-                    ->size(ActionSize::ExtraSmall)
-                    ->outlined()
-                    // ->form([
-                    //     FormComponents\DatePicker::make('expended_at')
-                    //         ->label(__('expendedAt'))
-                    //         ->weekStartsOnMonday()
-                    //         ->required()
-                    //         ->default(now())
-                    //         ->suffixIcon('tabler-calendar-dollar'),
-                    //     FormComponents\Textarea::make('description')
-                    //         ->label(__('description'))
-                    //         ->default('UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'))
-                    //         ->maxLength(65535)
-                    // ])
-                    // ->action(function (array $data) use ($totalVat): void {
-                    ->action(function () use ($totalVat): void {
-                        $obj = new Expense([
-                            'expended_at' => now(),
-                            'category' => ExpenseCategory::Vat,
-                            'price' => $totalVat[1],
-                            'quantity' => 1,
-                            'taxable' => false,
-                            'vat_rate' => 0,
-                            'description' => 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'),
-                        ]);
-                        $obj->save();
-                        Notification::make()
-                            ->title(__('vatExpenseCreated'))
-                            ->success()
-                            ->send();
-                        redirect('/expenses?activeTab=tax');
-                    })
-                    // ->modalHeading('Create VAT expense')
-                    // ->modalSubmitActionLabel(__('create))
-                ])
-                ->columnSpanFull()
-                ->alignment(Alignment::Right)
             ];
     }
 
@@ -153,17 +126,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->locale(app()->getLocale())->monthName;
-            $invoices = Invoice::where('paid_at', '>=', $dt->startOfMonth()->toDateString())
-                ->where('paid_at', '<=', $dt->endOfMonth()->toDateString())
-                ->get();
-            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
-            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
+            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::MONTH);
+            [, $vatExpended] = Expense::ofTime($dt, TimeUnit::MONTH);
             $netIncome[] = $netEarned;
-            $expenses = Expense::where('expended_at', '>=', $dt->startOfMonth()->toDateString())
-                ->where('expended_at', '<=', $dt->endOfMonth()->toDateString())
-                ->where('taxable', '=', '1')
-                ->get();
-            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subMonthsNoOverflow();
@@ -181,17 +146,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = "$dt->year Q$dt->quarter";
-            $invoices = Invoice::where('paid_at', '>=', $dt->startOfQuarter()->toDateString())
-                ->where('paid_at', '<=', $dt->endOfQuarter()->toDateString())
-                ->get();
-            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
-            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
+            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::QUARTER);
+            [, $vatExpended] = Expense::ofTime($dt, TimeUnit::QUARTER);
             $netIncome[] = $netEarned;
-            $expenses = Expense::where('expended_at', '>=', $dt->startOfQuarter()->toDateString())
-                ->where('expended_at', '<=', $dt->endOfQuarter()->toDateString())
-                ->where('taxable', '=', '1')
-                ->get();
-            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subQuarterNoOverflow();
@@ -209,17 +166,9 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->year;
-            $invoices = Invoice::where('paid_at', '>=', $dt->startOfYear()->toDateString())
-                ->where('paid_at', '<=', $dt->endOfYear()->toDateString())
-                ->get();
-            $netEarned = array_sum($invoices->map(fn (Invoice $i) => $i->net)->toArray());
-            $vatEarned = array_sum($invoices->map(fn (Invoice $i) => $i->vat)->toArray());
+            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
+            [, $vatExpended] = Expense::ofTime($dt, TimeUnit::YEAR);
             $netIncome[] = $netEarned;
-            $expenses = Expense::where('expended_at', '>=', $dt->startOfYear()->toDateString())
-                ->where('expended_at', '<=', $dt->endOfYear()->toDateString())
-                ->where('taxable', '=', '1')
-                ->get();
-            $vatExpended = array_sum($expenses->map(fn (Expense $e) => $e->vat)->toArray());
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subYearNoOverflow();

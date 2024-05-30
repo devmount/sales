@@ -25,6 +25,6 @@
                 </x-filament::input.wrapper>
             </x-slot>
         @endif
-        {{ $this->taxInfolist }}
+        {{ $this->infolist }}
     </x-filament::section>
 </x-filament-widgets::widget>
