@@ -97,11 +97,11 @@ class PositionResource extends Resource
             ->columns([
                 Columns\ColorColumn::make('invoice.project.client.color')
                     ->label('')
-                    ->tooltip(fn (Position $record): string => $record->invoice?->project?->client?->name),
+                    ->tooltip(fn (Position $record): ?string => $record->invoice?->project?->client?->name),
                 Columns\TextColumn::make('description')
                     ->label(__('description'))
                     ->searchable()
-                    ->tooltip(fn (Position $record): string => $record->invoice?->title)
+                    ->tooltip(fn (Position $record): ?string => $record->invoice?->title)
                     ->formatStateUsing(fn (string $state): string => nl2br($state))
                     ->html(),
                 Columns\TextColumn::make('amount')
