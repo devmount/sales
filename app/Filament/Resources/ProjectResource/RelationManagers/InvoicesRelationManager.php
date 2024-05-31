@@ -30,7 +30,7 @@ class InvoicesRelationManager extends RelationManager
                         ($record->invoiced_at ? __('invoicedAt') . ' ' . Carbon::parse($record->invoiced_at)->isoFormat('LL') : '') .
                         ($record->paid_at ? ', ' . __('paidAt') . ' ' . Carbon::parse($record->paid_at)->isoFormat('LL') : '')
                     )
-                    ->tooltip(fn (Invoice $record): string => $record->description),
+                    ->tooltip(fn (Invoice $record): ?string => $record->description),
                 Columns\TextColumn::make('price')
                     ->label(__('price'))
                     ->money('eur')

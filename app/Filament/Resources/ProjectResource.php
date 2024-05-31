@@ -105,7 +105,7 @@ class ProjectResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->description(fn (Project $record): string => $record->client?->name)
-                    ->tooltip(fn (Project $record): string|null => $record->description),
+                    ->tooltip(fn (Project $record): ?string => $record->description),
                 Columns\TextColumn::make('date_range')
                     ->label(__('dateRange'))
                     ->state(fn (Project $record): string => Carbon::parse($record->start_at)

@@ -59,7 +59,7 @@ class EstimateResource extends Resource
             ->columns([
                 Columns\ColorColumn::make('project.client.color')
                     ->label('')
-                    ->tooltip(fn (Estimate $record): string => $record->project?->client?->name),
+                    ->tooltip(fn (Estimate $record): ?string => $record->project?->client?->name),
                 Columns\TextColumn::make('title')
                     ->label(__('title'))
                     ->searchable()

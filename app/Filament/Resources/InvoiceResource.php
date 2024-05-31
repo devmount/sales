@@ -157,7 +157,7 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->description(fn (Invoice $record): string => $record->project?->client?->name)
-                    ->tooltip(fn (Invoice $record): string => $record->description),
+                    ->tooltip(fn (Invoice $record): ?string => $record->description),
                 Columns\TextColumn::make('price')
                     ->label(__('price'))
                     ->money('eur')
