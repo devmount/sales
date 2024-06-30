@@ -28,7 +28,7 @@ class MonthlyIncomeChart extends ChartWidget
             ->oldest('paid_at')
             ->get();
         $taxes = Expense::whereNotNull('expended_at')
-            ->where('taxable', 0)
+            ->whereIn('category', ['vat', 'tax'])
             ->oldest('expended_at')
             ->get();
         $period = Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear());
@@ -49,12 +49,12 @@ class MonthlyIncomeChart extends ChartWidget
             foreach ($taxes as $obj) {
                 if (
                     CarbonPeriod::create($date, $period[$i+1])->contains(Carbon::parse($obj->expended_at)->subYear()) &&
-                    $this->filter === 'net' &&
-                    $obj->category === ExpenseCategory::Tax
+                    $this->filter === 'net'
                 ) {
                     $invoiceData[$i] -= $obj->net;
                 }
             }
+            $invoiceData[$i] = round($invoiceData[$i]/($i == count($period)-2 ? now()->month : 12), 2);
         }
 
         return [
@@ -64,7 +64,7 @@ class MonthlyIncomeChart extends ChartWidget
                         'net' => __('netIncome'),
                         'gross' => __('grossIncome'),
                     },
-                    'data' => array_map(fn ($i) => round($i/12, 2), $invoiceData),
+                    'data' => $invoiceData,
                     'fill' => 'start',
                     'backgroundColor' => '#3b82f622',
                     'borderColor' => '#3b82f6',
