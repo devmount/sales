@@ -7,6 +7,7 @@ use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ use Filament\Support\Assets\Css;
 use Filament\Tables\Actions\Action;
 use Filament\Support\Enums\IconSize;
 use Illuminate\Support\Number;
+use Illuminate\Support\HtmlString;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -58,6 +60,16 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Css::make('app-styles', asset('css/app.css')),
         ]);
+
+        // Extend table headers
+        TextColumn::macro('abbr', function (?string $abbr = null, bool $asTooltip = false) {
+            /** @var TextColumn $this */
+            $label = $this->getLabel();
+            $abbr = $abbr ?? $label;
+            $classes = $this->isSortable() ? 'cursor-pointer' : 'cursor-help';
+            $attributes = $asTooltip ? "x-tooltip.raw=\"$abbr\" title=\"\"" : "title=\"$abbr\"";
+            return $this->label(new HtmlString("<abbr class=\"$classes\" $attributes>$label</abbr>"));
+        });
 
         // Customize Filament colors
         FilamentColor::register([
