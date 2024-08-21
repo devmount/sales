@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ExpenseCategory;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
@@ -33,11 +34,11 @@ class SalesChart extends ChartWidget
             ->oldest('paid_at')
             ->get();
         $expenses = Expense::whereNotNull('expended_at')
-            ->where('taxable', 1)
+            ->whereIn('category', ExpenseCategory::deliverableCategories())
             ->oldest('expended_at')
             ->get();
         $taxes = Expense::whereNotNull('expended_at')
-            ->where('taxable', 0)
+            ->whereIn('category', ExpenseCategory::taxCategories())
             ->oldest('expended_at')
             ->get();
         $period = match($this->filter) {
