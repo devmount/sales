@@ -1,3 +1,6 @@
 .data-list.fi-fo-component-ctn {
     gap: 0;
 }
+abbr {
+    cursor: help;
+}

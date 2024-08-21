@@ -94,6 +94,7 @@ class ClientResource extends Resource
                     ->description(fn (Client $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
                 Columns\TextColumn::make('days_to_pay')
                     ->label(__('payment'))
+                    ->abbr(__('averagePaymentDuration'), asTooltip: true)
                     ->numeric(1)
                     ->state(fn (Client $record): float => $record->avg_payment_delay)
                     ->description(trans_choice('day', 2)),

@@ -16,7 +16,12 @@ class WeeklyHoursChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('averageWeeklyHours');
+        return __('weeklyHours');
+    }
+
+    public function getDescription(): string
+    {
+        return __('averageWorkingHours');
     }
 
     protected function getData(): array

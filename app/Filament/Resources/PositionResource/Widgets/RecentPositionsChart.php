@@ -16,7 +16,12 @@ class RecentPositionsChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('productiveHours');
+        return __('productiveHoursPerProject');
+    }
+
+    public function getDescription(): string
+    {
+        return __('sumWorkingHoursPerDay');
     }
 
     protected function getData(): array

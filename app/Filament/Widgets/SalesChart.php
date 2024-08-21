@@ -21,6 +21,11 @@ class SalesChart extends ChartWidget
         return __('incomeAndExpenses');
     }
 
+    public function getDescription(): string
+    {
+        return __('netIncomeExpensesAndTaxes');
+    }
+
     protected function getData(): array
     {
         $invoices = Invoice::whereNotNull('paid_at')
