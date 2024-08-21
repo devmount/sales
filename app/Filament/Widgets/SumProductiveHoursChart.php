@@ -20,6 +20,11 @@ class SumProductiveHoursChart extends ChartWidget
         return __('productiveHours');
     }
 
+    public function getDescription(): string
+    {
+        return __('sumWorkingHoursPerYear');
+    }
+
     protected function getData(): array
     {
         $positions = Position::oldest('started_at')->get();

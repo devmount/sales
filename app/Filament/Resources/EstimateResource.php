@@ -36,7 +36,7 @@ class EstimateResource extends Resource
                     ->columnSpanFull()
                     ->maxLength(65535),
                 Components\TextInput::make('amount')
-                    ->label(trans_choice('estimate', 1))
+                    ->label(__('estimatedHours'))
                     ->numeric()
                     ->step(0.1)
                     ->minValue(0.1)

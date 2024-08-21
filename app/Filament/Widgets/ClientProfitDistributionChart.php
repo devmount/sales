@@ -20,6 +20,11 @@ class ClientProfitDistributionChart extends ChartWidget
         return __('clientsProfitDistribution');
     }
 
+    public function getDescription(): string
+    {
+        return __('sumNetPerYear');
+    }
+
     protected function getData(): array
     {
         $year = $this->filter ? (int) $this->filter : now()->year;

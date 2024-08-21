@@ -21,6 +21,11 @@ class MonthlyIncomeChart extends ChartWidget
         return __('monthlyIncome');
     }
 
+    public function getDescription(): string
+    {
+        return __('averageValuesPerYear');
+    }
+
     protected function getData(): array
     {
         $invoices = Invoice::whereNotNull('paid_at')

@@ -15,7 +15,12 @@ class HourlyRateChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('averageHourlyRate');
+        return __('hourlyRate');
+    }
+
+    public function getDescription(): string
+    {
+        return __('averageValuesPerYear');
     }
 
     protected function getData(): array
