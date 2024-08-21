@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `${invoice.number}_${label.invoice}_${config.company}.pdf`.toLowerCase(),
         { returnPromise: true }
     ).then(() => {
-        setTimeout(() => { window.close() }, 100);
+        setTimeout(() => { window.close() }, 500);
     });
 });
 </script>
