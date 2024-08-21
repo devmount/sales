@@ -168,8 +168,8 @@ valid.setDate(valid.getDate() + 21); // 3 weeks offer validity
 const quote = {
     title:       '{{ $this->record->title }}',
     description: '{{ str_replace("\n", "\\n", $this->record->description) }}',
-    start:       new Date('{{ $this->record->start_at }}'),
-    due:         {!! $this->record->due_at ? "hdate(new Date({$this->record->due_at}))" : "'∞'"!!},
+    start:       hdate(new Date('{{ $this->record->start_at }}'), lang),
+    due:         {!! $this->record->due_at ? "hdate(new Date('{$this->record->due_at}'), lang)" : "'∞'"!!},
     hours:       nDigit(billedPerProject ? {{ $this->record->scope ?? '0' }} : {{ $this->record->estimated_hours }}, 1, lang),
     price:       billedPerProject ? {{ $this->record->scope ? $this->record->price/$this->record->scope : '0' }} : {{ $this->record->price }},
     net:         euro({{ $this->record->estimated_net }}, lang),
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     doc.setTextColor(colors.dark).setFontSize(10)
         .setFont('FiraSansRegular').text(label.servicePeriod, 10, 228)
         .setFont('FiraSansExtraLight').text(
-            markerReplace(label.servicePeriodText, [hdate(quote.start), quote.due]), 10, 235, { maxWidth: 160 }
+            markerReplace(label.servicePeriodText, [quote.start, quote.due]), 10, 235, { maxWidth: 160 }
         )
         // .setFontSize(10).text([label.regards, config.name], 10, 244);
     // footer
@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `${isodate(today)}_${label.quote}_${config.company}.pdf`.toLowerCase(),
         { returnPromise: true }
     ).then(() => {
-        setTimeout(() => { window.close() }, 100);
+        setTimeout(() => { window.close() }, 500);
     });
 });
 </script>
