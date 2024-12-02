@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\LanguageCode;
 use App\Filament\Resources\ClientResource\Pages;
+use App\Filament\Resources\ClientResource\RelationManagers;
 use App\Mail\ContactClient;
 use App\Models\Client;
 use App\Models\Setting;
@@ -155,7 +156,7 @@ class ClientResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ProjectsRelationManager::class,
         ];
     }
 
