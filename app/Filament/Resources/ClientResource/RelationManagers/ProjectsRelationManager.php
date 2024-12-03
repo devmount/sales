@@ -3,8 +3,6 @@
 namespace App\Filament\Resources\ClientResource\RelationManagers;
 
 use App\Models\Project;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions;
 use Filament\Tables\Table;
@@ -16,16 +14,6 @@ class ProjectsRelationManager extends RelationManager
 {
     protected static string $relationship = 'projects';
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255),
-            ]);
-    }
-
     public function table(Table $table): Table
     {
         return $table
@@ -35,24 +23,21 @@ class ProjectsRelationManager extends RelationManager
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Project $record): string => $record->client?->name)
                     ->tooltip(fn (Project $record): ?string => $record->description),
                 Columns\TextColumn::make('date_range')
                     ->label(__('dateRange'))
                     ->state(fn (Project $record): string => Carbon::parse($record->start_at)
-                        ->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
-                    )
-                    ->description(fn (Project $record): string => Carbon::parse($record->start_at)
                         ->isoFormat('ll') . ' - ' . ($record->due_at ? Carbon::parse($record->due_at)->isoFormat('ll') : '∞')
                     ),
                 Columns\TextColumn::make('scope')
                     ->label(__('scope'))
-                    ->state(fn (Project $record): string => $record->scope_range)
-                    ->description(fn (Project $record): string => $record->price_per_unit),
+                    ->state(fn (Project $record): string => $record->scope_range),
+                Columns\TextColumn::make('price_per_unit')
+                    ->label(__('price_per_unit'))
+                    ->state(fn (Project $record): string => $record->price_per_unit),
                 Columns\TextColumn::make('progress')
                     ->label(__('progress'))
-                    ->state(fn (Project $record): string => $record->hours_with_label)
-                    ->description(fn (Project $record): string => $record->progress_percent),
+                    ->state(fn (Project $record): string => $record->hours_with_label),
                 Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
@@ -64,6 +49,7 @@ class ProjectsRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('start_at', 'desc')
             ->filters([
                 //
             ])
@@ -79,14 +65,8 @@ class ProjectsRelationManager extends RelationManager
                     ->label('')
                     ->url(fn (Project $obj): string => "/projects/$obj->id/edit/"),
                 Actions\ReplicateAction::make()->icon('tabler-copy')->label(''),
-                Actions\DeleteAction::make()->icon('tabler-trash')->label(''),
             ])
-            ->bulkActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
-                ])
-                ->icon('tabler-dots-vertical'),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
