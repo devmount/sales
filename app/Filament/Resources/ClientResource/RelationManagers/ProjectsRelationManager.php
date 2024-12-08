@@ -60,11 +60,11 @@ class ProjectsRelationManager extends RelationManager
                     ->url(fn (): string => '/projects/create'),
             ])
             ->actions([
-                Actions\Action::make('edit')
-                    ->icon('tabler-edit')
-                    ->label('')
-                    ->url(fn (Project $obj): string => "/projects/$obj->id/edit/"),
-                Actions\ReplicateAction::make()->icon('tabler-copy')->label(''),
+                Actions\ActionGroup::make([
+                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\ReplicateAction::make()->icon('tabler-copy'),
+                ])
+                ->icon('tabler-dots-vertical')
             ])
             ->bulkActions([]);
     }

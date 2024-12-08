@@ -6,6 +6,7 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Invoice;
+use App\Models\Project;
 use Carbon\Carbon;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
@@ -15,6 +16,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
+use Filament\Tables\Filters;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
 
@@ -194,7 +196,9 @@ class InvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filters\SelectFilter::make('project')
+                    ->label(trans_choice('project', 1))
+                    ->relationship('project', 'title'),
             ])
             ->actions(
                 Actions\ActionGroup::make([

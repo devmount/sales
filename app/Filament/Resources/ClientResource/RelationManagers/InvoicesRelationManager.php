@@ -59,12 +59,11 @@ class InvoicesRelationManager extends RelationManager
                     ->url(fn (): string => '/invoices/create'),
             ])
             ->actions([
-                Actions\Action::make('edit')
-                    ->icon('tabler-edit')
-                    ->label('')
-                    ->url(fn (Invoice $obj): string => "/invoices/$obj->id/edit/"),
-                Actions\ReplicateAction::make()->icon('tabler-copy')->label(''),
-                Actions\DeleteAction::make()->icon('tabler-trash')->label(''),
+                Actions\ActionGroup::make([
+                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\ReplicateAction::make()->icon('tabler-copy'),
+                ])
+                ->icon('tabler-dots-vertical')
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([

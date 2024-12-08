@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
+use Filament\Tables\Filters;
 use Carbon\Carbon;
 
 class ProjectResource extends Resource
@@ -134,7 +135,9 @@ class ProjectResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filters\SelectFilter::make('client')
+                    ->label(trans_choice('client', 1))
+                    ->relationship('client', 'name'),
             ])
             ->actions(
                 Actions\ActionGroup::make([
