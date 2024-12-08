@@ -8,7 +8,7 @@
     >
         {{ $brand }}
         <span class="text-gray-400 text-sm font-normal">
-            &nbsp;{{ config('app.version') }}
+            &nbsp;v{{ config('app.version') }}
         </span>
     </div>
 @endif

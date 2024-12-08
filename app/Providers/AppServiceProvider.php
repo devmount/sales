@@ -2,22 +2,24 @@
 
 namespace App\Providers;
 
+use Filament\Forms\Components\Select;
+use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\IconSize;
+use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
-use Filament\Support\Facades\FilamentAsset;
-use Filament\Forms\Components\Select;
+use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\ServiceProvider;
-use Filament\Support\Assets\Js;
-use Filament\Support\Assets\Css;
-use Filament\Tables\Actions\Action;
-use Filament\Support\Enums\IconSize;
-use Illuminate\Support\Number;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Number;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -78,6 +80,12 @@ class AppServiceProvider extends ServiceProvider
             'purple' => Color::Purple,
             'rose' => Color::Rose,
         ]);
+
+        // Insert custom content
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_FOOTER,
+            fn (): string => '', // TODO: Profile or Logout Link
+        );
 
         // Customize Filament icons
         FilamentIcon::register([

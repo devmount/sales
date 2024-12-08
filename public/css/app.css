@@ -4,3 +4,6 @@
 abbr {
     cursor: help;
 }
+.fi-sidebar-header {
+    background-color: transparent !important;
+}
