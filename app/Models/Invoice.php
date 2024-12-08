@@ -26,7 +26,7 @@ class Invoice extends Model
     ];
 
     /**
-     * Get the client that ordered the project.
+     * Get the project this invoice is assigned to.
      */
     public function project(): BelongsTo
     {
@@ -34,7 +34,7 @@ class Invoice extends Model
     }
 
     /**
-     * The positions of this project.
+     * The positions of this invoice.
      */
     public function positions(): HasMany
     {
