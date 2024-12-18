@@ -45,23 +45,36 @@ class ClientResource extends Resource
                             ->label(__('color'))
                             ->columnSpan(3)
                             ->suffixIcon('tabler-palette'),
-                        Components\Textarea::make('address')
+                        Components\TextInput::make('address')
                             ->label(__('address'))
-                            ->columnSpan(6)
-                            ->rows(4)
-                            ->autosize()
-                            ->required(),
+                            ->columnSpan(6),
                         Components\Select::make('language')
                             ->label(__('language'))
                             ->columnSpan(6)
                             ->suffixIcon('tabler-language')
                             ->options(LanguageCode::class)
                             ->required(),
+                        Components\TextInput::make('street')
+                            ->label(__('street'))
+                            ->columnSpan(6),
+                        Components\TextInput::make('vat_id')
+                            ->label(__('vatId'))
+                            ->suffixIcon('tabler-tax-euro')
+                            ->columnSpan(6),
+                        Components\TextInput::make('zip')
+                            ->label(__('zip'))
+                            ->columnSpan(3),
+                        Components\TextInput::make('city')
+                            ->label(__('city'))
+                            ->columnSpan(3),
                         Components\TextInput::make('email')
                             ->label(__('email'))
                             ->columnSpan(6)
                             ->suffixIcon('tabler-mail')
                             ->email(),
+                        Components\TextInput::make('country')
+                            ->label(__('country'))
+                            ->columnSpan(6),
                         Components\TextInput::make('phone')
                             ->label(__('phone'))
                             ->columnSpan(6)
@@ -81,7 +94,7 @@ class ClientResource extends Resource
                     ->label(__('name'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Client $record): string => $record->address)
+                    ->description(fn (Client $record): string => $record->full_address)
                     ->wrap(),
                 Columns\TextColumn::make('language')
                     ->label(__('language'))

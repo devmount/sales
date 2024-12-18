@@ -20,6 +20,7 @@ A service sales manager especially for freelancers. Built in German, available i
 Prerequisites:
 
 - PHP 8.2 or later
+- PHP extensions: mbstring, zip, xml, curl, dom, intl, mysql
 - Composer 2.5 or later
 
 ```bash
@@ -47,7 +48,7 @@ php artisan db:anonymize
 To start a local development server, run:
 
 ```bash
-php artisan serve # start dev webserver
+php artisan serve
 ```
 
 Now you can log in on <http://localhost:8000> with the initial admin user credentials (email: `admin@example.com`, password: `Joh.3,16`).

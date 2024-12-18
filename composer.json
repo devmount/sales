@@ -15,7 +15,7 @@
         "laravel/framework": "^11.0.7",
         "laravel/sanctum": "^4.0.0",
         "laravel/tinker": "^2.8",
-        "ryangjchandler/blade-tabler-icons": "^2.1"
+        "secondnetwork/blade-tabler-icons": "^3.21.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
