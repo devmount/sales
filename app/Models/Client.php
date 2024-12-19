@@ -33,8 +33,8 @@ class Client extends Model
      */
     public function getFullAddressAttribute()
     {
-        $data = array_filter([$this->address, $this->street, trim($this->zip . ' ' . $this->city)]);
-        return implode(', ', $data);
+        $data = $this->address ? "{$this->address}\n" : '';
+        return "$data{$this->street}\n{$this->zip} {$this->city}";
     }
 
     /**
