@@ -114,7 +114,7 @@ const lang = '{{ $lang }}';
 const billedPerProject = {{ $this->record->pricing_unit->value === 'p' ? 'true' : 'false' }};
 const client = {
     name:    decodeHtml('{{ $this->record->client->name }}'),
-    address: decodeHtml('{{ str_replace("\n", "\\n", $this->record->client->address) }}'),
+    address: decodeHtml('{{ str_replace("\n", "\\n", $this->record->client->full_address) }}'),
 };
 const label = {
     amountNet:         '{{ __("amountNet", [], $lang) }}',

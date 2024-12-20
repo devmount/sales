@@ -54,7 +54,10 @@ class AnonymizePersonalData extends Command
             $name = fake()->company();
             $obj->name = $name;
             $obj->short = str($name)->substr(0, 2)->upper();
-            $obj->address = fake()->streetAddress() . "\n" . fake()->postcode() . ' ' . fake()->city();
+            $obj->street = fake()->streetAddress();
+            $obj->zip = fake()->postcode();
+            $obj->city = fake()->city();
+            $obj->country = 'DE';
             $obj->email = fake()->companyEmail();
             $obj->phone = fake()->phoneNumber();
             $obj->save();

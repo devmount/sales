@@ -10,7 +10,7 @@ class Taxes extends BaseDashboard
 {
     protected static string $routePath = 'taxes';
     protected static ?string $title = 'Steuern';
-    protected static ?string $navigationIcon = 'tabler-moneybag';
+    protected static ?string $navigationIcon = 'tabler-tax-euro';
 
     public function getColumns(): int | string | array
     {

@@ -29,6 +29,15 @@ class Client extends Model
     }
 
     /**
+     * All address information of this client as one string
+     */
+    public function getFullAddressAttribute()
+    {
+        $data = $this->address ? "{$this->address}\n" : '';
+        return "$data{$this->street}\n{$this->zip} {$this->city}";
+    }
+
+    /**
      * Number of hours worked for this client
      */
     public function getHoursAttribute()

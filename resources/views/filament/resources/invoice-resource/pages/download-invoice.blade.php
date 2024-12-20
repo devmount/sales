@@ -130,7 +130,7 @@ const config = {
 const lang = '{{ $lang }}';
 const client = {
     name:    decodeHtml('{{ $this->record->project->client->name }}'),
-    address: decodeHtml('{{ str_replace("\n", "\\n", $this->record->project->client->address) }}'),
+    address: decodeHtml('{{ str_replace("\n", "\\n", $this->record->project->client->full_address) }}'),
 };
 const label = {
     amountNet:          '{{ __("amountNet", [], $lang) }}',
