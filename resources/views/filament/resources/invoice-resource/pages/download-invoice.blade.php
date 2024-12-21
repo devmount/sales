@@ -4,6 +4,7 @@
 
 <x-filament-panels::page>
 {{ __('downloadStartsAutomatically' )}}
+{{ $this->xml }}
 
 <script>
 // human readable date, e.g. '2. Januar 2022'
@@ -391,12 +392,12 @@ document.addEventListener('DOMContentLoaded', () => {
         page.current++;
     });
     // serve document
-    doc.save(
-        `${invoice.number}_${label.invoice}_${config.company}.pdf`.toLowerCase(),
-        { returnPromise: true }
-    ).then(() => {
-        setTimeout(() => { window.close() }, 500);
-    });
+    // doc.save(
+    //     `${invoice.number}_${label.invoice}_${config.company}.pdf`.toLowerCase(),
+    //     { returnPromise: true }
+    // ).then(() => {
+    //     setTimeout(() => { window.close() }, 500);
+    // });
 });
 </script>
 </x-filament-panels::page>
