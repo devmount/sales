@@ -4,7 +4,6 @@
 
 <x-filament-panels::page>
 {{ __('downloadStartsAutomatically' )}}
-{{ $this->xml }}
 
 <script>
 // human readable date, e.g. '2. Januar 2022'
