@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Setting;
 use App\Filament\Resources\InvoiceResource;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Storage;
 use XMLWriter;
 use Carbon\Carbon;
 
@@ -17,7 +18,6 @@ class DownloadInvoice extends Page
 
     public $record;
     public $settings;
-    public $xml;
 
     public function mount(Invoice $record)
     {
@@ -27,11 +27,11 @@ class DownloadInvoice extends Page
         $client = $this->record?->project?->client;
         $lang = $client?->language ?? 'de';
         $label = trans_choice("invoice", 1, [], $lang);
-        $filename = "{$record->current_number}_{$label}_{$this->settings['company']}.xml";
+        $filename = strtolower("{$record->current_number}_{$label}_{$this->settings['company']}.xml");
         $currency = 'EUR';
 
         $x = new XMLWriter();
-        $x->openURI($filename);
+        $x->openURI(Storage::path($filename));
         $x->setIndent(true);
         $x->setIndentString('    ');
         $x->startDocument('1.0', 'UTF-8');
@@ -181,5 +181,6 @@ class DownloadInvoice extends Page
         $x->endDocument();
         $x->flush();
         unset($x);
+        Storage::download($filename);
     }
 }
