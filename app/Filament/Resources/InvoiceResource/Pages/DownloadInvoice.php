@@ -35,7 +35,6 @@ class DownloadInvoice extends Page
         $x->setIndent(true);
         $x->setIndentString('    ');
         $x->startDocument('1.0', 'UTF-8');
-            $x->startElement('xml');
             $x->startElement('Invoice');
                 $x->writeAttribute('xmlns:cac', 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2');
                 $x->writeAttribute('xmlns:cbc', 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2');
@@ -50,6 +49,10 @@ class DownloadInvoice extends Page
                 $x->writeElement('cbc:ID', $record->current_number);
                 $x->writeElement('cbc:IssueDate', Carbon::now()->format('Y-m-d'));
                 $x->writeElement('cbc:DueDate', Carbon::now()->addWeeks(2)->format('Y-m-d'));
+                // 380 Rechnung
+                // 381 Gutschrift
+                // 384 Rechnungskorrektur
+                $x->writeElement('cbc:InvoiceTypeCode', 380);
                 $x->writeElement('cbc:DocumentCurrencyCode', $currency);
                 // Contractor (me)
                 $x->startElement('cac:AccountingSupplierParty');
@@ -85,7 +88,7 @@ class DownloadInvoice extends Page
                             $x->writeElement('cbc:CityName', $client?->city);
                             $x->writeElement('cbc:PostalZone', $client?->zip);
                             $x->startElement('cac:Country');
-                                $x->writeElement('cbc:IdentificationCode', $client?->crountry);
+                                $x->writeElement('cbc:IdentificationCode', $client?->country);
                             $x->endElement();
                         $x->endElement();
                         $x->startElement('cac:PartyTaxScheme');
@@ -102,6 +105,13 @@ class DownloadInvoice extends Page
                 $x->endElement();
                 // Payment
                 $x->startElement('cac:PaymentMeans');
+                    // 58 SEPA credit transfer
+                    // 59 SEPA direct debit
+                    // 57 Standing agreement
+                    // 30 Credit transfer (non-SEPA)
+                    // 49 Direct debit (non-SEPA)
+                    // 48 Bank card
+                    $x->writeElement('cbc:PaymentMeansCode', 30);
                     $x->writeElement('cbc:PaymentID', $record->current_number);
                     $x->startElement('cac:PayeeFinancialAccount');
                         $x->writeElement('cbc:ID', $this->settings['iban']);
@@ -139,7 +149,7 @@ class DownloadInvoice extends Page
                     $x->endElement();
                     $x->startElement('cbc:TaxExclusiveAmount');
                         $x->writeAttribute('currencyID', $currency);
-                        $x->text($record->vat);
+                        $x->text($record->net);
                     $x->endElement();
                     $x->startElement('cbc:TaxInclusiveAmount');
                         $x->writeAttribute('currencyID', $currency);
@@ -168,11 +178,19 @@ class DownloadInvoice extends Page
                         $x->endElement();
                         $x->startElement('cac:Item');
                             $x->writeElement('cbc:Description', $position->description);
+                            $x->writeElement('cbc:Name', trans_choice('position', 1));
+                            $x->startElement('cac:ClassifiedTaxCategory');
+                                $x->writeElement('cbc:ID', 'S');
+                                $x->writeElement('cbc:Percent', $record->vat_rate*100);
+                                $x->startElement('cac:TaxScheme');
+                                    $x->writeElement('cbc:ID', 'VAT');
+                                $x->endElement();
+                            $x->endElement();
                         $x->endElement();
                         $x->startElement('cac:Price');
                             $x->startElement('cbc:PriceAmount');
                                 $x->writeAttribute('currencyID', $currency);
-                                $x->text($position->net);
+                                $x->text($record->price);
                             $x->endElement();
                         $x->endElement();
                     $x->endElement();
