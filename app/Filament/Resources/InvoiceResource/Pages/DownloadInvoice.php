@@ -5,6 +5,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
 use App\Models\Setting;
 use App\Filament\Resources\InvoiceResource;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Storage;
 use XMLWriter;
@@ -23,11 +24,29 @@ class DownloadInvoice extends Page
     {
         $this->record = $record;
         $this->settings = Setting::pluck('value', 'field');
+    }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('download')
+                ->icon('tabler-file-type-xml')
+                ->action(function () {
+                    $file = $this->generateEn16931Xml();
+                    $redirect = response()->download(Storage::path($file));
+                    // Storage::delete($file); // TODO
+                    return $redirect;
+                }),
+        ];
+    }
+
+    private function generateEn16931Xml()
+    {
         $client = $this->record?->project?->client;
         $lang = $client?->language ?? 'de';
         $label = trans_choice("invoice", 1, [], $lang);
-        $filename = strtolower("{$record->current_number}_{$label}_{$this->settings['company']}.xml");
+        $filename = strtolower("{$this->record->current_number}_{$label}_{$this->settings['company']}.xml");
+
         $currency = 'EUR';
 
         $x = new XMLWriter();
@@ -46,7 +65,7 @@ class DownloadInvoice extends Page
                 $x->writeAttribute('xsi:schemaLocation', 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd');
                 // Meta
                 $x->writeElement('cbc:CustomizationID', 'urn:cen.eu:en16931:2017');
-                $x->writeElement('cbc:ID', $record->current_number);
+                $x->writeElement('cbc:ID', $this->record->current_number);
                 $x->writeElement('cbc:IssueDate', Carbon::now()->format('Y-m-d'));
                 $x->writeElement('cbc:DueDate', Carbon::now()->addWeeks(2)->format('Y-m-d'));
                 // 380 Rechnung
@@ -112,7 +131,7 @@ class DownloadInvoice extends Page
                     // 49 Direct debit (non-SEPA)
                     // 48 Bank card
                     $x->writeElement('cbc:PaymentMeansCode', 30);
-                    $x->writeElement('cbc:PaymentID', $record->current_number);
+                    $x->writeElement('cbc:PaymentID', $this->record->current_number);
                     $x->startElement('cac:PayeeFinancialAccount');
                         $x->writeElement('cbc:ID', $this->settings['iban']);
                     $x->endElement();
@@ -121,20 +140,20 @@ class DownloadInvoice extends Page
                 $x->startElement('cac:TaxTotal');
                     $x->startElement('cbc:TaxAmount');
                         $x->writeAttribute('currencyID', $currency);
-                        $x->text($record->vat);
+                        $x->text($this->record->vat);
                     $x->endElement();
                     $x->startElement('cac:TaxSubtotal');
                         $x->startElement('cbc:TaxableAmount');
                             $x->writeAttribute('currencyID', $currency);
-                            $x->text($record->net);
+                            $x->text($this->record->net);
                         $x->endElement();
                         $x->startElement('cbc:TaxAmount');
                             $x->writeAttribute('currencyID', $currency);
-                            $x->text($record->vat);
+                            $x->text($this->record->vat);
                         $x->endElement();
                         $x->startElement('cac:TaxCategory');
                             $x->writeElement('cbc:ID', 'S');
-                            $x->writeElement('cbc:Percent', $record->vat_rate*100);
+                            $x->writeElement('cbc:Percent', $this->record->vat_rate*100);
                             $x->startElement('cac:TaxScheme');
                                 $x->writeElement('cbc:ID', 'VAT');
                             $x->endElement();
@@ -145,15 +164,15 @@ class DownloadInvoice extends Page
                 $x->startElement('cac:LegalMonetaryTotal');
                     $x->startElement('cbc:LineExtensionAmount');
                         $x->writeAttribute('currencyID', $currency);
-                        $x->text($record->net);
+                        $x->text($this->record->net);
                     $x->endElement();
                     $x->startElement('cbc:TaxExclusiveAmount');
                         $x->writeAttribute('currencyID', $currency);
-                        $x->text($record->net);
+                        $x->text($this->record->net);
                     $x->endElement();
                     $x->startElement('cbc:TaxInclusiveAmount');
                         $x->writeAttribute('currencyID', $currency);
-                        $x->text($record->gross);
+                        $x->text($this->record->gross);
                     $x->endElement();
                     $x->startElement('cbc:ChargeTotalAmount');
                         $x->writeAttribute('currencyID', $currency);
@@ -161,11 +180,11 @@ class DownloadInvoice extends Page
                     $x->endElement();
                     $x->startElement('cbc:PayableAmount');
                         $x->writeAttribute('currencyID', $currency);
-                        $x->text($record->gross);
+                        $x->text($this->record->gross);
                     $x->endElement();
                 $x->endElement();
                 // Positions
-                foreach($record->positions as $key => $position){
+                foreach($this->record->positions as $key => $position){
                     $x->startElement('cac:InvoiceLine');
                         $x->writeElement('cbc:ID', $key+1);
                         $x->startElement('cbc:InvoicedQuantity');
@@ -181,7 +200,7 @@ class DownloadInvoice extends Page
                             $x->writeElement('cbc:Name', trans_choice('position', 1));
                             $x->startElement('cac:ClassifiedTaxCategory');
                                 $x->writeElement('cbc:ID', 'S');
-                                $x->writeElement('cbc:Percent', $record->vat_rate*100);
+                                $x->writeElement('cbc:Percent', $this->record->vat_rate*100);
                                 $x->startElement('cac:TaxScheme');
                                     $x->writeElement('cbc:ID', 'VAT');
                                 $x->endElement();
@@ -190,7 +209,7 @@ class DownloadInvoice extends Page
                         $x->startElement('cac:Price');
                             $x->startElement('cbc:PriceAmount');
                                 $x->writeAttribute('currencyID', $currency);
-                                $x->text($record->price);
+                                $x->text($this->record->price);
                             $x->endElement();
                         $x->endElement();
                     $x->endElement();
@@ -199,6 +218,6 @@ class DownloadInvoice extends Page
         $x->endDocument();
         $x->flush();
         unset($x);
-        Storage::download($filename);
+        return $filename;
     }
 }

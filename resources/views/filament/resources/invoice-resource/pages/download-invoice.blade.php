@@ -3,7 +3,8 @@
 @endphp
 
 <x-filament-panels::page>
-{{ __('downloadStartsAutomatically' )}}
+{{-- {{ __('downloadStartsAutomatically' )}} --}}
+<iframe id="preview" class="w-full"></iframe>
 
 <script>
 // human readable date, e.g. '2. Januar 2022'
@@ -391,12 +392,10 @@ document.addEventListener('DOMContentLoaded', () => {
         page.current++;
     });
     // serve document
-    // doc.save(
-    //     `${invoice.number}_${label.invoice}_${config.company}.pdf`.toLowerCase(),
-    //     { returnPromise: true }
-    // ).then(() => {
-    //     setTimeout(() => { window.close() }, 500);
-    // });
+    let blob = doc.output('blob');
+    let blob_url = URL.createObjectURL(blob);
+    let iframeElementContainer = document.getElementById('preview');
+    iframeElementContainer.src=blob_url;
 });
 </script>
 </x-filament-panels::page>
