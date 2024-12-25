@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fb8b2fd1309c18b59d7e872ed2b1d742",
+    "content-hash": "ea5b0a231d4bfa841ea619bdc588c3f9",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -983,6 +983,95 @@
                 }
             ],
             "time": "2023-10-06T06:47:41+00:00"
+        },
+        {
+            "name": "elao/enum",
+            "version": "v2.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Elao/PhpEnums.git",
+                "reference": "25382e9a114872148f34f549d028378bc357ffac"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Elao/PhpEnums/zipball/25382e9a114872148f34f549d028378bc357ffac",
+                "reference": "25382e9a114872148f34f549d028378bc357ffac",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "conflict": {
+                "doctrine/dbal": ">=4.0,<4.2"
+            },
+            "require-dev": {
+                "composer/semver": "^3.2",
+                "doctrine/dbal": "^3.8|^4.2",
+                "doctrine/doctrine-bundle": "^2.11",
+                "doctrine/orm": "^2.20|^3.0",
+                "ext-pdo_sqlite": "*",
+                "phpstan/phpstan": "^1.10",
+                "phpstan/phpstan-symfony": "^1.2",
+                "symfony/browser-kit": "^5.4.40|^6.4|^7.0",
+                "symfony/config": "^5.4.40|^6.4|^7.0",
+                "symfony/dependency-injection": "^5.4.40|^6.4|^7.0",
+                "symfony/filesystem": "^5.4.40|^6.4|^7.0",
+                "symfony/form": "^5.4.40|^6.4|^7.0",
+                "symfony/framework-bundle": "^5.4.40|^6.4|^7.0",
+                "symfony/http-kernel": "^5.4.40|^6.4|^7.0",
+                "symfony/phpunit-bridge": "^5.4.40|^6.4|^7.0",
+                "symfony/translation": "^5.4.40|^6.4|^7.0",
+                "symfony/var-dumper": "^5.4.40|^6.4|^7.0",
+                "symfony/var-exporter": "^5.4.40|^6.4|^7.0",
+                "symfony/yaml": "^5.4.40|^6.4|^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-2.x": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Bridge/Symfony/VarDumper/Resources/register_caster.php"
+                ],
+                "psr-4": {
+                    "Elao\\Enum\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Elao",
+                    "homepage": "https://www.elao.com"
+                },
+                {
+                    "name": "Maxime Steinhausser",
+                    "email": "maxime.steinhausser@gmail.com",
+                    "homepage": "https://github.com/ogizanagi"
+                }
+            ],
+            "description": "Extended PHP enums capabilities and frameworks integrations",
+            "homepage": "https://github.com/Elao/PhpEnums",
+            "keywords": [
+                "doctrine",
+                "enum",
+                "symfony"
+            ],
+            "support": {
+                "issues": "https://github.com/Elao/PhpEnums/issues",
+                "source": "https://github.com/Elao/PhpEnums/tree/v2.5.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/ogizanagi",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-10-16T19:13:47+00:00"
         },
         {
             "name": "filament/actions",
@@ -2561,6 +2650,69 @@
                 "source": "https://github.com/laravel/tinker/tree/v2.10.0"
             },
             "time": "2024-09-23T13:32:56+00:00"
+        },
+        {
+            "name": "laurentmuller/fpdf2",
+            "version": "2.0.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laurentmuller/fpdf2.git",
+                "reference": "b5b4ba03f9cb8154084a1a145bda45ee271f2d3d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laurentmuller/fpdf2/zipball/b5b4ba03f9cb8154084a1a145bda45ee271f2d3d",
+                "reference": "b5b4ba03f9cb8154084a1a145bda45ee271f2d3d",
+                "shasum": ""
+            },
+            "require": {
+                "elao/enum": "^2.0",
+                "ext-gd": "*",
+                "ext-iconv": "*",
+                "ext-intl": "*",
+                "ext-zlib": "*",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.0",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": false,
+                    "forward-command": true,
+                    "target-directory": "vendor-bin"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "fpdf\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Laurent Muller",
+                    "email": "bibi@bibi.nu",
+                    "homepage": "https://www.bibi.nu",
+                    "role": "Developer"
+                }
+            ],
+            "description": "FPDF 2 is a PHP class which allows to generate PDF files with pure PHP. F from FPDF stands for Free: you may use it for any kind of usage and modify it to suit your needs.",
+            "homepage": "https://github.com/laurentmuller/fpdf2",
+            "keywords": [
+                "fpdf",
+                "pdf"
+            ],
+            "support": {
+                "issues": "https://github.com/laurentmuller/fpdf2/issues",
+                "source": "https://github.com/laurentmuller/fpdf2"
+            },
+            "time": "2024-11-25T08:08:19+00:00"
         },
         {
             "name": "league/commonmark",

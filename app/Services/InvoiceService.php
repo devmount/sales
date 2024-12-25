@@ -7,6 +7,10 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
 use XMLWriter;
 use Carbon\Carbon;
+use fpdf\Enums\PdfFontName;
+use fpdf\Enums\PdfFontStyle;
+use fpdf\PdfDocument;
+use fpdf\Enums\PdfDestination;
 
 class InvoiceService
 {
@@ -17,8 +21,21 @@ class InvoiceService
      * @return string
      */
     public static function generatePdf(Invoice $invoice): string {
-        // TODO: implement with FPDF
-        return '';
+        $settings = Setting::pluck('value', 'field');
+        $client = $invoice?->project?->client;
+        $lang = $client?->language ?? 'de';
+        $label = trans_choice("invoice", 1, [], $lang);
+        $filename = strtolower("{$invoice->current_number}_{$label}_{$settings['company']}.pdf");
+
+        $pdf = new PdfDocument();
+        $pdf->addPage();
+        $pdf->addFont('FiraSans-Regular', dir: __DIR__ . '/fonts');
+        $pdf->addFont('FiraSans-ExtraLight', dir: __DIR__ . '/fonts');
+        $pdf->addFont('FiraSans-ExtraBold', dir: __DIR__ . '/fonts');
+        $pdf->setFont('FiraSans-Regular', fontSizeInPoint: 16);
+        $pdf->cell(40, 10, 'Hello World!');
+        $pdf->output(PdfDestination::FILE, Storage::path($filename));
+        return $filename;
     }
 
     /**

@@ -207,19 +207,26 @@ class InvoiceResource extends Resource
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->excludeAttributes(['invoiced_at', 'paid_at']),
+                    // TODO
                     Actions\Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
                         ->url(fn (Invoice $record): string => static::getUrl('download', ['record' => $record]))
                         ->openUrlInNewTab(),
+                    Actions\Action::make('newpdf')
+                        // ->label(__('downloadFiletype', ['type' => 'pdf']))
+                        ->label('New PDF')
+                        ->icon('tabler-file-type-pdf')
+                        ->action(function (Invoice $record) {
+                            $file = InvoiceService::generatePdf($record);
+                            return response()->download(Storage::path($file));
+                        }),
                     Actions\Action::make('xml')
                         ->label(__('downloadFiletype', ['type' => 'xml']))
                         ->icon('tabler-file-type-xml')
                         ->action(function (Invoice $record) {
                             $file = InvoiceService::generateEn16931Xml($record);
-                            $redirect = response()->download(Storage::path($file));
-                            // Storage::delete($file); // TODO
-                            return $redirect;
+                            return response()->download(Storage::path($file));
                         }),
                     Actions\Action::make('send')
                         ->label(__('send'))
