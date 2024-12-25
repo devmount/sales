@@ -40,6 +40,7 @@
     "disclaimerText": "The Contractor shall only be liable for damages to the Client if they are based on grossly negligent or intentional behaviour or on the breach of a material contractual obligation. In the event of a slightly negligent breach of a material contractual obligation, the amount of liability shall be limited to the foreseeable, typically occurring damage at the start of the contract. Liability for loss of profit, third-party claims, lost savings, data acquisition and processing costs is excluded. Claims for injury to life, limb or health or under the Product Liability Act remain unaffected by the above limitations of liability.",
     "discount": "Discount",
     "download": "Download",
+    "downloadFiletype": "Download :TYPE",
     "downloadStartsAutomatically": "Download starts automatically...",
     "dueAt": "Due at",
     "earliest": "Earliest",

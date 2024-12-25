@@ -23,7 +23,8 @@ class SettingResource extends Resource
             ->columns([
                 Columns\TextColumn::make('field')
                     ->label(__('field'))
-                    ->state(fn (Setting $record): string => $record->label),
+                    ->state(fn (Setting $record): string => "{$record->label} (<code>{$record->field}</code>)")
+                    ->html(),
                 Columns\TextColumn::make('value')
                     ->label(__('value'))
                     ->limit(),
