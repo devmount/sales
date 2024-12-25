@@ -3,8 +3,7 @@
 @endphp
 
 <x-filament-panels::page>
-{{-- {{ __('downloadStartsAutomatically' )}} --}}
-<iframe id="preview" class="w-full"></iframe>
+{{ __('downloadStartsAutomatically' )}}
 
 <script>
 // human readable date, e.g. '2. Januar 2022'

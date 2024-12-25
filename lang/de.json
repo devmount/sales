@@ -40,6 +40,7 @@
     "disclaimerText": "Der Auftragnehmer haftet nur für Schäden des Auftraggebers, wenn sie auf grob fahrlässigem oder vorsätzlichem Verhalten oder auf der Verletzung einer wesentlichen Vertragspflicht beruhen. Im Falle der leicht fahrlässigen Verletzung einer wesentlichen Vertragspflicht ist die Haftung der Höhe nach auf den bei Vertragsbeginn vorhersehbaren, typischerweise eintretenden Schaden begrenzt. Eine Haftung für entgangenen Gewinn, Ansprüche Dritter, ausgebliebene Einsparungen, Datenerfassungs- und Verarbeitungsaufwand ist ausgeschlossen. Ansprüche wegen der Verletzung von Leben, Körper oder Gesundheit oder nach dem Produkthaftungsgesetz bleiben von den vorstehenden Haftungsbeschränkungen unberührt.",
     "discount": "Rabatt",
     "download": "Download",
+    "downloadFiletype": ":TYPE Download",
     "downloadStartsAutomatically": "Der Download startet automatisch...",
     "dueAt": "Fällig",
     "earliest": "Früheste",

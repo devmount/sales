@@ -6,7 +6,7 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Invoice;
-use App\Models\Project;
+use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
@@ -19,6 +19,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
+use Illuminate\Support\Facades\Storage;
 
 class InvoiceResource extends Resource
 {
@@ -206,11 +207,20 @@ class InvoiceResource extends Resource
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->excludeAttributes(['invoiced_at', 'paid_at']),
-                    Actions\Action::make('download')
-                        ->label(__('download'))
+                    Actions\Action::make('pdf')
+                        ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
                         ->url(fn (Invoice $record): string => static::getUrl('download', ['record' => $record]))
                         ->openUrlInNewTab(),
+                    Actions\Action::make('xml')
+                        ->label(__('downloadFiletype', ['type' => 'xml']))
+                        ->icon('tabler-file-type-xml')
+                        ->action(function (Invoice $record) {
+                            $file = InvoiceService::generateEn16931Xml($record);
+                            $redirect = response()->download(Storage::path($file));
+                            // Storage::delete($file); // TODO
+                            return $redirect;
+                        }),
                     Actions\Action::make('send')
                         ->label(__('send'))
                         ->icon('tabler-mail-forward')
