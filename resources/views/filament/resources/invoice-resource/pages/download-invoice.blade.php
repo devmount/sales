@@ -392,10 +392,12 @@ document.addEventListener('DOMContentLoaded', () => {
         page.current++;
     });
     // serve document
-    let blob = doc.output('blob');
-    let blob_url = URL.createObjectURL(blob);
-    let iframeElementContainer = document.getElementById('preview');
-    iframeElementContainer.src=blob_url;
+    doc.save(
+        `${invoice.number}_${label.invoice}_${config.company}.pdf`.toLowerCase(),
+        { returnPromise: true }
+    ).then(() => {
+        setTimeout(() => { window.close() }, 500);
+    });
 });
 </script>
 </x-filament-panels::page>
