@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use fpdf\Enums\PdfDestination;
 use fpdf\Enums\PdfLineCap;
 use fpdf\Enums\PdfRectangleStyle;
+use fpdf\Enums\PdfTextAlignment;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use XMLWriter;
@@ -28,6 +29,24 @@ class InvoiceService
         $lang = $client?->language ?? 'de';
         $billedPerProject = $invoice->pricing_unit === PricingUnit::Project;
 
+        $data = collect([
+            'address' => Setting::address(),
+            'clientLocation' => "{$client->zip} {$client->city}",
+            'clientName' => strtoupper($client->name),
+            'clientStreet' => $client->street,
+            'date' => Carbon::now()->locale($lang)->isoFormat('LL'),
+            'description' => $invoice->description,
+            'discount' => '-' . Number::currency($invoice->discount ?? 0, 'EUR', locale: $lang),
+            'gross' => Number::currency($invoice->gross, 'EUR', locale: $lang),
+            'hours' => Number::format($billedPerProject ? 1 : $invoice->hours, 1, locale: $lang),
+            'realNet' => Number::currency($invoice->real_net, 'EUR', locale: $lang),
+            'number' => $invoice->current_number,
+            'price' => Number::currency($invoice->price, 'EUR', locale: $lang),
+            'title' => $invoice->title,
+            'vat' => Number::currency($invoice->vat, 'EUR', locale: $lang),
+            'vatRate' => Number::percentage($invoice->vat_rate*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
+        ]);
+
         $label = collect([
             'amountNet' => __("amountNet", locale: $lang),
             'bank' => __("bank", locale: $lang),
@@ -36,7 +55,7 @@ class InvoiceService
             'dateAndDescription' => __("dateAndDescription", locale: $lang),
             'deliverables' => __("deliverables", locale: $lang),
             'description' => __("description", locale: $lang),
-            'explanation' => __("invoice.explanation", locale: $lang),
+            'explanation' => __("invoice.explanation", ['gross' => $data['gross'], 'number' => $data['number']], $lang),
             'holder' => __("holder", locale: $lang),
             'iban' => __("iban", locale: $lang),
             'inHours' => __("inHours", locale: $lang),
@@ -61,29 +80,11 @@ class InvoiceService
             'vatId' => __("vatId", locale: $lang),
         ]);
 
-        $data = collect([
-            'address' => Setting::address(),
-            'clientLocation' => "{$client->zip} {$client->city}",
-            'clientName' => strtoupper($client->name),
-            'clientStreet' => $client->street,
-            'date' => Carbon::now()->locale($lang)->isoFormat('LL'),
-            'description' => $invoice->description,
-            'discount' => '-' . Number::currency($invoice->discount ?? 0, 'EUR', locale: $lang),
-            'gross' => Number::currency($invoice->gross, 'EUR', locale: $lang),
-            'hours' => Number::format($billedPerProject ? 1 : $invoice->hours, 1, locale: $lang),
-            'realNet' => Number::currency($invoice->real_net, 'EUR', locale: $lang),
-            'number' => $invoice->current_number,
-            'price' => Number::currency($invoice->price, 'EUR', locale: $lang),
-            'title' => $invoice->title,
-            'vat' => Number::currency($invoice->vat, 'EUR', locale: $lang),
-            'vatRate' => Number::percentage($invoice->vat_rate*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
-        ]);
-
         // Convert to supported char encoding
         $encoding = 'windows-1252';
         $settings = $settings->map(fn ($e) => iconv('UTF-8', $encoding, $e));
-        $label = $label->map(fn ($e) => iconv('UTF-8', $encoding, $e));
         $data = $data->map(fn ($e) => iconv('UTF-8', $encoding, $e));
+        $label = $label->map(fn ($e) => iconv('UTF-8', $encoding, $e));
 
         // Init document
         $pdf = new PdfTemplate($lang);
@@ -206,6 +207,22 @@ class InvoiceService
                 ->text($pdf->rightX($label['totalAmount'], 50), 205, $label['totalAmount'])
                 ->text($pdf->rightX($data['gross'], 16), 205, $data['gross']);
         }
+
+        // Terms
+        $pdf->setFontSizeInPoint(10)
+            ->setFont('FiraSans-ExtraLight')
+            ->setTextColor(...Color::DARK->rgb())
+            ->setXY(9, 222)
+            ->multiCell(180, 5.25, $label['explanation'], align: PdfTextAlignment::LEFT)
+            ->text(10, 245, $label['regards'])
+            ->text(10, 250, $settings['name']);
+
+        // Document guides
+        $pdf->setDrawColor(...Color::LINE->rgb())
+            ->line(0, 105, 3, 105)
+            ->line(0, 148, 5, 148)
+            ->setDrawColor(...Color::LINE4->rgb())
+            ->line(0, 210, 3, 210);
 
         // Save document
         $filename = strtolower("{$data['number']}_{$label['invoice']}_{$settings['company']}.pdf");

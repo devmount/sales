@@ -85,7 +85,7 @@
     "increase": "increase",
     "inquiries": "Thank you for your interest and I look forward to working with you! Please do not hesitate to contact me if you have any questions.",
     "invoice": "Invoice|Invoices",
-    "invoice.explanation": "Thank you for your cooperation and trust. The total amount of {0} is to be transferred to the bank account mentioned below within 14 days from receipt of this invoice, quoting the invoice number {1}. Please do not hesitate to contact me if you have any questions.",
+    "invoice.explanation": "Thank you for your cooperation and trust. The total amount of :Gross is to be transferred to the bank account mentioned below within 14 days from receipt of this invoice, quoting the invoice number :Number. Please do not hesitate to contact me if you have any questions.",
     "invoice.onlyTransitory": "This invoice only contains transitory items.",
     "invoiceDate": "Invoice Date",
     "invoiceDates": "Invoice dates",
