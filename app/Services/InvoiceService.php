@@ -81,10 +81,9 @@ class InvoiceService
         ]);
 
         // Convert to supported char encoding
-        $encoding = 'windows-1252';
-        $settings = $settings->map(fn ($e) => iconv('UTF-8', $encoding, $e));
-        $data = $data->map(fn ($e) => iconv('UTF-8', $encoding, $e));
-        $label = $label->map(fn ($e) => iconv('UTF-8', $encoding, $e));
+        $settings = $settings->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+        $data = $data->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+        $label = $label->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
 
         // Init document
         $pdf = new PdfTemplate($lang);

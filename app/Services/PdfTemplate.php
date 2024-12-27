@@ -2,15 +2,12 @@
 
 namespace App\Services;
 
-use fpdf\Enums\PdfFontName;
-use fpdf\Enums\PdfFontStyle;
 use fpdf\Enums\PdfTextAlignment;
 use fpdf\Enums\PdfRectangleStyle;
-use fpdf\Enums\PdfMove;
-use fpdf\PdfBorder;
 use fpdf\PdfDocument;
 use App\Models\Setting;
 use App\Enums\DocumentColor as Color;
+use Carbon\Carbon;
 
 class PdfTemplate extends PdfDocument
 {
@@ -49,12 +46,26 @@ class PdfTemplate extends PdfDocument
      */
     public function footer(): void
     {
-        // position at 1.5 cm from bottom
-        $this->setY(-15);
-        // Arial italic 8pt
-        // $this->setFont(PdfFontName::ARIAL, PdfFontStyle::ITALIC, 8);
-        // page number
-        $this->cell(null, 10, \sprintf('Page %d/{nb}', $this->getPage()), PdfBorder::none(), PdfMove::RIGHT, PdfTextAlignment::CENTER);
+        // Bottom line
+        $this->setDrawColor(...Color::LINE->rgb())
+            ->setLineWidth(0.4)
+            ->line(10, 277, 202, 277);
+        // Signature
+        $this->image(Setting::get('signature'), 13, 262, 24, 18, 'PNG');
+        // Page number
+        $this->setY(-26)
+            ->setFontSizeInPoint(9)
+            ->setTextColor(...Color::GRAY->rgb())
+            ->cell(text: \sprintf('%d/{nb}', $this->getPage()), align: PdfTextAlignment::CENTER);
+        $city = Setting::get('city');
+        $date = Carbon::now()->locale($this->lang)->isoFormat('LL');
+        $this->setXY(9, -18)
+            ->multiCell(text: iconv('UTF-8', 'windows-1252', Setting::get('name') . "\n{$city}, {$date}"));
+            // ->text([label.iban, label.bic, label.bank], 90, 282, { align: 'right' })
+            // ->text([label.vatId, label.taxOffice], 170, 282, { align: 'right' })
+            // ->setFont('FiraSans-Regular')
+            // ->text([config.iban, config.bic, config.bank], 92, 282)
+            // ->text([config.vatId, config.taxOffice], 172, 282);
     }
 
     /**
