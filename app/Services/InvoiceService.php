@@ -7,10 +7,8 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
 use XMLWriter;
 use Carbon\Carbon;
-use fpdf\Enums\PdfFontName;
-use fpdf\Enums\PdfFontStyle;
-use fpdf\PdfDocument;
 use fpdf\Enums\PdfDestination;
+use App\Enums\DocumentColor as Color;
 
 class InvoiceService
 {
@@ -24,16 +22,28 @@ class InvoiceService
         $settings = Setting::pluck('value', 'field');
         $client = $invoice?->project?->client;
         $lang = $client?->language ?? 'de';
-        $label = trans_choice("invoice", 1, [], $lang);
+        $label = trans_choice("invoice", 1, locale: $lang);
         $filename = strtolower("{$invoice->current_number}_{$label}_{$settings['company']}.pdf");
 
-        $pdf = new PdfDocument();
+        // Init document
+        $pdf = new PdfTemplate($lang);
+        $pdf->addFont('FiraSans-Regular', dir: __DIR__ . '/fonts')
+            ->addFont('FiraSans-ExtraLight', dir: __DIR__ . '/fonts')
+            ->addFont('FiraSans-ExtraBold', dir: __DIR__ . '/fonts');
+
+        // Cover page
         $pdf->addPage();
-        $pdf->addFont('FiraSans-Regular', dir: __DIR__ . '/fonts');
-        $pdf->addFont('FiraSans-ExtraLight', dir: __DIR__ . '/fonts');
-        $pdf->addFont('FiraSans-ExtraBold', dir: __DIR__ . '/fonts');
-        $pdf->setFont('FiraSans-Regular', fontSizeInPoint: 16);
-        $pdf->cell(40, 10, 'Hello World!');
+
+        // Address header
+        $pdf->setFont('FiraSans-ExtraLight', fontSizeInPoint: 8)
+            ->setTextColor(...Color::GRAY->rgb())
+            ->text(10, 50, mb_convert_encoding(Setting::address(), 'ISO-8859-1'));
+        $pdf->setFontSizeInPoint(9)->text(10, 62, __("to", locale: $lang));
+        $pdf->setFontSizeInPoint(15)
+            ->setTextColor(...Color::MAIN->rgb())
+            ->text(10, 69, strtoupper($client->name));
+
+        // Save document
         $pdf->output(PdfDestination::FILE, Storage::path($filename));
         return $filename;
     }
