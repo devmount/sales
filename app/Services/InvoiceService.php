@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
+use App\Enums\DocumentColor as Color;
 use App\Models\Invoice;
 use App\Models\Setting;
-use Illuminate\Support\Facades\Storage;
-use XMLWriter;
 use Carbon\Carbon;
 use fpdf\Enums\PdfDestination;
-use App\Enums\DocumentColor as Color;
+use Illuminate\Support\Facades\Storage;
+use XMLWriter;
 
 class InvoiceService
 {
@@ -22,8 +22,28 @@ class InvoiceService
         $settings = Setting::pluck('value', 'field');
         $client = $invoice?->project?->client;
         $lang = $client?->language ?? 'de';
-        $label = trans_choice("invoice", 1, locale: $lang);
-        $filename = strtolower("{$invoice->current_number}_{$label}_{$settings['company']}.pdf");
+
+        $label = collect([
+            'invoice' => trans_choice("invoice", 1, locale: $lang),
+            'invoiceDate' => __("invoiceDate", locale: $lang),
+            'invoiceNumber' => __("invoiceNumber", locale: $lang),
+            'to' => __("to", locale: $lang),
+        ]);
+
+        $data = collect([
+            'address' => Setting::address(),
+            'clientLocation' => "{$client->zip} {$client->city}",
+            'clientName' => strtoupper($client->name),
+            'clientStreet' => $client->street,
+            'date' => Carbon::now()->locale($lang)->isoFormat('LL'),
+            'number' => $invoice->current_number,
+        ]);
+
+        // Convert to supported char encoding
+        $encoding = 'ISO-8859-1';
+        $settings = $settings->map(fn ($e) => mb_convert_encoding($e, $encoding));
+        $label = $label->map(fn ($e) => mb_convert_encoding($e, $encoding));
+        $data = $data->map(fn ($e) => mb_convert_encoding($e, $encoding));
 
         // Init document
         $pdf = new PdfTemplate($lang);
@@ -37,13 +57,30 @@ class InvoiceService
         // Address header
         $pdf->setFont('FiraSans-ExtraLight', fontSizeInPoint: 8)
             ->setTextColor(...Color::GRAY->rgb())
-            ->text(10, 50, mb_convert_encoding(Setting::address(), 'ISO-8859-1'));
-        $pdf->setFontSizeInPoint(9)->text(10, 62, __("to", locale: $lang));
+            ->text(10, 50, $data['address']);
+        $pdf->setFontSizeInPoint(9)
+            ->text(10, 62, $label['to']);
         $pdf->setFontSizeInPoint(15)
             ->setTextColor(...Color::MAIN->rgb())
-            ->text(10, 69, strtoupper($client->name));
+            ->text(10, 69, $data['clientName']);
+        $pdf->setDrawColor(...Color::LINE->rgb())
+            ->setLineWidth(0.4)
+            ->line(0, 73, 70, 73)
+            ->line(138, 73, 210, 73);
+        $pdf->setFontSizeInPoint(10)
+            ->setTextColor(...Color::GRAY->rgb())
+            ->text(10, 79, $data['clientStreet'])
+            ->text(10, 84, $data['clientLocation'])
+            ->text(142, 62.8, $label['invoiceNumber'])
+            ->text(142, 68.8, $label['invoiceDate'])
+            ->setFont('FiraSans-Regular')
+            ->setTextColor(...Color::MAIN->rgb())
+            ->text($pdf->rightX($data['number'], 8), 62.8, $data['number'])
+            ->text($pdf->rightX($data['date'], 8), 68.8, $data['date']);
+
 
         // Save document
+        $filename = strtolower("{$data['number']}_{$label['invoice']}_{$settings['company']}.pdf");
         $pdf->output(PdfDestination::FILE, Storage::path($filename));
         return $filename;
     }

@@ -63,7 +63,7 @@ class PdfTemplate extends PdfDocument
      * @param  string $text
      * @return float
      */
-    private function centerX(string $text): float
+    public function centerX(string $text): float
     {
         return ($this->width - $this->getStringWidth($text)) / 2.0;
     }
@@ -75,7 +75,7 @@ class PdfTemplate extends PdfDocument
      * @param  float  $margin
      * @return float
      */
-    private function rightX(string $text, $margin = 0.0): float
+    public function rightX(string $text, $margin = 0.0): float
     {
         return ($this->width - $this->getStringWidth($text)) - $margin;
     }
