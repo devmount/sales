@@ -3,11 +3,15 @@
 namespace App\Services;
 
 use App\Enums\DocumentColor as Color;
+use App\Enums\PricingUnit;
 use App\Models\Invoice;
 use App\Models\Setting;
 use Carbon\Carbon;
 use fpdf\Enums\PdfDestination;
+use fpdf\Enums\PdfLineCap;
+use fpdf\Enums\PdfRectangleStyle;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 use XMLWriter;
 
 class InvoiceService
@@ -22,12 +26,39 @@ class InvoiceService
         $settings = Setting::pluck('value', 'field');
         $client = $invoice?->project?->client;
         $lang = $client?->language ?? 'de';
+        $billedPerProject = $invoice->pricing_unit === PricingUnit::Project;
 
         $label = collect([
+            'amountNet' => __("amountNet", locale: $lang),
+            'bank' => __("bank", locale: $lang),
+            'bic' => __("bic", locale: $lang),
+            'creadit' => __("credit", locale: $lang),
+            'dateAndDescription' => __("dateAndDescription", locale: $lang),
+            'deliverables' => __("deliverables", locale: $lang),
+            'description' => __("description", locale: $lang),
+            'explanation' => __("invoice.explanation", locale: $lang),
+            'holder' => __("holder", locale: $lang),
+            'iban' => __("iban", locale: $lang),
+            'inHours' => __("inHours", locale: $lang),
             'invoice' => trans_choice("invoice", 1, locale: $lang),
             'invoiceDate' => __("invoiceDate", locale: $lang),
             'invoiceNumber' => __("invoiceNumber", locale: $lang),
+            'page' => __("page", locale: $lang) ,
+            'perHour' => __("perHour", locale: $lang),
+            'position' => trans_choice("position", 1, locale: $lang),
+            'price' => __("price", locale: $lang),
+            'priceSutitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("inHours", locale: $lang),
+            'quantity' => __("quantity", locale: $lang),
+            'quantitySubtitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("perHour", locale: $lang),
+            'regards' => __("withKindRegards", locale: $lang),
+            'statementOfWork' => __("statementOfWork", locale: $lang),
+            'sum' => $billedPerProject ? __("sum", locale: $lang) : __("sumOfAllPositions", locale: $lang),
+            'taxOffice' => __("taxOffice", locale: $lang),
             'to' => __("to", locale: $lang),
+            'total' => __("total", locale: $lang),
+            'totalAmount' => __("totalAmount", locale: $lang),
+            'vat' => __("vat", locale: $lang),
+            'vatId' => __("vatId", locale: $lang),
         ]);
 
         $data = collect([
@@ -36,14 +67,23 @@ class InvoiceService
             'clientName' => strtoupper($client->name),
             'clientStreet' => $client->street,
             'date' => Carbon::now()->locale($lang)->isoFormat('LL'),
+            'description' => $invoice->description,
+            'discount' => $invoice->discount,
+            'gross' => Number::currency($invoice->gross, '€', locale: $lang),
+            'hours' => Number::format($billedPerProject ? 1 : $invoice->hours, 1, locale: $lang),
+            'net' => Number::currency($invoice->net, 'EUR', locale: $lang),
             'number' => $invoice->current_number,
+            'price' => Number::currency($invoice->price, 'EUR', locale: $lang),
+            'title' => $invoice->title,
+            'vat' => Number::currency($invoice->vat, '€', locale: $lang),
+            'vatRate' => Number::percentage($invoice->vat_rate, 2, locale: $lang),
         ]);
 
         // Convert to supported char encoding
-        $encoding = 'ISO-8859-1';
-        $settings = $settings->map(fn ($e) => mb_convert_encoding($e, $encoding));
-        $label = $label->map(fn ($e) => mb_convert_encoding($e, $encoding));
-        $data = $data->map(fn ($e) => mb_convert_encoding($e, $encoding));
+        $encoding = 'windows-1252';
+        $settings = $settings->map(fn ($e) => iconv('UTF-8', $encoding, $e));
+        $label = $label->map(fn ($e) => iconv('UTF-8', $encoding, $e));
+        $data = $data->map(fn ($e) => iconv('UTF-8', $encoding, $e));
 
         // Init document
         $pdf = new PdfTemplate($lang);
@@ -65,6 +105,7 @@ class InvoiceService
             ->text(10, 69, $data['clientName']);
         $pdf->setDrawColor(...Color::LINE->rgb())
             ->setLineWidth(0.4)
+            ->setLineCap(PdfLineCap::BUTT)
             ->line(0, 73, 70, 73)
             ->line(138, 73, 210, 73);
         $pdf->setFontSizeInPoint(10)
@@ -78,6 +119,54 @@ class InvoiceService
             ->text($pdf->rightX($data['number'], 8), 62.8, $data['number'])
             ->text($pdf->rightX($data['date'], 8), 68.8, $data['date']);
 
+        // Invoice cover table
+        $pdf->setLineWidth(0.8)
+            ->setFillColor(...Color::COL3->rgb())
+            ->rect(10, 105, 90, 56, PdfRectangleStyle::FILL)
+            ->setDrawColor(...Color::COL2->rgb())
+            ->line(10, 133, 100, 133)
+            ->setFillColor(...Color::COL2->rgb())
+            ->rect(100, 105, 31, 56, PdfRectangleStyle::FILL)
+            ->setDrawColor(...Color::COL1->rgb())
+            ->line(100, 133, 131, 133)
+            ->setFillColor(...Color::COL1->rgb())
+            ->rect(131, 105, 30, 56, PdfRectangleStyle::FILL)
+            ->setDrawColor(...Color::COL4->rgb())
+            ->line(131, 133, 162, 133)
+            ->setFillColor(...Color::ACCENT->rgb())
+            ->rect(162, 105, 40, 56, PdfRectangleStyle::FILL)
+            ->setDrawColor(...Color::LINE2->rgb())
+            ->line(162, 133, 202, 133);
+        $pdf->setFontSizeInPoint(13)
+            ->setFont('FiraSans-ExtraLight')
+            ->setTextColor(...Color::DARK->rgb())
+            ->text(15, 118, $label['description'])
+            ->text($pdf->centerX($label['quantity'], 115), 118, $label['quantity'])
+            ->text($pdf->centerX($label['price'], 146), 118, $label['price'])
+            ->setFont('FiraSans-Regular')
+            ->setTextColor(...Color::LIGHT->rgb())
+            ->text($pdf->centerX($label['total'], 182), 118, $label['total']);
+        $pdf->setFontSizeInPoint(8)
+            ->setFont('FiraSans-ExtraLight')
+            ->setTextColor(...Color::DARK->rgb())
+            ->text(15, 124, $label['statementOfWork'])
+            ->text($pdf->centerX($label['priceSutitle'], 115), 124, $label['priceSutitle'])
+            ->text($pdf->centerX($label['quantitySubtitle'], 146), 124, $label['quantitySubtitle'])
+            ->setTextColor(...Color::LIGHT->rgb())
+            ->text($pdf->centerX($label['sum'], 182), 124, $label['sum']);
+        $pdf->setTextColor(...Color::DARK->rgb())
+            ->setFont('FiraSans-Regular')
+            ->setFontSizeInPoint(9)
+            ->text(15, 141, $data['title'])
+            ->setFont('FiraSans-ExtraLight')
+            ->setFontSizeInPoint(8)
+            ->setXY(14, 144)
+            ->multiCell(height: 4.25, text: $data['description'])
+            ->setFontSizeInPoint(16)
+            ->text($pdf->centerX($data['hours'], 115), 148, $data['hours'])
+            ->text($pdf->centerX($data['price'], 146), 148, $data['price'])
+            ->setTextColor(...Color::LIGHT->rgb())
+            ->text($pdf->centerX($data['net'], 182), 148, $data['net']);
 
         // Save document
         $filename = strtolower("{$data['number']}_{$label['invoice']}_{$settings['company']}.pdf");

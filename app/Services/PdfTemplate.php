@@ -61,11 +61,14 @@ class PdfTemplate extends PdfDocument
      * Calculate the horizontal start position of a centered text
      *
      * @param  string $text
+     * @param  float|null $anchor If set, this will be used as center point instead of page width
      * @return float
      */
-    public function centerX(string $text): float
+    public function centerX(string $text, ?float $anchor = null): float
     {
-        return ($this->width - $this->getStringWidth($text)) / 2.0;
+        return $anchor === null
+            ? ($this->width - $this->getStringWidth($text)) / 2.0
+            : $anchor - $this->getStringWidth($text) / 2.0;
     }
 
     /**
