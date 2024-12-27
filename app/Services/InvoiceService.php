@@ -32,7 +32,7 @@ class InvoiceService
             'amountNet' => __("amountNet", locale: $lang),
             'bank' => __("bank", locale: $lang),
             'bic' => __("bic", locale: $lang),
-            'creadit' => __("credit", locale: $lang),
+            'credit' => __("credit", locale: $lang),
             'dateAndDescription' => __("dateAndDescription", locale: $lang),
             'deliverables' => __("deliverables", locale: $lang),
             'description' => __("description", locale: $lang),
@@ -68,15 +68,15 @@ class InvoiceService
             'clientStreet' => $client->street,
             'date' => Carbon::now()->locale($lang)->isoFormat('LL'),
             'description' => $invoice->description,
-            'discount' => $invoice->discount,
-            'gross' => Number::currency($invoice->gross, '€', locale: $lang),
+            'discount' => '-' . Number::currency($invoice->discount ?? 0, 'EUR', locale: $lang),
+            'gross' => Number::currency($invoice->gross, 'EUR', locale: $lang),
             'hours' => Number::format($billedPerProject ? 1 : $invoice->hours, 1, locale: $lang),
-            'net' => Number::currency($invoice->net, 'EUR', locale: $lang),
+            'realNet' => Number::currency($invoice->real_net, 'EUR', locale: $lang),
             'number' => $invoice->current_number,
             'price' => Number::currency($invoice->price, 'EUR', locale: $lang),
             'title' => $invoice->title,
-            'vat' => Number::currency($invoice->vat, '€', locale: $lang),
-            'vatRate' => Number::percentage($invoice->vat_rate, 2, locale: $lang),
+            'vat' => Number::currency($invoice->vat, 'EUR', locale: $lang),
+            'vatRate' => Number::percentage($invoice->vat_rate*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
         ]);
 
         // Convert to supported char encoding
@@ -119,7 +119,7 @@ class InvoiceService
             ->text($pdf->rightX($data['number'], 8), 62.8, $data['number'])
             ->text($pdf->rightX($data['date'], 8), 68.8, $data['date']);
 
-        // Invoice cover table
+        // Cover table
         $pdf->setLineWidth(0.8)
             ->setFillColor(...Color::COL3->rgb())
             ->rect(10, 105, 90, 56, PdfRectangleStyle::FILL)
@@ -166,7 +166,46 @@ class InvoiceService
             ->text($pdf->centerX($data['hours'], 115), 148, $data['hours'])
             ->text($pdf->centerX($data['price'], 146), 148, $data['price'])
             ->setTextColor(...Color::LIGHT->rgb())
-            ->text($pdf->centerX($data['net'], 182), 148, $data['net']);
+            ->text($pdf->centerX($data['realNet'], 182), 148, $data['realNet']);
+
+        // Table total
+        $pdf->setFillColor(...Color::MAIN->rgb())
+            ->rect(0, 165, 210, 50, PdfRectangleStyle::FILL)
+            ->setDrawColor(...Color::LINE3->rgb())
+            ->setLineWidth(0.3);
+        if ($invoice->discount) {
+            // Total with discount
+            $pdf->line(124, 198, 194, 198)
+                ->setTextColor(...Color::TEXT->rgb())
+                ->setFont('FiraSans-ExtraLight')
+                ->setFontSizeInPoint(13)
+                ->text($pdf->rightX($label['amountNet'], 50), 177, $label['amountNet'])
+                ->text($pdf->rightX($label['credit'], 50), 185, $label['credit'])
+                ->text($pdf->rightX($data['vatRate'], 50), 193, $data['vatRate'])
+                ->text($pdf->rightX($data['realNet'], 16), 177, $data['realNet'])
+                ->text($pdf->rightX($data['discount'], 16), 185, $data['discount'])
+                ->text($pdf->rightX($data['vat'], 16), 193, $data['vat'])
+                ->setTextColor(...Color::LIGHT->rgb())
+                ->setFont('FiraSans-Regular')
+                ->setFontSizeInPoint(16)
+                ->text($pdf->rightX($label['totalAmount'], 50), 207, $label['totalAmount'])
+                ->text($pdf->rightX($data['gross'], 16), 207, $data['gross']);
+        } else {
+            // Total without discount
+            $pdf->line(124, 196, 194, 196)
+                ->setTextColor(...Color::TEXT->rgb())
+                ->setFont('FiraSans-ExtraLight')
+                ->setFontSizeInPoint(13)
+                ->text($pdf->rightX($label['amountNet'], 50), 181, $label['amountNet'])
+                ->text($pdf->rightX($data['vatRate'], 50), 190, $data['vatRate'])
+                ->text($pdf->rightX($data['realNet'], 16), 181, $data['realNet'])
+                ->text($pdf->rightX($data['vat'], 16), 190, $data['vat'])
+                ->setTextColor(...Color::LIGHT->rgb())
+                ->setFont('FiraSans-Regular')
+                ->setFontSizeInPoint(16)
+                ->text($pdf->rightX($label['totalAmount'], 50), 205, $label['totalAmount'])
+                ->text($pdf->rightX($data['gross'], 16), 205, $data['gross']);
+        }
 
         // Save document
         $filename = strtolower("{$data['number']}_{$label['invoice']}_{$settings['company']}.pdf");

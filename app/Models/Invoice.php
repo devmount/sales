@@ -63,7 +63,7 @@ class Invoice extends Model
     /**
      * Net amount of all assigned positions
      */
-    public function getNetAttribute()
+    public function getRealNetAttribute()
     {
         $net = 0;
         if ($this->pricing_unit === PricingUnit::Project) {
@@ -74,7 +74,15 @@ class Invoice extends Model
                 PricingUnit::Day => 8,
             };
         }
-        return round($net, 2) - $this->discount;
+        return round($net, 2);
+    }
+
+    /**
+     * Net amount of all assigned positions reduced by discount
+     */
+    public function getNetAttribute()
+    {
+        return $this->real_net - $this->discount;
     }
 
     /**
