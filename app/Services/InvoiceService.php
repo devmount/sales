@@ -24,7 +24,7 @@ class InvoiceService
      * @return string
      */
     public static function generatePdf(Invoice $invoice): string {
-        $settings = Setting::pluck('value', 'field');
+        $conf = Setting::pluck('value', 'field');
         $client = $invoice?->project?->client;
         $lang = $client?->language ?? 'de';
         $billedPerProject = $invoice->pricing_unit === PricingUnit::Project;
@@ -49,15 +49,12 @@ class InvoiceService
 
         $label = collect([
             'amountNet' => __("amountNet", locale: $lang),
-            'bank' => __("bank", locale: $lang),
-            'bic' => __("bic", locale: $lang),
             'credit' => __("credit", locale: $lang),
             'dateAndDescription' => __("dateAndDescription", locale: $lang),
             'deliverables' => __("deliverables", locale: $lang),
             'description' => __("description", locale: $lang),
             'explanation' => __("invoice.explanation", ['gross' => $data['gross'], 'number' => $data['number']], $lang),
             'holder' => __("holder", locale: $lang),
-            'iban' => __("iban", locale: $lang),
             'inHours' => __("inHours", locale: $lang),
             'invoice' => trans_choice("invoice", 1, locale: $lang),
             'invoiceDate' => __("invoiceDate", locale: $lang),
@@ -72,16 +69,14 @@ class InvoiceService
             'regards' => __("withKindRegards", locale: $lang),
             'statementOfWork' => __("statementOfWork", locale: $lang),
             'sum' => $billedPerProject ? __("sum", locale: $lang) : __("sumOfAllPositions", locale: $lang),
-            'taxOffice' => __("taxOffice", locale: $lang),
             'to' => __("to", locale: $lang),
             'total' => __("total", locale: $lang),
             'totalAmount' => __("totalAmount", locale: $lang),
             'vat' => __("vat", locale: $lang),
-            'vatId' => __("vatId", locale: $lang),
         ]);
 
         // Convert to supported char encoding
-        $settings = $settings->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+        $conf = $conf->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
         $data = $data->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
         $label = $label->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
 
@@ -214,7 +209,7 @@ class InvoiceService
             ->setXY(9, 222)
             ->multiCell(180, 5.25, $label['explanation'], align: PdfTextAlignment::LEFT)
             ->text(10, 245, $label['regards'])
-            ->text(10, 250, $settings['name']);
+            ->text(10, 250, $conf['name']);
 
         // Document guides
         $pdf->setDrawColor(...Color::LINE->rgb())
@@ -224,7 +219,7 @@ class InvoiceService
             ->line(0, 210, 3, 210);
 
         // Save document
-        $filename = strtolower("{$data['number']}_{$label['invoice']}_{$settings['company']}.pdf");
+        $filename = strtolower("{$data['number']}_{$label['invoice']}_{$conf['company']}.pdf");
         $pdf->output(PdfDestination::FILE, Storage::path($filename));
         return $filename;
     }

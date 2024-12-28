@@ -57,15 +57,35 @@ class PdfTemplate extends PdfDocument
             ->setFontSizeInPoint(9)
             ->setTextColor(...Color::GRAY->rgb())
             ->cell(text: \sprintf('%d/{nb}', $this->getPage()), align: PdfTextAlignment::CENTER);
-        $city = Setting::get('city');
-        $date = Carbon::now()->locale($this->lang)->isoFormat('LL');
+
+        // Prepare settings, data and labels
+        $conf = Setting::pluck('value', 'field');
+        $data = collect(['date' => Carbon::now()->locale($this->lang)->isoFormat('LL')]);
+        $label = collect([
+            'bank' => __("bank", locale: $this->lang),
+            'bic' => __("bic", locale: $this->lang),
+            'holder' => __("holder", locale: $this->lang),
+            'iban' => __("iban", locale: $this->lang),
+            'taxOffice' => __("taxOffice", locale: $this->lang),
+            'vatId' => __("vatId", locale: $this->lang),
+        ]);
+
+        // Convert to supported char encoding
+        $conf = $conf->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+        $data = $data->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+        $label = $label->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+
         $this->setXY(9, -18)
-            ->multiCell(text: iconv('UTF-8', 'windows-1252', Setting::get('name') . "\n{$city}, {$date}"));
-            // ->text([label.iban, label.bic, label.bank], 90, 282, { align: 'right' })
-            // ->text([label.vatId, label.taxOffice], 170, 282, { align: 'right' })
-            // ->setFont('FiraSans-Regular')
-            // ->text([config.iban, config.bic, config.bank], 92, 282)
-            // ->text([config.vatId, config.taxOffice], 172, 282);
+            ->multiCell(null, 4.25, "{$conf['name']}\n{$conf['city']}, {$data['date']}")
+            ->setXY(50, -18)
+            ->multiCell(40, 4.25, "{$label['iban']}\n{$label['bic']}\n{$label['bank']}", align: PdfTextAlignment::RIGHT)
+            ->setXY(130, -18)
+            ->multiCell(40, 4.25, "{$label['vatId']}\n{$label['taxOffice']}", align: PdfTextAlignment::RIGHT)
+            ->setFont('FiraSans-Regular')
+            ->setXY(90, -18)
+            ->multiCell(50, 4.25, "{$conf['iban']}\n{$conf['bic']}\n{$conf['bank']}")
+            ->setXY(170, -18)
+            ->multiCell(40, 4.25, "{$conf['vatId']}\n{$conf['taxOffice']}");
     }
 
     /**
