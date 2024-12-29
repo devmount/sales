@@ -73,6 +73,11 @@ class InvoiceService
             'total' => __("total", locale: $lang),
             'totalAmount' => __("totalAmount", locale: $lang),
             'vat' => __("vat", locale: $lang),
+            'quantityPositions' => $billedPerProject ? '' : __("quantity", locale: $lang),
+            'pricePositions' => $billedPerProject ? '' : __("price", locale: $lang),
+            'totalPositions' => $billedPerProject ? '' : __("total", locale: $lang),
+            'inHoursPositions' => $billedPerProject ? '' : __("inHours", locale: $lang),
+            'perHourPositions' => $billedPerProject ? '' : __("perHour", locale: $lang),
         ]);
 
         // Convert to supported char encoding
@@ -211,12 +216,46 @@ class InvoiceService
             ->text(10, 245, $label['regards'])
             ->text(10, 250, $conf['name']);
 
-        // Document guides
-        $pdf->setDrawColor(...Color::LINE->rgb())
-            ->line(0, 105, 3, 105)
-            ->line(0, 148, 5, 148)
-            ->setDrawColor(...Color::LINE4->rgb())
-            ->line(0, 210, 3, 210);
+        // Positions
+        foreach ($invoice->paginated_positions as $positions) {
+            $totalHeight = array_reduce($positions, fn ($a, $c) => $a + count(explode("\n", $c->description)) + 2, 0) * 3.5 + 32;
+            $pdf->addPage();
+
+            $pdf->setLineWidth(0.8)
+                ->setFillColor(...Color::COL3->rgb())
+                ->rect(10, 50, 113, $totalHeight, PdfRectangleStyle::FILL)
+                ->setDrawColor(...Color::COL2->rgb())
+                ->line(10, 78, 123, 78);
+            $pdf->setFillColor(... $billedPerProject ? Color::COL3->rgb() : Color::COL2->rgb())
+                ->rect(123, 50, 26, $totalHeight, PdfRectangleStyle::FILL)
+                ->setDrawColor(... $billedPerProject ? Color::COL2->rgb() : Color::COL1->rgb())
+                ->line(123, 78, 149, 78)
+                ->setFillColor(... $billedPerProject ? Color::COL3->rgb() : Color::COL1->rgb())
+                ->rect(149, 50, 26, $totalHeight, PdfRectangleStyle::FILL)
+                ->setDrawColor(... $billedPerProject ? Color::COL2->rgb() : Color::COL4->rgb())
+                ->line(149, 78, 176, 78)
+                ->setFillColor(... $billedPerProject ? Color::COL3->rgb() : Color::ACCENT->rgb())
+                ->rect(176, 50, 26, $totalHeight, PdfRectangleStyle::FILL)
+                ->setDrawColor(... $billedPerProject ? Color::COL2->rgb() : Color::LINE2->rgb())
+                ->line(176, 78, 202, 78);
+            $pdf->setFontSizeInPoint(13)
+                ->setFont('FiraSans-ExtraLight')
+                ->setTextColor(...Color::DARK->rgb())
+                ->text(15, 63, $label['position'])
+                ->text($pdf->centerX($label['quantityPositions'], 136), 63, $label['quantityPositions'])
+                ->text($pdf->centerX($label['pricePositions'], 162), 63, $label['pricePositions'])
+                ->setFont('FiraSans-Regular')
+                ->setTextColor(...Color::LIGHT->rgb())
+                ->text($pdf->centerX($label['totalPositions'], 189), 63, $label['totalPositions']);
+            $pdf->setFontSizeInPoint(8)
+                ->setFont('FiraSans-ExtraLight')
+                ->setTextColor(...Color::DARK->rgb())
+                ->text(15, 69, $invoice->undated ? $label['description'] : $label['dateAndDescription'])
+                ->text($pdf->centerX($label['inHoursPositions'], 136), 69, $label['inHoursPositions'])
+                ->text($pdf->centerX($label['perHourPositions'], 162), 69, $label['perHourPositions'])
+                ->setTextColor(...Color::LIGHT->rgb())
+                ->text($pdf->centerX($label['pricePositions'], 189), 69, $label['pricePositions']);
+        }
 
         // Save document
         $filename = strtolower("{$data['number']}_{$label['invoice']}_{$conf['company']}.pdf");

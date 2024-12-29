@@ -46,7 +46,7 @@ class Invoice extends Model
     public function getSortedPositionsAttribute()
     {
         // If undated, sort by positions creation date, if dated, sort by positions starting date
-        return $this->positions->all()->sortBy($this->undated ? 'created_at' : 'started_at');
+        return $this->positions->sortBy($this->undated ? 'created_at' : 'started_at')->all();
     }
 
     /**

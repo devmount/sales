@@ -28,7 +28,9 @@ class PdfTemplate extends PdfDocument
         // Logo
         $this->image(Setting::get('logo'), 12, 13, 22, 22, 'JPEG');
         // Title text
-        $title = strtoupper(trans_choice("invoice", 1, [], $this->lang));
+        $title = strtoupper(
+            $this->getPage() <= 1 ? trans_choice("invoice", 1, [], $this->lang) : __("deliverables", [], $this->lang)
+        );
         $this->setFont('FiraSans-ExtraLight', fontSizeInPoint: 26)
             ->setTextColor(...Color::LIGHT->rgb())
             ->text($this->centerX($title), 27, $title);
@@ -75,6 +77,7 @@ class PdfTemplate extends PdfDocument
         $data = $data->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
         $label = $label->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
 
+        // Footer content
         $this->setXY(9, -18)
             ->multiCell(null, 4.25, "{$conf['name']}\n{$conf['city']}, {$data['date']}")
             ->setXY(50, -18)
@@ -86,6 +89,15 @@ class PdfTemplate extends PdfDocument
             ->multiCell(50, 4.25, "{$conf['iban']}\n{$conf['bic']}\n{$conf['bank']}")
             ->setXY(170, -18)
             ->multiCell(40, 4.25, "{$conf['vatId']}\n{$conf['taxOffice']}");
+
+        // Document guides
+        $this->setDrawColor(...Color::LINE->rgb())
+            ->line(0, 105, 3, 105)
+            ->line(0, 148, 5, 148);
+        if ($this->getPage() <= 1) {
+            $this->setDrawColor(...Color::LINE4->rgb());
+        }
+        $this->line(0, 210, 3, 210);
     }
 
     /**
