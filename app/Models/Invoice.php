@@ -41,6 +41,24 @@ class Invoice extends Model
     }
 
     /**
+     * All assigned positions sorted depending on undated flag
+     */
+    public function getSortedPositionsAttribute()
+    {
+        // If undated, sort by positions creation date, if dated, sort by positions starting date
+        return $this->positions->all()->sortBy($this->undated ? 'created_at' : 'started_at');
+    }
+
+    /**
+     * All sorted positions split into chunks
+     */
+    public function getPaginatedPositionsAttribute()
+    {
+        // Get positions by page, one page has space for 50 lines (I know. Let me have my magic number.)
+        return array_chunk($this->sorted_positions, 50);
+    }
+
+    /**
      * Number of hours worked for this invoice
      */
     public function getHoursAttribute()
