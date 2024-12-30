@@ -207,7 +207,7 @@ class InvoiceResource extends Resource
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->excludeAttributes(['invoiced_at', 'paid_at']),
-                    Actions\Action::make('newpdf')
+                    Actions\Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
                         ->action(function (Invoice $record) {
