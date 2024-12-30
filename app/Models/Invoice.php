@@ -50,12 +50,25 @@ class Invoice extends Model
     }
 
     /**
-     * All sorted positions split into chunks
+     * All sorted positions split into chunks based on description lines count
      */
     public function getPaginatedPositionsAttribute()
     {
-        // Get positions by page, one page has space for 50 lines (I know. Let me have my magic number.)
-        return array_chunk($this->sorted_positions, 50);
+        // Get positions by page, one page has space for 50 lines (I know. Let me have my magic number here.)
+        $paginated = [];
+        $linesProcessed = 0;
+        foreach ($this->sorted_positions as $p) {
+            // Take the description lines and the position title (2 lines) into account
+            $lineCount = count(explode("\n", trim($p->description))) + 2;
+            $linesProcessed += $lineCount;
+            $i = floor($linesProcessed/50);
+            if (key_exists($i,$paginated)) {
+                $paginated[$i][] = $p;
+            } else {
+                $paginated[$i] = [$p];
+            }
+        }
+        return $paginated;
     }
 
     /**

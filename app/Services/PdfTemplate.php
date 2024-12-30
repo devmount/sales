@@ -79,16 +79,16 @@ class PdfTemplate extends PdfDocument
 
         // Footer content
         $this->setXY(9, -18)
-            ->multiCell(null, 4.25, "{$conf['name']}\n{$conf['city']}, {$data['date']}")
+            ->multiCell(null, 4, "{$conf['name']}\n{$conf['city']}, {$data['date']}")
             ->setXY(50, -18)
-            ->multiCell(40, 4.25, "{$label['iban']}\n{$label['bic']}\n{$label['bank']}", align: PdfTextAlignment::RIGHT)
+            ->multiCell(40, 4, "{$label['iban']}\n{$label['bic']}\n{$label['bank']}", align: PdfTextAlignment::RIGHT)
             ->setXY(130, -18)
-            ->multiCell(40, 4.25, "{$label['vatId']}\n{$label['taxOffice']}", align: PdfTextAlignment::RIGHT)
+            ->multiCell(40, 4, "{$label['vatId']}\n{$label['taxOffice']}", align: PdfTextAlignment::RIGHT)
             ->setFont('FiraSans-Regular')
             ->setXY(90, -18)
-            ->multiCell(50, 4.25, "{$conf['iban']}\n{$conf['bic']}\n{$conf['bank']}")
+            ->multiCell(50, 4, "{$conf['iban']}\n{$conf['bic']}\n{$conf['bank']}")
             ->setXY(170, -18)
-            ->multiCell(40, 4.25, "{$conf['vatId']}\n{$conf['taxOffice']}");
+            ->multiCell(40, 4, "{$conf['vatId']}\n{$conf['taxOffice']}");
 
         // Document guides
         $this->setDrawColor(...Color::LINE->rgb())

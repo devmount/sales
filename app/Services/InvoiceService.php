@@ -223,6 +223,7 @@ class InvoiceService
                 $positions,
                 fn ($a, $c) => $a + count(explode("\n", $c->description)) + 2, 0
             ) * $rowHeight + 32;
+
             $pdf->addPage();
 
             $pdf->setLineWidth(0.8)
@@ -267,23 +268,31 @@ class InvoiceService
                 $poshours = $position->duration;
                 $lineCount = count(explode("\n", trim($position->description))) + 2;
                 $num = $i + 1;
-                $title = $invoice->undated ? "{$num}. {$label['position']}" : $posdate;
-                $poshoursFormatted = Number::format($billedPerProject ? '' : $poshours, 1, locale: $lang);
-                $posprice = $billedPerProject ? '' : $data['price'];
-                $postotal = $billedPerProject ? '' : Number::currency($invoice->price * $poshours, 'EUR', locale: $lang);
+
+                $posdata = collect([
+                    'title' => $invoice->undated ? "{$num}. {$label['position']}" : $posdate,
+                    'description' => trim($position->description),
+                    'hours' => Number::format($billedPerProject ? '' : $poshours, 1, locale: $lang),
+                    'price' => $billedPerProject ? '' : Number::currency($invoice->price, 'EUR', locale: $lang),
+                    'total' => $billedPerProject ? '' : Number::currency($invoice->price * $poshours, 'EUR', locale: $lang),
+                ]);
+
+                // Convert to supported char encoding
+                $posdata = $posdata->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
 
                 $pdf->setTextColor(...Color::DARK->rgb())
                     ->setFont('FiraSans-Regular')
                     ->setFontSizeInPoint(9)
-                    ->text(15, (84 + $rowHeight * $linesProcessed), $title)
+                    ->text(15, (84 + $rowHeight * $linesProcessed), $posdata['title'])
                     ->setFont('FiraSans-ExtraLight')
                     ->setFontSizeInPoint(8)
-                    ->text(15, (88 + $rowHeight * $linesProcessed), trim($position->description))
+                    ->setXY(14, (85.5 + $rowHeight * $linesProcessed))
+                    ->multiCell(height: $rowHeight, text: $posdata['description'])
                     ->setFontSizeInPoint(11)
-                    ->text($pdf->centerX($poshoursFormatted, 136), (87 + $rowHeight * $linesProcessed), $poshoursFormatted)
-                    ->text($pdf->centerX($posprice, 162), (87 + $rowHeight * $linesProcessed), $posprice)
+                    ->text($pdf->centerX($posdata['hours'], 136), (87 + $rowHeight * $linesProcessed), $posdata['hours'])
+                    ->text($pdf->centerX($posdata['price'], 162), (87 + $rowHeight * $linesProcessed), $posdata['price'])
                     ->setTextColor(...Color::LIGHT->rgb())
-                    ->text($pdf->rightX($postotal, 13), (87 + $rowHeight * $linesProcessed), $postotal);
+                    ->text($pdf->rightX($posdata['total'], 13), (87 + $rowHeight * $linesProcessed), $posdata['total']);
 
                 $linesProcessed += $lineCount;
             }
