@@ -116,8 +116,8 @@ class InvoiceService
             ->text(142, 68.8, $label['invoiceDate'])
             ->setFont('FiraSans-Regular')
             ->setTextColor(...Color::MAIN->rgb())
-            ->text($pdf->rightX($data['number'], 8), 62.8, $data['number'])
-            ->text($pdf->rightX($data['date'], 8), 68.8, $data['date']);
+            ->textRightX($data['number'], 62.8, 8)
+            ->textRightX($data['date'], 68.8, 8);
 
         // Cover table
         $pdf->setLineWidth(0.8)
@@ -141,19 +141,19 @@ class InvoiceService
             ->setFont('FiraSans-ExtraLight')
             ->setTextColor(...Color::DARK->rgb())
             ->text(15, 118, $label['description'])
-            ->text($pdf->centerX($label['quantity'], 115), 118, $label['quantity'])
-            ->text($pdf->centerX($label['price'], 146), 118, $label['price'])
+            ->textCenterX($label['quantity'], 118, 115)
+            ->textCenterX($label['price'], 118, 146)
             ->setFont('FiraSans-Regular')
             ->setTextColor(...Color::LIGHT->rgb())
-            ->text($pdf->centerX($label['total'], 182), 118, $label['total']);
+            ->textCenterX($label['total'], 118, 182);
         $pdf->setFontSizeInPoint(8)
             ->setFont('FiraSans-ExtraLight')
             ->setTextColor(...Color::DARK->rgb())
             ->text(15, 124, $label['statementOfWork'])
-            ->text($pdf->centerX($label['priceSutitle'], 115), 124, $label['priceSutitle'])
-            ->text($pdf->centerX($label['quantitySubtitle'], 146), 124, $label['quantitySubtitle'])
+            ->textCenterX($label['priceSutitle'], 124, 115)
+            ->textCenterX($label['quantitySubtitle'], 124, 146)
             ->setTextColor(...Color::LIGHT->rgb())
-            ->text($pdf->centerX($label['sum'], 182), 124, $label['sum']);
+            ->textCenterX($label['sum'], 124, 182);
         $pdf->setTextColor(...Color::DARK->rgb())
             ->setFont('FiraSans-Regular')
             ->setFontSizeInPoint(9)
@@ -163,10 +163,10 @@ class InvoiceService
             ->setXY(14, 144)
             ->multiCell(height: 4.25, text: $data['description'])
             ->setFontSizeInPoint(16)
-            ->text($pdf->centerX($data['hours'], 115), 148, $data['hours'])
-            ->text($pdf->centerX($data['price'], 146), 148, $data['price'])
+            ->textCenterX($data['hours'], 148, 115)
+            ->textCenterX($data['price'], 148, 146)
             ->setTextColor(...Color::LIGHT->rgb())
-            ->text($pdf->centerX($data['realNet'], 182), 148, $data['realNet']);
+            ->textCenterX($data['realNet'], 148, 182);
 
         // Table total
         $pdf->setFillColor(...Color::MAIN->rgb())
@@ -179,32 +179,32 @@ class InvoiceService
                 ->setTextColor(...Color::TEXT->rgb())
                 ->setFont('FiraSans-ExtraLight')
                 ->setFontSizeInPoint(13)
-                ->text($pdf->rightX($label['amountNet'], 50), 177, $label['amountNet'])
-                ->text($pdf->rightX($label['credit'], 50), 185, $label['credit'])
-                ->text($pdf->rightX($data['vatRate'], 50), 193, $data['vatRate'])
-                ->text($pdf->rightX($data['realNet'], 16), 177, $data['realNet'])
-                ->text($pdf->rightX($data['discount'], 16), 185, $data['discount'])
-                ->text($pdf->rightX($data['vat'], 16), 193, $data['vat'])
+                ->textRightX($label['amountNet'], 177, 50)
+                ->textRightX($label['credit'], 185, 50)
+                ->textRightX($data['vatRate'], 193, 50)
+                ->textRightX($data['realNet'], 177, 16)
+                ->textRightX($data['discount'], 185, 16)
+                ->textRightX($data['vat'], 193, 16)
                 ->setTextColor(...Color::LIGHT->rgb())
                 ->setFont('FiraSans-Regular')
                 ->setFontSizeInPoint(16)
-                ->text($pdf->rightX($label['totalAmount'], 50), 207, $label['totalAmount'])
-                ->text($pdf->rightX($data['gross'], 16), 207, $data['gross']);
+                ->textRightX($label['totalAmount'], 207, 50)
+                ->textRightX($data['gross'], 207, 16);
         } else {
             // Total without discount
             $pdf->line(124, 196, 194, 196)
                 ->setTextColor(...Color::TEXT->rgb())
                 ->setFont('FiraSans-ExtraLight')
                 ->setFontSizeInPoint(13)
-                ->text($pdf->rightX($label['amountNet'], 50), 181, $label['amountNet'])
-                ->text($pdf->rightX($data['vatRate'], 50), 190, $data['vatRate'])
-                ->text($pdf->rightX($data['realNet'], 16), 181, $data['realNet'])
-                ->text($pdf->rightX($data['vat'], 16), 190, $data['vat'])
+                ->textRightX($label['amountNet'], 181, 50)
+                ->textRightX($data['vatRate'], 190, 50)
+                ->textRightX($data['realNet'], 181, 16)
+                ->textRightX($data['vat'], 190, 16)
                 ->setTextColor(...Color::LIGHT->rgb())
                 ->setFont('FiraSans-Regular')
                 ->setFontSizeInPoint(16)
-                ->text($pdf->rightX($label['totalAmount'], 50), 205, $label['totalAmount'])
-                ->text($pdf->rightX($data['gross'], 16), 205, $data['gross']);
+                ->textRightX($label['totalAmount'], 205, 50)
+                ->textRightX($data['gross'], 205, 16);
         }
 
         // Terms
@@ -247,19 +247,19 @@ class InvoiceService
                 ->setFont('FiraSans-ExtraLight')
                 ->setTextColor(...Color::DARK->rgb())
                 ->text(15, 63, $label['position'])
-                ->text($pdf->centerX($label['quantityPositions'], 136), 63, $label['quantityPositions'])
-                ->text($pdf->centerX($label['pricePositions'], 162), 63, $label['pricePositions'])
+                ->textCenterX($label['quantityPositions'], 63, 136)
+                ->textCenterX($label['pricePositions'], 63, 162)
                 ->setFont('FiraSans-Regular')
                 ->setTextColor(...Color::LIGHT->rgb())
-                ->text($pdf->centerX($label['totalPositions'], 189), 63, $label['totalPositions']);
+                ->textCenterX($label['totalPositions'], 63, 189);
             $pdf->setFontSizeInPoint(8)
                 ->setFont('FiraSans-ExtraLight')
                 ->setTextColor(...Color::DARK->rgb())
                 ->text(15, 69, $invoice->undated ? $label['description'] : $label['dateAndDescription'])
-                ->text($pdf->centerX($label['inHoursPositions'], 136), 69, $label['inHoursPositions'])
-                ->text($pdf->centerX($label['perHourPositions'], 162), 69, $label['perHourPositions'])
+                ->textCenterX($label['inHoursPositions'], 69, 136)
+                ->textCenterX($label['perHourPositions'], 69, 162)
                 ->setTextColor(...Color::LIGHT->rgb())
-                ->text($pdf->centerX($label['pricePositions'], 189), 69, $label['pricePositions']);
+                ->textCenterX($label['pricePositions'], 69, 189);
 
             // draw positions
             $linesProcessed = 0;
@@ -289,10 +289,10 @@ class InvoiceService
                     ->setXY(14, (85.5 + $rowHeight * $linesProcessed))
                     ->multiCell(height: $rowHeight, text: $posdata['description'])
                     ->setFontSizeInPoint(11)
-                    ->text($pdf->centerX($posdata['hours'], 136), (87 + $rowHeight * $linesProcessed), $posdata['hours'])
-                    ->text($pdf->centerX($posdata['price'], 162), (87 + $rowHeight * $linesProcessed), $posdata['price'])
+                    ->textCenterX($posdata['hours'], (87 + $rowHeight * $linesProcessed), 136)
+                    ->textCenterX($posdata['price'], (87 + $rowHeight * $linesProcessed), 162)
                     ->setTextColor(...Color::LIGHT->rgb())
-                    ->text($pdf->rightX($posdata['total'], 13), (87 + $rowHeight * $linesProcessed), $posdata['total']);
+                    ->textRightX($posdata['total'], (87 + $rowHeight * $linesProcessed), 13);
 
                 $linesProcessed += $lineCount;
             }

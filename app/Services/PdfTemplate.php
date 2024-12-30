@@ -33,12 +33,12 @@ class PdfTemplate extends PdfDocument
         );
         $this->setFont('FiraSans-ExtraLight', fontSizeInPoint: 26)
             ->setTextColor(...Color::LIGHT->rgb())
-            ->text($this->centerX($title), 27, $title);
+            ->textCenterX($title, 27);
         // Contact entries
         $this->setFontSizeInPoint(9)
-            ->text($this->rightX(Setting::get('phone'), 8), 19, Setting::get('phone'))
-            ->text($this->rightX(Setting::get('email'), 8), 25, Setting::get('email'))
-            ->text($this->rightX(Setting::get('website'), 8), 31, Setting::get('website'));
+            ->textRightX(Setting::get('phone'), 19, 8)
+            ->textRightX(Setting::get('email'), 25, 8)
+            ->textRightX(Setting::get('website'), 31, 8);
         // Start content
         $this->setXY(10, 45);
     }
@@ -104,25 +104,29 @@ class PdfTemplate extends PdfDocument
      * Calculate the horizontal start position of a centered text
      *
      * @param  string $text
+     * @param  float $y
      * @param  float|null $anchor If set, this will be used as center point instead of page width
-     * @return float
+     * @return static
      */
-    public function centerX(string $text, ?float $anchor = null): float
+    public function textCenterX(string $text, float $y, ?float $anchor = null): static
     {
-        return $anchor === null
+        $x = $anchor === null
             ? ($this->width - $this->getStringWidth($text)) / 2.0
             : $anchor - $this->getStringWidth($text) / 2.0;
+        return $this->text($x, $y, $text);
     }
 
     /**
      * Calculate the horizontal start position of a right aligned text
      *
      * @param  string $text
-     * @param  float  $margin
-     * @return float
+     * @param  float  $y
+     * @param  float  $offset Margin from right border
+     * @return static
      */
-    public function rightX(string $text, $margin = 0.0): float
+    public function textRightX(string $text, float $y, float $offset = 0.0): static
     {
-        return ($this->width - $this->getStringWidth($text)) - $margin;
+        $x = ($this->width - $this->getStringWidth($text)) - $offset;
+        return $this->text($x, $y, $text);
     }
 }
