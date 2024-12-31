@@ -8,12 +8,20 @@ use fpdf\PdfDocument;
 use App\Models\Setting;
 use App\Enums\DocumentColor as Color;
 use Carbon\Carbon;
+use Exception;
 
 class PdfTemplate extends PdfDocument
 {
+    // Locale
     private $lang;
 
-    public function __construct(string $lang = null) {
+    // Attachments
+    protected array $files = [];
+    protected int $nFiles;
+    protected bool $openAttachmentPane = false;
+
+    public function __construct(string $lang = null)
+    {
         $this->lang = $lang ?? config('app.locale');
         parent::__construct();
     }
@@ -73,9 +81,9 @@ class PdfTemplate extends PdfDocument
         ]);
 
         // Convert to supported char encoding
-        $conf = $conf->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
-        $data = $data->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
-        $label = $label->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+        $conf = $conf->map(fn($e) => iconv('UTF-8', 'windows-1252', $e));
+        $data = $data->map(fn($e) => iconv('UTF-8', 'windows-1252', $e));
+        $label = $label->map(fn($e) => iconv('UTF-8', 'windows-1252', $e));
 
         // Footer content
         $this->setXY(9, -18)
@@ -128,5 +136,112 @@ class PdfTemplate extends PdfDocument
     {
         $x = ($this->width - $this->getStringWidth($text)) - $offset;
         return $this->text($x, $y, $text);
+    }
+
+    public function attach(string $file, string $name = '', string $desc = '')
+    {
+        if ($name == '') {
+            $p = strrpos($file, '/');
+            if ($p === false) {
+                $p = strrpos($file, '\\');
+            }
+            if ($p !== false) {
+                $name = substr($file, $p + 1);
+            }
+            else {
+                $name = $file;
+            }
+        }
+        $this->files[] = ['file' => $file, 'name' => $name, 'desc' => $desc];
+        return $this;
+    }
+
+    public function openAttachmentPane()
+    {
+        $this->openAttachmentPane = true;
+        return $this;
+    }
+
+    protected function putFiles()
+    {
+        foreach ($this->files as $i => &$info) {
+            $file = $info['file'];
+            $name = $info['name'];
+            $desc = $info['desc'];
+
+            $fc = file_get_contents($file);
+            if ($fc === false) {
+                $this->error('Cannot open file: ' . $file);
+            }
+            $size = strlen($fc);
+            $date = @date('YmdHisO', filemtime($file));
+            $md = 'D:' . substr($date, 0, -2) . "'" . substr($date, -2) . "'";;
+
+            $this->putNewObj();
+            $info['n'] = $this->objectNumber;
+            $this->put('<<');
+            $this->put('/Type /Filespec');
+            $this->put('/F (' . $this->escape($name) . ')');
+            $this->put('/UF ' . $this->textstring($name));
+            $this->put('/EF <</F ' . ($this->objectNumber + 1) . ' 0 R>>');
+            if ($desc) {
+                $this->put('/Desc ' . $this->textstring($desc));
+            }
+            $this->put('/AFRelationship /Unspecified');
+            $this->put('>>');
+            $this->put('endobj');
+
+            $this->putNewObj();
+            $this->put('<<');
+            $this->put('/Type /EmbeddedFile');
+            $this->put('/Subtype /application#2Foctet-stream');
+            $this->put('/Length ' . $size);
+            $this->put('/Params <</Size ' . $size . ' /ModDate ' . $this->textstring($md) . '>>');
+            $this->put('>>');
+            $this->putstream($fc);
+            $this->put('endobj');
+        }
+        unset($info);
+
+        $this->putNewObj();
+        $this->nFiles = $this->objectNumber;
+        $a = array();
+        foreach ($this->files as $i => $info) {
+            $a[] = $this->textstring(sprintf('%03d', $i)) . ' ' . $info['n'] . ' 0 R';
+        }
+        $this->put('<<');
+        $this->put('/Names [' . implode(' ', $a) . ']');
+        $this->put('>>');
+        $this->put('endobj');
+    }
+
+    protected function putResources(): void
+    {
+        parent::putResources();
+        if (!empty($this->files)) {
+            $this->putFiles();
+        }
+    }
+
+    protected function putCatalog(): void
+    {
+        parent::putCatalog();
+        if (!empty($this->files)) {
+            $this->put('/Names <</EmbeddedFiles ' . $this->nFiles . ' 0 R>>');
+            $a = array();
+            foreach ($this->files as $info) {
+                $a[] = $info['n'] . ' 0 R';
+            }
+            $this->put('/AF [' . implode(' ', $a) . ']');
+            if ($this->openAttachmentPane) {
+                $this->put('/PageMode /UseAttachments');
+            }
+        }
+    }
+
+    protected function error(string $msg)
+    {
+        // Fatal error
+        throw new Exception('FPDF2 error: ' . $msg);
     }
 }

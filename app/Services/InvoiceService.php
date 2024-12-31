@@ -298,6 +298,11 @@ class InvoiceService
             }
         }
 
+        // Generate and add XML attachment
+        $xmlFile = self::generateEn16931Xml($invoice);
+        $pdf->attach(Storage::path($xmlFile))
+            ->openAttachmentPane();
+
         // Save document
         $filename = strtolower("{$data['number']}_{$label['invoice']}_{$conf['company']}.pdf");
         $pdf->output(PdfDestination::FILE, Storage::path($filename));
