@@ -33,4 +33,16 @@ class Setting extends Model
     {
         return __($this->field);
     }
+
+    /**
+     * Address field
+     */
+    public static function address()
+    {
+        $name = self::get('name');
+        $street = self::get('street');
+        $zip = self::get('zip');
+        $city = self::get('city');
+        return "$name, $street, $zip $city";
+    }
 }

@@ -41,6 +41,37 @@ class Invoice extends Model
     }
 
     /**
+     * All assigned positions sorted depending on undated flag
+     */
+    public function getSortedPositionsAttribute()
+    {
+        // If undated, sort by positions creation date, if dated, sort by positions starting date
+        return $this->positions->sortBy($this->undated ? 'created_at' : 'started_at')->all();
+    }
+
+    /**
+     * All sorted positions split into chunks based on description lines count
+     */
+    public function getPaginatedPositionsAttribute()
+    {
+        // Get positions by page, one page has space for 50 lines (I know. Let me have my magic number here.)
+        $paginated = [];
+        $linesProcessed = 0;
+        foreach ($this->sorted_positions as $p) {
+            // Take the description lines and the position title (2 lines) into account
+            $lineCount = count(explode("\n", trim($p->description))) + 2;
+            $linesProcessed += $lineCount;
+            $i = floor($linesProcessed/50);
+            if (key_exists($i,$paginated)) {
+                $paginated[$i][] = $p;
+            } else {
+                $paginated[$i] = [$p];
+            }
+        }
+        return $paginated;
+    }
+
+    /**
      * Number of hours worked for this invoice
      */
     public function getHoursAttribute()
@@ -63,7 +94,7 @@ class Invoice extends Model
     /**
      * Net amount of all assigned positions
      */
-    public function getNetAttribute()
+    public function getRealNetAttribute()
     {
         $net = 0;
         if ($this->pricing_unit === PricingUnit::Project) {
@@ -74,7 +105,15 @@ class Invoice extends Model
                 PricingUnit::Day => 8,
             };
         }
-        return round($net, 2) - $this->discount;
+        return round($net, 2);
+    }
+
+    /**
+     * Net amount of all assigned positions reduced by discount
+     */
+    public function getNetAttribute()
+    {
+        return $this->real_net - $this->discount;
     }
 
     /**
