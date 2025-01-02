@@ -6,6 +6,7 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Invoice;
+use App\Models\Project;
 use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Filament\Forms\Components;
@@ -40,6 +41,7 @@ class InvoiceResource extends Resource
                             ->label(trans_choice('project', 1))
                             ->columnSpan(6)
                             ->relationship('project', 'title')
+                            ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
                             ->searchable()
                             ->preload()
                             ->suffixIcon('tabler-package')
