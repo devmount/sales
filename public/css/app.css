@@ -6,6 +6,19 @@ abbr {
 }
 .fi-sidebar-header {
     background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+@media (min-width: 1024px) {
+    .fi-topbar {
+        position: fixed !important;
+        right: 0 !important;
+
+        nav {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+    }
 }
 
 iframe#preview {
