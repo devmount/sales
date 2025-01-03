@@ -217,14 +217,17 @@ class InvoiceResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->suffixIcon('tabler-package')
-                                ->required(),
+                                ->required()
+                                ->columnSpan(1),
                             Components\TextInput::make('title')
                                 ->label(__('title'))
-                                ->required(),
+                                ->required()
+                                ->columnSpan(1),
                             Components\Textarea::make('description')
                                 ->label(__('description'))
                                 ->autosize()
-                                ->maxLength(65535),
+                                ->maxLength(65535)
+                                ->columnSpan(2),
                         ]),
                     Actions\Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
