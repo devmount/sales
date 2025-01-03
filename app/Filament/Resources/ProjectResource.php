@@ -142,14 +142,73 @@ class ProjectResource extends Resource
             ->actions(
                 Actions\ActionGroup::make([
                     Actions\EditAction::make()->icon('tabler-edit'),
-                    Actions\ReplicateAction::make()->icon('tabler-copy'),
-                    Actions\Action::make('download')
-                        ->label(__('quote'))
-                        ->icon('tabler-file-type-pdf')
-                        ->url(fn (Project $record): string => static::getUrl('download', ['record' => $record]))
-                        ->openUrlInNewTab(),
-                    Actions\DeleteAction::make()->icon('tabler-trash'),
-                ])
+                    Actions\ReplicateAction::make()
+                        ->icon('tabler-copy')
+                        ->beforeFormFilled(function (Actions\ReplicateAction $action, Project $record) {
+                            $year = Carbon::parse($record->due_at)->year + 1;
+                            $record->start_at = Carbon::create($year)->format('Y-m-d');
+                            $record->due_at = Carbon::create($year, 12, 31)->format('Y-m-d');
+                        })
+                        ->form([
+                            Components\TextInput::make('title')
+                                ->label(__('title'))
+                                ->required()
+                                ->columnSpan(2),
+                            Components\Textarea::make('description')
+                                ->label(__('description'))
+                                ->autosize()
+                                ->maxLength(65535)
+                                ->columnSpan(2),
+                            Components\DatePicker::make('start_at')
+                                ->label(__('startAt'))
+                                ->weekStartsOnMonday()
+                                ->suffixIcon('tabler-calendar-plus')
+                                ->required()
+                                ->columnSpan(1),
+                            Components\DatePicker::make('due_at')
+                                ->label(__('dueAt'))
+                                ->weekStartsOnMonday()
+                                ->suffixIcon('tabler-calendar-check')
+                                ->columnSpan(1),
+                            Components\TextInput::make('minimum')
+                                ->label(__('minimum'))
+                                ->numeric()
+                                ->step(0.1)
+                                ->minValue(0.1)
+                                ->suffix('h')
+                                ->suffixIcon('tabler-clock-check')
+                                ->columnSpan(1),
+                            Components\TextInput::make('scope')
+                                ->label(__('scope'))
+                                ->numeric()
+                                ->step(0.1)
+                                ->minValue(0.1)
+                                ->suffix('h')
+                                ->suffixIcon('tabler-clock-exclamation')
+                                ->required()
+                                ->columnSpan(1),
+                            Components\TextInput::make('price')
+                                ->label(__('price'))
+                                ->numeric()
+                                ->step(0.01)
+                                ->minValue(0.01)
+                                ->suffixIcon('tabler-currency-euro')
+                                ->columnSpan(1)
+                                ->required(),
+                            Components\Select::make('pricing_unit')
+                                ->label(__('pricingUnit'))
+                                ->options(PricingUnit::class)
+                                ->suffixIcon('tabler-clock-2')
+                                ->columnSpan(1)
+                                ->required(),
+                        ]),
+                        Actions\Action::make('download')
+                            ->label(__('quote'))
+                            ->icon('tabler-file-type-pdf')
+                            ->url(fn (Project $record): string => static::getUrl('download', ['record' => $record]))
+                            ->openUrlInNewTab(),
+                        Actions\DeleteAction::make()->icon('tabler-trash'),
+                    ])
                 ->icon('tabler-dots-vertical')
             )
             ->bulkActions([
