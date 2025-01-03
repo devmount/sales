@@ -208,7 +208,24 @@ class InvoiceResource extends Resource
                     Actions\EditAction::make()->icon('tabler-edit'),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->excludeAttributes(['invoiced_at', 'paid_at']),
+                        ->excludeAttributes(['invoiced_at', 'paid_at'])
+                        ->form([
+                            Components\Select::make('project_id')
+                                ->label(trans_choice('project', 1))
+                                ->relationship('project', 'title')
+                                ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
+                                ->searchable()
+                                ->preload()
+                                ->suffixIcon('tabler-package')
+                                ->required(),
+                            Components\TextInput::make('title')
+                                ->label(__('title'))
+                                ->required(),
+                            Components\Textarea::make('description')
+                                ->label(__('description'))
+                                ->autosize()
+                                ->maxLength(65535),
+                        ]),
                     Actions\Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
