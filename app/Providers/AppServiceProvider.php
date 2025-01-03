@@ -81,12 +81,6 @@ class AppServiceProvider extends ServiceProvider
             'rose' => Color::Rose,
         ]);
 
-        // Insert custom content
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::SIDEBAR_FOOTER,
-            fn (): string => '', // TODO: Profile or Logout Link
-        );
-
         // Customize Filament icons
         FilamentIcon::register([
             // Panel Builder icon aliases
