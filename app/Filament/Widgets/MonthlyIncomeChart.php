@@ -14,7 +14,7 @@ class MonthlyIncomeChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 4;
     public ?string $filter = 'net';
-    protected static ?string $pollingInterval = null;
+    protected static ?string $pollingInterval = '5';
 
     public function getHeading(): string
     {
@@ -33,7 +33,7 @@ class MonthlyIncomeChart extends ChartWidget
             ->oldest('paid_at')
             ->get();
         $taxes = Expense::whereNotNull('expended_at')
-            ->whereIn('category', ExpenseCategory::taxCategories())
+            ->where('category', ExpenseCategory::Tax)
             ->oldest('expended_at')
             ->get();
         $period = Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear());
@@ -53,6 +53,12 @@ class MonthlyIncomeChart extends ChartWidget
             }
             if ($this->filter === 'net') {
                 foreach ($taxes as $obj) {
+                    // Shift yearly income taxes post pays to the year before
+                    if ($i > 0 && !Str($obj->description)->contains('EStVA') && CarbonPeriod::create($date, $period[$i+1])->contains(Carbon::parse($obj->expended_at))) {
+                        $invoiceData[$i-1] = round($invoiceData[$i-1] - $obj->net/($i == count($period)-2 ? now()->month : 12), 2);
+                        continue;
+                    }
+                    // Handle income tax advance pays
                     if (CarbonPeriod::create($date, $period[$i+1])->contains(Carbon::parse($obj->expended_at))) {
                         $invoiceData[$i] -= $obj->net;
                     }
