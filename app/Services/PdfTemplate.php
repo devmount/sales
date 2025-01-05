@@ -37,7 +37,8 @@ class PdfTemplate extends PdfDocument
     public function header(): void
     {
         // Title bar
-        $this->setFillColor(0, 32, 51)->rect(0, 9, 210, 30, PdfRectangleStyle::FILL);
+        $this->setFillColor(...Color::MAIN->rgb())
+            ->rect(0, 9, 210, 30, PdfRectangleStyle::FILL);
         // Logo
         $this->image(Setting::get('logo'), 12, 13, 22, 22, 'JPEG');
         // Title text

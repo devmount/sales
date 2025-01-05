@@ -54,12 +54,10 @@ class InvoiceService
             'deliverables' => __("deliverables", locale: $lang),
             'description' => __("description", locale: $lang),
             'explanation' => __("invoice.explanation", ['gross' => $data['gross'], 'number' => $data['number']], $lang),
-            'holder' => __("holder", locale: $lang),
             'inHours' => __("inHours", locale: $lang),
             'invoice' => trans_choice("invoice", 1, locale: $lang),
             'invoiceDate' => __("invoiceDate", locale: $lang),
             'invoiceNumber' => __("invoiceNumber", locale: $lang),
-            'page' => __("page", locale: $lang) ,
             'perHour' => __("perHour", locale: $lang),
             'position' => trans_choice("position", 1, locale: $lang),
             'price' => __("price", locale: $lang),
@@ -91,8 +89,6 @@ class InvoiceService
             ->addFont('FiraSans-ExtraLight', dir: __DIR__ . '/fonts')
             ->addFont('FiraSans-ExtraBold', dir: __DIR__ . '/fonts');
 
-        // Cover page
-        $pdf->addPage();
 
         // Address header
         $pdf->setFont('FiraSans-ExtraLight', fontSizeInPoint: 8)
@@ -224,7 +220,6 @@ class InvoiceService
                 fn ($a, $c) => $a + count(explode("\n", $c->description)) + 2, 0
             ) * $rowHeight + 32;
 
-            $pdf->addPage();
 
             $pdf->setLineWidth(0.8)
                 ->setFillColor(...Color::COL3->rgb())
