@@ -7,6 +7,7 @@ use fpdf\Enums\PdfRectangleStyle;
 use fpdf\PdfDocument;
 use App\Models\Setting;
 use App\Enums\DocumentColor as Color;
+use App\Enums\DocumentType;
 use Carbon\Carbon;
 use Exception;
 
@@ -15,14 +16,18 @@ class PdfTemplate extends PdfDocument
     // Locale
     private $lang;
 
+    // Document type
+    private $type;
+
     // Attachments
     protected array $files = [];
     protected int $nFiles;
     protected bool $openAttachmentPane = false;
 
-    public function __construct(string $lang = null)
+    public function __construct(string $lang = null, DocumentType $type = DocumentType::INVOICE)
     {
         $this->lang = $lang ?? config('app.locale');
+        $this->type = $type;
         parent::__construct();
     }
 
@@ -37,7 +42,14 @@ class PdfTemplate extends PdfDocument
         $this->image(Setting::get('logo'), 12, 13, 22, 22, 'JPEG');
         // Title text
         $title = strtoupper(
-            $this->getPage() <= 1 ? trans_choice("invoice", 1, [], $this->lang) : __("deliverables", [], $this->lang)
+            match ($this->type) {
+                DocumentType::INVOICE => $this->getPage() <= 1
+                    ? trans_choice("invoice", 1, locale: $this->lang)
+                    : __("deliverables", locale: $this->lang),
+                DocumentType::QUOTE => $this->getPage() <= 2
+                    ? __("quote", locale: $this->lang)
+                    : __("costEstimate", locale: $this->lang),
+            }
         );
         $this->setFont('FiraSans-ExtraLight', fontSizeInPoint: 26)
             ->setTextColor(...Color::LIGHT->rgb())
