@@ -46,6 +46,38 @@ class Project extends Model
         return $this->hasMany(Invoice::class);
     }
 
+
+    /**
+     * All assigned estimates sorted by weight
+     */
+    public function getSortedPositionsAttribute()
+    {
+        return $this->estimates->sortBy('weight')->all();
+    }
+
+
+    /**
+     * All sorted estimates split into chunks based on description lines count
+     */
+    public function getPaginatedEstimatesAttribute()
+    {
+        // Get estimates by page, one page has space for 50 lines (I know. Let me have my magic number here.)
+        $paginated = [];
+        $linesProcessed = 0;
+        foreach ($this->sorted_estimates as $e) {
+            // Take the description lines and the position title (2 lines) into account
+            $lineCount = count(explode("\n", trim($e->description))) + 2;
+            $linesProcessed += $lineCount;
+            $i = floor($linesProcessed/50);
+            if (key_exists($i,$paginated)) {
+                $paginated[$i][] = $e;
+            } else {
+                $paginated[$i] = [$e];
+            }
+        }
+        return $paginated;
+    }
+
     /**
      * Number of hours worked for this project
      */

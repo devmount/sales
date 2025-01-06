@@ -55,27 +55,28 @@ class InvoiceService
             'description' => __("description", locale: $lang),
             'explanation' => __("invoice.explanation", ['gross' => $data['gross'], 'number' => $data['number']], $lang),
             'inHours' => __("inHours", locale: $lang),
+            'inHoursPositions' => $billedPerProject ? '' : __("inHours", locale: $lang),
             'invoice' => trans_choice("invoice", 1, locale: $lang),
             'invoiceDate' => __("invoiceDate", locale: $lang),
             'invoiceNumber' => __("invoiceNumber", locale: $lang),
+            'page' => __("page", locale: $lang) ,
             'perHour' => __("perHour", locale: $lang),
+            'perHourPositions' => $billedPerProject ? '' : __("perHour", locale: $lang),
             'position' => trans_choice("position", 1, locale: $lang),
             'price' => __("price", locale: $lang),
-            'priceSutitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("inHours", locale: $lang),
+            'pricePositions' => $billedPerProject ? '' : __("price", locale: $lang),
+            'priceSubtitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("perHour", locale: $lang),
             'quantity' => __("quantity", locale: $lang),
-            'quantitySubtitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("perHour", locale: $lang),
+            'quantityPositions' => $billedPerProject ? '' : __("quantity", locale: $lang),
+            'quantitySubtitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("inHours", locale: $lang),
             'regards' => __("withKindRegards", locale: $lang),
             'statementOfWork' => __("statementOfWork", locale: $lang),
             'sum' => $billedPerProject ? __("sum", locale: $lang) : __("sumOfAllPositions", locale: $lang),
             'to' => __("to", locale: $lang),
             'total' => __("total", locale: $lang),
             'totalAmount' => __("totalAmount", locale: $lang),
-            'vat' => __("vat", locale: $lang),
-            'quantityPositions' => $billedPerProject ? '' : __("quantity", locale: $lang),
-            'pricePositions' => $billedPerProject ? '' : __("price", locale: $lang),
             'totalPositions' => $billedPerProject ? '' : __("total", locale: $lang),
-            'inHoursPositions' => $billedPerProject ? '' : __("inHours", locale: $lang),
-            'perHourPositions' => $billedPerProject ? '' : __("perHour", locale: $lang),
+            'vat' => __("vat", locale: $lang),
         ]);
 
         // Convert to supported char encoding
@@ -85,10 +86,9 @@ class InvoiceService
 
         // Init document
         $pdf = new PdfTemplate($lang);
-        $pdf->addFont('FiraSans-Regular', dir: __DIR__ . '/fonts')
-            ->addFont('FiraSans-ExtraLight', dir: __DIR__ . '/fonts')
-            ->addFont('FiraSans-ExtraBold', dir: __DIR__ . '/fonts');
 
+        // Cover page
+        $pdf->addPage();
 
         // Address header
         $pdf->setFont('FiraSans-ExtraLight', fontSizeInPoint: 8)
@@ -146,8 +146,8 @@ class InvoiceService
             ->setFont('FiraSans-ExtraLight')
             ->setTextColor(...Color::DARK->rgb())
             ->text(15, 124, $label['statementOfWork'])
-            ->textCenterX($label['priceSutitle'], 124, 115)
-            ->textCenterX($label['quantitySubtitle'], 124, 146)
+            ->textCenterX($label['quantitySubtitle'], 124, 115)
+            ->textCenterX($label['priceSubtitle'], 124, 146)
             ->setTextColor(...Color::LIGHT->rgb())
             ->textCenterX($label['sum'], 124, 182);
         $pdf->setTextColor(...Color::DARK->rgb())
@@ -220,6 +220,7 @@ class InvoiceService
                 fn ($a, $c) => $a + count(explode("\n", $c->description)) + 2, 0
             ) * $rowHeight + 32;
 
+            $pdf->addPage();
 
             $pdf->setLineWidth(0.8)
                 ->setFillColor(...Color::COL3->rgb())

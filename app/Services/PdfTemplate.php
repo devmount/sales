@@ -26,9 +26,15 @@ class PdfTemplate extends PdfDocument
 
     public function __construct(string $lang = null, DocumentType $type = DocumentType::INVOICE)
     {
+        // Init
         $this->lang = $lang ?? config('app.locale');
         $this->type = $type;
         parent::__construct();
+
+        // Init fonts
+        $this->addFont('FiraSans-Regular', dir: __DIR__ . '/fonts')
+            ->addFont('FiraSans-ExtraLight', dir: __DIR__ . '/fonts')
+            ->addFont('FiraSans-ExtraBold', dir: __DIR__ . '/fonts');
     }
 
     /**
