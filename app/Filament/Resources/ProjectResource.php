@@ -6,14 +6,16 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource\RelationManagers;
 use App\Models\Project;
+use App\Services\ProjectService;
+use Carbon\Carbon;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
-use Filament\Tables\Table;
 use Filament\Tables\Filters;
-use Carbon\Carbon;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectResource extends Resource
 {
@@ -205,8 +207,10 @@ class ProjectResource extends Resource
                         Actions\Action::make('download')
                             ->label(__('quote'))
                             ->icon('tabler-file-type-pdf')
-                            ->url(fn (Project $record): string => static::getUrl('download', ['record' => $record]))
-                            ->openUrlInNewTab(),
+                            ->action(function (Project $record) {
+                                $file = ProjectService::generateQuotePdf($record);
+                                return response()->download(Storage::path($file));
+                            }),
                         Actions\DeleteAction::make()->icon('tabler-trash'),
                     ])
                 ->icon('tabler-dots-vertical')
@@ -239,7 +243,6 @@ class ProjectResource extends Resource
             'index' => Pages\ListProjects::route('/'),
             'create' => Pages\CreateProject::route('/create'),
             'edit' => Pages\EditProject::route('/{record}/edit'),
-            'download' => Pages\DownloadQuote::route('/{record}/download'),
         ];
     }
 

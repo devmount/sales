@@ -2,28 +2,39 @@
 
 namespace App\Services;
 
-use fpdf\Enums\PdfTextAlignment;
-use fpdf\Enums\PdfRectangleStyle;
-use fpdf\PdfDocument;
-use App\Models\Setting;
 use App\Enums\DocumentColor as Color;
+use App\Enums\DocumentType;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Exception;
+use fpdf\Enums\PdfRectangleStyle;
+use fpdf\Enums\PdfTextAlignment;
+use fpdf\PdfDocument;
 
 class PdfTemplate extends PdfDocument
 {
     // Locale
     private $lang;
 
+    // Document type
+    private $type;
+
     // Attachments
     protected array $files = [];
     protected int $nFiles;
     protected bool $openAttachmentPane = false;
 
-    public function __construct(string $lang = null)
+    public function __construct(string $lang = null, DocumentType $type = DocumentType::INVOICE)
     {
+        // Init
         $this->lang = $lang ?? config('app.locale');
+        $this->type = $type;
         parent::__construct();
+
+        // Init fonts
+        $this->addFont('FiraSans-Regular', dir: __DIR__ . '/fonts')
+            ->addFont('FiraSans-ExtraLight', dir: __DIR__ . '/fonts')
+            ->addFont('FiraSans-ExtraBold', dir: __DIR__ . '/fonts');
     }
 
     /**
@@ -32,12 +43,20 @@ class PdfTemplate extends PdfDocument
     public function header(): void
     {
         // Title bar
-        $this->setFillColor(0, 32, 51)->rect(0, 9, 210, 30, PdfRectangleStyle::FILL);
+        $this->setFillColor(...Color::MAIN->rgb())
+            ->rect(0, 9, 210, 30, PdfRectangleStyle::FILL);
         // Logo
         $this->image(Setting::get('logo'), 12, 13, 22, 22, 'JPEG');
         // Title text
         $title = strtoupper(
-            $this->getPage() <= 1 ? trans_choice("invoice", 1, [], $this->lang) : __("deliverables", [], $this->lang)
+            match ($this->type) {
+                DocumentType::INVOICE => $this->getPage() <= 1
+                    ? trans_choice("invoice", 1, locale: $this->lang)
+                    : __("deliverables", locale: $this->lang),
+                DocumentType::QUOTE => $this->getPage() <= 2
+                    ? __("quote", locale: $this->lang)
+                    : __("costEstimate", locale: $this->lang),
+            }
         );
         $this->setFont('FiraSans-ExtraLight', fontSizeInPoint: 26)
             ->setTextColor(...Color::LIGHT->rgb())
@@ -103,7 +122,15 @@ class PdfTemplate extends PdfDocument
             ->line(0, 105, 3, 105)
             ->line(0, 148, 5, 148);
         if ($this->getPage() <= 1) {
-            $this->setDrawColor(...Color::LINE4->rgb());
+            switch ($this->type) {
+                case DocumentType::QUOTE:
+                    $this->setDrawColor(...Color::COL1->rgb());
+                    break;
+                case DocumentType::INVOICE:
+                default:
+                    $this->setDrawColor(...Color::LINE4->rgb());
+                    break;
+            }
         }
         $this->line(0, 210, 3, 210);
     }
