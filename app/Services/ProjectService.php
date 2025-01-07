@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DocumentColor as Color;
+use App\Enums\DocumentType;
 use App\Enums\PricingUnit;
 use App\Models\Project;
 use App\Models\Setting;
@@ -28,24 +29,26 @@ class ProjectService
         $client = $project?->client;
         $lang = $client?->language ?? 'de';
         $billedPerProject = $project->pricing_unit === PricingUnit::Project;
+        $now = Carbon::now();
 
         $data = collect([
             'address' => Setting::address(),
             'clientLocation' => "{$client->zip} {$client->city}",
             'clientName' => strtoupper($client->name),
             'clientStreet' => $client->street,
-            'date' => Carbon::now()->locale($lang)->isoFormat('LL'),
-            'start' => Carbon::parse($project->start)->locale($lang)->isoFormat('LL'),
-            'due' => Carbon::parse($project->due)->locale($lang)->isoFormat('LL'),
-            'validDate' => Carbon::now()->addWeeks(3)->locale($lang)->isoFormat('LL'),
+            'date' => $now->locale($lang)->isoFormat('LL'),
+            'start' => Carbon::parse($project->start_at)->locale($lang)->isoFormat('LL'),
+            'due' => Carbon::parse($project->due_at)->locale($lang)->isoFormat('LL'),
+            'validDate' => $now->addWeeks(3)->locale($lang)->isoFormat('LL'),
             'description' => $project->description,
             'gross' => Number::currency($project->estimated_gross, 'EUR', locale: $lang),
             'hours' => Number::format($billedPerProject ? $project->scope ?? 0 : $project->estimated_hours, 1, locale: $lang),
             'net' => Number::currency($project->estimated_net, 'EUR', locale: $lang),
+            'number' => $now->format('Ymd'),
             'price' => Number::currency($billedPerProject ? ($project->scope ? $project->price/$project->scope : 0) : $project->price, 'EUR', locale: $lang),
             'title' => $project->title,
             'vat' => Number::currency($project->estimated_vat, 'EUR', locale: $lang),
-            'vatRate' => Number::percentage($conf['vat_rate']*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
+            'vatRate' => Number::percentage($conf['vatRate']*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
         ]);
 
         $label = collect([
@@ -97,7 +100,7 @@ class ProjectService
         $label = $label->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
 
         // Init document
-        $pdf = new PdfTemplate($lang);
+        $pdf = new PdfTemplate($lang, DocumentType::QUOTE);
 
         // Cover page
         $pdf->addPage();
@@ -193,24 +196,36 @@ class ProjectService
 
         // Terms
         $pdf->setFontSizeInPoint(10)
-            ->setXY(9, 222)
-            ->multiCell(160, 5.25, $label['servicePeriod'], align: PdfTextAlignment::LEFT)
+            ->setXY(9, 224)
+            ->multiCell(160, 8, $label['servicePeriod'], align: PdfTextAlignment::LEFT)
             ->setFont('FiraSans-ExtraLight')
+            ->setX(9)
             ->multiCell(160, 5.25, $label['servicePeriodText'], align: PdfTextAlignment::LEFT);
 
         // Terms page
         $pdf->addPage()
-            ->multiCell(160, 5.25, $label['invoicing'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-Regular')
+            ->multiCell(160, 8, "\n" . $label['invoicing'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-ExtraLight')
             ->multiCell(160, 5.25, $label['invoicingText'], align: PdfTextAlignment::LEFT)
-            ->multiCell(160, 5.25, $label['disclaimer'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-Regular')
+            ->multiCell(160, 8, "\n" . $label['disclaimer'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-ExtraLight')
             ->multiCell(160, 5.25, $label['disclaimerText'], align: PdfTextAlignment::LEFT)
-            ->multiCell(160, 5.25, $label['servicePlace'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-Regular')
+            ->multiCell(160, 8, "\n" . $label['servicePlace'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-ExtraLight')
             ->multiCell(160, 5.25, $label['servicePlaceText'], align: PdfTextAlignment::LEFT)
-            ->multiCell(160, 5.25, $label['referenceUse'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-Regular')
+            ->multiCell(160, 8, "\n" . $label['referenceUse'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-ExtraLight')
             ->multiCell(160, 5.25, $label['referenceUseText'], align: PdfTextAlignment::LEFT)
-            ->multiCell(160, 5.25, $label['validity'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-Regular')
+            ->multiCell(160, 8, "\n" . $label['validity'], align: PdfTextAlignment::LEFT)
+            ->setFont('FiraSans-ExtraLight')
             ->multiCell(160, 5.25, $label['validityText'], align: PdfTextAlignment::LEFT)
-            ->text(10, 235, $label['inquiries'])
+            ->setXY(9, 227)
+            ->multiCell(160, 5.25, $label['inquiries'], align: PdfTextAlignment::LEFT)
             ->text(10, 245, $label['regards'])
             ->text(10, 250, $conf['name']);
 
@@ -294,7 +309,7 @@ class ProjectService
         }
 
         // Save document
-        $filename = strtolower("{$data['number']}_{$label['invoice']}_{$conf['company']}.pdf");
+        $filename = strtolower("{$data['number']}_{$label['quote']}_{$conf['company']}.pdf");
         $pdf->output(PdfDestination::FILE, Storage::path($filename));
         return $filename;
     }

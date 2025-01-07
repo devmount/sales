@@ -122,7 +122,15 @@ class PdfTemplate extends PdfDocument
             ->line(0, 105, 3, 105)
             ->line(0, 148, 5, 148);
         if ($this->getPage() <= 1) {
-            $this->setDrawColor(...Color::LINE4->rgb());
+            switch ($this->type) {
+                case DocumentType::QUOTE:
+                    $this->setDrawColor(...Color::COL1->rgb());
+                    break;
+                case DocumentType::INVOICE:
+                default:
+                    $this->setDrawColor(...Color::LINE4->rgb());
+                    break;
+            }
         }
         $this->line(0, 210, 3, 210);
     }

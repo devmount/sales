@@ -50,7 +50,7 @@ class Project extends Model
     /**
      * All assigned estimates sorted by weight
      */
-    public function getSortedPositionsAttribute()
+    public function getSortedEstimatesAttribute()
     {
         return $this->estimates->sortBy('weight')->all();
     }
