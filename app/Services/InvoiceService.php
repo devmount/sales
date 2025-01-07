@@ -39,9 +39,9 @@ class InvoiceService
             'discount' => '-' . Number::currency($invoice->discount ?? 0, 'EUR', locale: $lang),
             'gross' => Number::currency($invoice->gross, 'EUR', locale: $lang),
             'hours' => Number::format($billedPerProject ? 1 : $invoice->hours, 1, locale: $lang),
-            'realNet' => Number::currency($invoice->real_net, 'EUR', locale: $lang),
             'number' => $invoice->current_number,
             'price' => Number::currency($invoice->price, 'EUR', locale: $lang),
+            'realNet' => Number::currency($invoice->real_net, 'EUR', locale: $lang),
             'title' => $invoice->title,
             'vat' => Number::currency($invoice->vat, 'EUR', locale: $lang),
             'vatRate' => Number::percentage($invoice->vat_rate*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
@@ -266,10 +266,10 @@ class InvoiceService
                 $num = $i + 1;
 
                 $posdata = collect([
-                    'title' => $invoice->undated ? "{$num}. {$label['position']}" : $posdate,
                     'description' => trim($position->description),
                     'hours' => Number::format($billedPerProject ? '' : $poshours, 1, locale: $lang),
                     'price' => $billedPerProject ? '' : Number::currency($invoice->price, 'EUR', locale: $lang),
+                    'title' => $invoice->undated ? "{$num}. {$label['position']}" : $posdate,
                     'total' => $billedPerProject ? '' : Number::currency($invoice->price * $poshours, 'EUR', locale: $lang),
                 ]);
 

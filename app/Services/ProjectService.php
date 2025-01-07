@@ -14,7 +14,6 @@ use fpdf\Enums\PdfRectangleStyle;
 use fpdf\Enums\PdfTextAlignment;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
-use XMLWriter;
 
 class ProjectService
 {
@@ -37,16 +36,16 @@ class ProjectService
             'clientName' => strtoupper($client->name),
             'clientStreet' => $client->street,
             'date' => $now->locale($lang)->isoFormat('LL'),
-            'start' => Carbon::parse($project->start_at)->locale($lang)->isoFormat('LL'),
-            'due' => Carbon::parse($project->due_at)->locale($lang)->isoFormat('LL'),
-            'validDate' => $now->addWeeks(3)->locale($lang)->isoFormat('LL'),
             'description' => $project->description,
+            'due' => Carbon::parse($project->due_at)->locale($lang)->isoFormat('LL'),
             'gross' => Number::currency($project->estimated_gross, 'EUR', locale: $lang),
             'hours' => Number::format($billedPerProject ? $project->scope ?? 0 : $project->estimated_hours, 1, locale: $lang),
             'net' => Number::currency($project->estimated_net, 'EUR', locale: $lang),
             'number' => $now->format('Ymd'),
             'price' => Number::currency($billedPerProject ? ($project->scope ? $project->price/$project->scope : 0) : $project->price, 'EUR', locale: $lang),
+            'start' => Carbon::parse($project->start_at)->locale($lang)->isoFormat('LL'),
             'title' => $project->title,
+            'validDate' => $now->addWeeks(3)->locale($lang)->isoFormat('LL'),
             'vat' => Number::currency($project->estimated_vat, 'EUR', locale: $lang),
             'vatRate' => Number::percentage($conf['vatRate']*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
         ]);
@@ -58,16 +57,20 @@ class ProjectService
             'disclaimer' => __('disclaimer', locale: $lang),
             'disclaimerText' => __('disclaimerText', locale: $lang),
             'inHours' => __('inHours', locale: $lang),
+            'inHoursEstimates' => $billedPerProject ? '' : __('inHours', locale: $lang),
             'inquiries' => __('inquiries', locale: $lang),
             'invoicing' => __('invoicing', locale: $lang),
             'invoicingText' => __('invoicingText', locale: $lang),
             'otherClients' => __('otherClients', locale: $lang),
             'perHour' => __('perHour', locale: $lang),
+            'perHourEstimates' => $billedPerProject ? '' : __('perHour', locale: $lang),
             'position' => trans_choice('position', 1, locale: $lang),
             'price' => __('price', locale: $lang),
-            'quantitySubtitle' => $billedPerProject ? __('flatRate', locale: $lang) : __('inHours', locale: $lang),
-            'quantity' => __('quantity', locale: $lang),
+            'priceEstimates' => $billedPerProject ? '' : __('price', locale: $lang),
             'priceSubtitle' => $billedPerProject ? __('flatRate', locale: $lang) : __('perHour', locale: $lang),
+            'quantity' => __('quantity', locale: $lang),
+            'quantityEstimates' => $billedPerProject ? '' : __('quantity', locale: $lang),
+            'quantitySubtitle' => $billedPerProject ? __('flatRate', locale: $lang) : __('inHours', locale: $lang),
             'quote' => __('quote', locale: $lang),
             'quote' => __('quote', locale: $lang),
             'referenceUse' => __('referenceUse', locale: $lang),
@@ -82,16 +85,12 @@ class ProjectService
             'to' => __('to', locale: $lang),
             'total' => __('total', locale: $lang),
             'totalAmount' => __('totalAmount', locale: $lang),
+            'totalEstimates' => $billedPerProject ? '' : __('total', locale: $lang),
             'totalQuote' => __('totalQuote', locale: $lang),
             'validity' => __('validity', locale: $lang),
             'validityText' => __('validityText', ['date' => $data['validDate']], $lang),
             'vat' => __('vat', locale: $lang),
             'vatId' => __('vatId', locale: $lang),
-            'quantityEstimates' => $billedPerProject ? '' : __('quantity', locale: $lang),
-            'priceEstimates' => $billedPerProject ? '' : __('price', locale: $lang),
-            'totalEstimates' => $billedPerProject ? '' : __('total', locale: $lang),
-            'inHoursEstimates' => $billedPerProject ? '' : __('inHours', locale: $lang),
-            'perHourEstimates' => $billedPerProject ? '' : __('perHour', locale: $lang),
         ]);
 
         // Convert to supported char encoding
@@ -280,10 +279,10 @@ class ProjectService
                 $lineCount = count(explode("\n", trim($estimate->description))) + 2;
 
                 $estData = collect([
-                    'title' => $estimate->title,
                     'description' => trim($estimate->description),
                     'hours' => Number::format($estimate->amount, 1, locale: $lang),
                     'price' => $billedPerProject ? '' : Number::currency($project->price, 'EUR', locale: $lang),
+                    'title' => $estimate->title,
                     'total' => $billedPerProject ? '' : Number::currency($project->price * $estimate->amount, 'EUR', locale: $lang),
                 ]);
 

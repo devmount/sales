@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use fpdf\Enums\PdfTextAlignment;
-use fpdf\Enums\PdfRectangleStyle;
-use fpdf\PdfDocument;
-use App\Models\Setting;
 use App\Enums\DocumentColor as Color;
 use App\Enums\DocumentType;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Exception;
+use fpdf\Enums\PdfRectangleStyle;
+use fpdf\Enums\PdfTextAlignment;
+use fpdf\PdfDocument;
 
 class PdfTemplate extends PdfDocument
 {
