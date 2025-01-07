@@ -57,9 +57,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Register assets
         FilamentAsset::register([
-            Js::make('jspdf-script', asset('js/jspdf.umd.min.js')),
-        ]);
-        FilamentAsset::register([
             Css::make('app-styles', asset('css/app.css')),
         ]);
 
