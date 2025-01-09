@@ -208,6 +208,7 @@ class ProjectResource extends Resource
                             ->label(__('quote'))
                             ->icon('tabler-file-type-pdf')
                             ->action(function (Project $record) {
+                                Storage::delete(Storage::allFiles());
                                 $file = ProjectService::generateQuotePdf($record);
                                 return response()->download(Storage::path($file));
                             }),

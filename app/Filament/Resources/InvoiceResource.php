@@ -233,6 +233,7 @@ class InvoiceResource extends Resource
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
                         ->action(function (Invoice $record) {
+                            Storage::delete(Storage::allFiles());
                             $file = InvoiceService::generatePdf($record);
                             return response()->download(Storage::path($file));
                         }),
@@ -240,6 +241,7 @@ class InvoiceResource extends Resource
                         ->label(__('downloadFiletype', ['type' => 'xml']))
                         ->icon('tabler-file-type-xml')
                         ->action(function (Invoice $record) {
+                            Storage::delete(Storage::allFiles());
                             $file = InvoiceService::generateEn16931Xml($record);
                             return response()->download(Storage::path($file));
                         }),
