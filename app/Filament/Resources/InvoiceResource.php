@@ -12,15 +12,16 @@ use Carbon\Carbon;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
-use Filament\Tables\Table;
 use Filament\Tables\Filters;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
-use Illuminate\Support\Facades\Storage;
 
 class InvoiceResource extends Resource
 {
@@ -244,6 +245,34 @@ class InvoiceResource extends Resource
                             Storage::delete(Storage::allFiles());
                             $file = InvoiceService::generateEn16931Xml($record);
                             return response()->download(Storage::path($file));
+                        }),
+                    Actions\Action::make('issue')
+                        ->label(__('invoiceIssued'))
+                        ->icon('tabler-calendar-up')
+                        ->hidden(fn(Invoice $record) => $record->invoiced_at !== null)
+                        ->action(function (Invoice $record) {
+                            $record->invoiced_at = now();
+                            $record->save();
+                            Notification::make()->title(__('invoiceDateSet'))->success()->send();
+                            return true;
+                        }),
+                    Actions\Action::make('paid')
+                        ->label(__('invoicePaid'))
+                        ->icon('tabler-calendar-down')
+                        ->hidden(fn(Invoice $record) => ($record->invoiced_at === null && $record->paid_at === null) || $record->paid_at !== null)
+                        ->form([
+                            Components\DatePicker::make('paid_at')
+                                ->label(__('paidAt'))
+                                ->weekStartsOnMonday()
+                                ->suffixIcon('tabler-calendar-down')
+                                ->default(now())
+                                ->required(),
+                        ])
+                        ->action(function (array $data, Invoice $record) {
+                            $record->paid_at = $data['paid_at'];
+                            $record->save();
+                            Notification::make()->title(__('PaidDateSet'))->success()->send();
+                            return true;
                         }),
                     Actions\Action::make('send')
                         ->label(__('send'))
