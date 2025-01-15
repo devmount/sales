@@ -93,6 +93,7 @@
     "invoiceDates": "Rechnungsdaten",
     "invoiceIssued": "Rechnung gestellt",
     "invoiceNumber": "Rechnungsnummer",
+    "invoicePaid": "Rechnung beglichen",
     "invoicesInProgress": "Rechnungen in Arbeit",
     "invoicing": "Rechnungsstellung",
     "invoicingText": "Ein Personentag umfasst 8 Stunden. Die Abrechnung erfolgt auf Basis tatsächlich geleisteter Stunden. Der Abrechnungstakt beträgt 15 Minuten. Die innerhalb eines Kalendermonats geleisteten Stunden werden sofern nicht anders vereinbart zu Beginn des Folgemonats in Rechnung gestellt. Ein Nachweis über die erbrachten Leistungen wird der Rechnung angehängt. Die Rechnungssumme ist innerhalb von 14 Tagen nach Erhalt der Rechnung fällig.",

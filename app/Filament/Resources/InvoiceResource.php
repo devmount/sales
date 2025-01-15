@@ -248,11 +248,28 @@ class InvoiceResource extends Resource
                         }),
                     Actions\Action::make('issue')
                         ->label(__('invoiceIssued'))
-                        ->icon('tabler-calendar')
+                        ->icon('tabler-calendar-up')
                         ->action(function (Invoice $record) {
                             $record->invoiced_at = now();
                             $record->save();
                             Notification::make()->title(__('invoiceDateSet'))->success()->send();
+                            return true;
+                        }),
+                    Actions\Action::make('paid')
+                        ->label(__('invoicePaid'))
+                        ->icon('tabler-calendar-down')
+                        ->form([
+                            Components\DatePicker::make('paid_at')
+                                ->label(__('paidAt'))
+                                ->weekStartsOnMonday()
+                                ->suffixIcon('tabler-calendar-down')
+                                ->default(now())
+                                ->required(),
+                        ])
+                        ->action(function (array $data, Invoice $record) {
+                            $record->paid_at = $data['paid_at'];
+                            $record->save();
+                            Notification::make()->title(__('PaidDateSet'))->success()->send();
                             return true;
                         }),
                     Actions\Action::make('send')
