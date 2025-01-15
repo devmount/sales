@@ -249,6 +249,7 @@ class InvoiceResource extends Resource
                     Actions\Action::make('issue')
                         ->label(__('invoiceIssued'))
                         ->icon('tabler-calendar-up')
+                        ->hidden(fn(Invoice $record) => $record->invoiced_at !== null)
                         ->action(function (Invoice $record) {
                             $record->invoiced_at = now();
                             $record->save();
@@ -258,6 +259,7 @@ class InvoiceResource extends Resource
                     Actions\Action::make('paid')
                         ->label(__('invoicePaid'))
                         ->icon('tabler-calendar-down')
+                        ->hidden(fn(Invoice $record) => ($record->invoiced_at === null && $record->paid_at === null) || $record->paid_at !== null)
                         ->form([
                             Components\DatePicker::make('paid_at')
                                 ->label(__('paidAt'))
