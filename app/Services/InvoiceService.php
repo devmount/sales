@@ -44,39 +44,42 @@ class InvoiceService
             'realNet' => Number::currency($invoice->real_net, 'EUR', locale: $lang),
             'title' => $invoice->title,
             'vat' => Number::currency($invoice->vat, 'EUR', locale: $lang),
-            'vatRate' => Number::percentage($invoice->vat_rate*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
+            'vatRate' => $invoice->taxable
+                ? Number::percentage($invoice->vat_rate*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang)
+                : __('vatNotChargeable', locale: $lang),
         ]);
 
         $label = collect([
-            'amountNet' => __("amountNet", locale: $lang),
-            'credit' => __("credit", locale: $lang),
-            'dateAndDescription' => __("dateAndDescription", locale: $lang),
-            'deliverables' => __("deliverables", locale: $lang),
-            'description' => __("description", locale: $lang),
-            'explanation' => __("invoice.explanation", ['gross' => $data['gross'], 'number' => $data['number']], $lang),
-            'inHours' => __("inHours", locale: $lang),
-            'inHoursPositions' => $billedPerProject ? '' : __("inHours", locale: $lang),
-            'invoice' => trans_choice("invoice", 1, locale: $lang),
-            'invoiceDate' => __("invoiceDate", locale: $lang),
-            'invoiceNumber' => __("invoiceNumber", locale: $lang),
-            'page' => __("page", locale: $lang) ,
-            'perHour' => __("perHour", locale: $lang),
-            'perHourPositions' => $billedPerProject ? '' : __("perHour", locale: $lang),
-            'position' => trans_choice("position", 1, locale: $lang),
-            'price' => __("price", locale: $lang),
-            'pricePositions' => $billedPerProject ? '' : __("price", locale: $lang),
-            'priceSubtitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("perHour", locale: $lang),
-            'quantity' => __("quantity", locale: $lang),
-            'quantityPositions' => $billedPerProject ? '' : __("quantity", locale: $lang),
-            'quantitySubtitle' => $billedPerProject ? __("flatRate", locale: $lang) : __("inHours", locale: $lang),
-            'regards' => __("withKindRegards", locale: $lang),
-            'statementOfWork' => __("statementOfWork", locale: $lang),
-            'sum' => $billedPerProject ? __("sum", locale: $lang) : __("sumOfAllPositions", locale: $lang),
-            'to' => __("to", locale: $lang),
-            'total' => __("total", locale: $lang),
-            'totalAmount' => __("totalAmount", locale: $lang),
-            'totalPositions' => $billedPerProject ? '' : __("total", locale: $lang),
-            'vat' => __("vat", locale: $lang),
+            'amountNet' => __('amountNet', locale: $lang),
+            'credit' => __('credit', locale: $lang),
+            'dateAndDescription' => __('dateAndDescription', locale: $lang),
+            'deliverables' => __('deliverables', locale: $lang),
+            'description' => __('description', locale: $lang),
+            'explanation' => __('invoice.explanation', ['gross' => $data['gross'], 'number' => $data['number']], $lang)
+                . ($invoice->taxable ? '' : __('invoice.noVat', locale: $lang))
+                . __('inquiries', locale: $lang),
+            'inHours' => __('inHours', locale: $lang),
+            'inHoursPositions' => $billedPerProject ? '' : __('inHours', locale: $lang),
+            'invoice' => trans_choice('invoice', 1, locale: $lang),
+            'invoiceDate' => __('invoiceDate', locale: $lang),
+            'invoiceNumber' => __('invoiceNumber', locale: $lang),
+            'page' => __('page', locale: $lang) ,
+            'perHour' => __('perHour', locale: $lang),
+            'perHourPositions' => $billedPerProject ? '' : __('perHour', locale: $lang),
+            'position' => trans_choice('position', 1, locale: $lang),
+            'price' => __('price', locale: $lang),
+            'pricePositions' => $billedPerProject ? '' : __('price', locale: $lang),
+            'priceSubtitle' => $billedPerProject ? __('flatRate', locale: $lang) : __('perHour', locale: $lang),
+            'quantity' => __('quantity', locale: $lang),
+            'quantityPositions' => $billedPerProject ? '' : __('quantity', locale: $lang),
+            'quantitySubtitle' => $billedPerProject ? __('flatRate', locale: $lang) : __('inHours', locale: $lang),
+            'regards' => __('withKindRegards', locale: $lang),
+            'statementOfWork' => __('statementOfWork', locale: $lang),
+            'sum' => $billedPerProject ? __('sum', locale: $lang) : __('sumOfAllPositions', locale: $lang),
+            'to' => __('to', locale: $lang),
+            'total' => __('total', locale: $lang),
+            'totalAmount' => __('totalAmount', locale: $lang),
+            'totalPositions' => $billedPerProject ? '' : __('total', locale: $lang),
         ]);
 
         // Convert to supported char encoding
@@ -176,10 +179,10 @@ class InvoiceService
                 ->setFont('FiraSans-ExtraLight')
                 ->setFontSizeInPoint(13)
                 ->textRightX($label['amountNet'], 177, 50)
-                ->textRightX($label['credit'], 185, 50)
-                ->textRightX($data['vatRate'], 193, 50)
                 ->textRightX($data['realNet'], 177, 16)
+                ->textRightX($label['credit'], 185, 50)
                 ->textRightX($data['discount'], 185, 16)
+                ->textRightX($data['vatRate'], 193, 50)
                 ->textRightX($data['vat'], 193, 16)
                 ->setTextColor(...Color::LIGHT->rgb())
                 ->setFont('FiraSans-Regular')
@@ -193,8 +196,8 @@ class InvoiceService
                 ->setFont('FiraSans-ExtraLight')
                 ->setFontSizeInPoint(13)
                 ->textRightX($label['amountNet'], 181, 50)
-                ->textRightX($data['vatRate'], 190, 50)
                 ->textRightX($data['realNet'], 181, 16)
+                ->textRightX($data['vatRate'], 190, 50)
                 ->textRightX($data['vat'], 190, 16)
                 ->setTextColor(...Color::LIGHT->rgb())
                 ->setFont('FiraSans-Regular')
@@ -209,8 +212,8 @@ class InvoiceService
             ->setTextColor(...Color::DARK->rgb())
             ->setXY(9, 222)
             ->multiCell(180, 5.25, $label['explanation'], align: PdfTextAlignment::LEFT)
-            ->text(10, 245, $label['regards'])
-            ->text(10, 250, $conf['name']);
+            ->lineBreak()
+            ->multiCell(180, 5.25, "{$label['regards']}\n{$conf['name']}", align: PdfTextAlignment::LEFT);
 
         // Positions
         foreach ($invoice->paginated_positions as $positions) {
