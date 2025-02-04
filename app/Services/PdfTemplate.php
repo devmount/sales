@@ -6,13 +6,15 @@ use App\Enums\DocumentColor as Color;
 use App\Enums\DocumentType;
 use App\Models\Setting;
 use Carbon\Carbon;
-use Exception;
 use fpdf\Enums\PdfRectangleStyle;
 use fpdf\Enums\PdfTextAlignment;
 use fpdf\PdfDocument;
+use fpdf\Traits\PdfAttachmentTrait;
 
 class PdfTemplate extends PdfDocument
 {
+    use PdfAttachmentTrait;
+
     // Locale
     private $lang;
 
@@ -43,7 +45,7 @@ class PdfTemplate extends PdfDocument
     public function header(): void
     {
         // Title bar
-        $this->setFillColor(...Color::MAIN->rgb())
+        $this->setFillColor(Color::MAIN->pdf())
             ->rect(0, 9, 210, 30, PdfRectangleStyle::FILL);
         // Logo
         $this->image(Setting::get('logo'), 12, 13, 22, 22, 'JPEG');
@@ -59,7 +61,7 @@ class PdfTemplate extends PdfDocument
             }
         );
         $this->setFont('FiraSans-ExtraLight', fontSizeInPoint: 26)
-            ->setTextColor(...Color::LIGHT->rgb())
+            ->setTextColor(Color::LIGHT->pdf())
             ->textCenterX($title, 27);
         // Contact entries
         $this->setFontSizeInPoint(9)
@@ -76,7 +78,7 @@ class PdfTemplate extends PdfDocument
     public function footer(): void
     {
         // Bottom line
-        $this->setDrawColor(...Color::LINE->rgb())
+        $this->setDrawColor(Color::LINE->pdf())
             ->setLineWidth(0.4)
             ->line(10, 277, 202, 277);
         // Signature
@@ -84,7 +86,7 @@ class PdfTemplate extends PdfDocument
         // Page number
         $this->setY(-26)
             ->setFontSizeInPoint(9)
-            ->setTextColor(...Color::GRAY->rgb())
+            ->setTextColor(Color::GRAY->pdf())
             ->cell(text: \sprintf('%d/{nb}', $this->getPage()), align: PdfTextAlignment::CENTER);
 
         // Prepare settings, data and labels
@@ -118,17 +120,17 @@ class PdfTemplate extends PdfDocument
             ->multiCell(40, 4, "{$conf['vatId']}\n{$conf['taxOffice']}");
 
         // Document guides
-        $this->setDrawColor(...Color::LINE->rgb())
+        $this->setDrawColor(Color::LINE->pdf())
             ->line(0, 105, 3, 105)
             ->line(0, 148, 5, 148);
         if ($this->getPage() <= 1) {
             switch ($this->type) {
                 case DocumentType::QUOTE:
-                    $this->setDrawColor(...Color::COL1->rgb());
+                    $this->setDrawColor(Color::COL1->pdf());
                     break;
                 case DocumentType::INVOICE:
                 default:
-                    $this->setDrawColor(...Color::LINE4->rgb());
+                    $this->setDrawColor(Color::LINE4->pdf());
                     break;
             }
         }
@@ -165,110 +167,4 @@ class PdfTemplate extends PdfDocument
         return $this->text($x, $y, $text);
     }
 
-    public function attach(string $file, string $name = '', string $desc = '')
-    {
-        if ($name == '') {
-            $p = strrpos($file, '/');
-            if ($p === false) {
-                $p = strrpos($file, '\\');
-            }
-            if ($p !== false) {
-                $name = substr($file, $p + 1);
-            }
-            else {
-                $name = $file;
-            }
-        }
-        $this->files[] = ['file' => $file, 'name' => $name, 'desc' => $desc];
-        return $this;
-    }
-
-    public function openAttachmentPane()
-    {
-        $this->openAttachmentPane = true;
-        return $this;
-    }
-
-    protected function putFiles()
-    {
-        foreach ($this->files as $i => &$info) {
-            $file = $info['file'];
-            $name = $info['name'];
-            $desc = $info['desc'];
-
-            $fc = file_get_contents($file);
-            if ($fc === false) {
-                $this->error('Cannot open file: ' . $file);
-            }
-            $size = strlen($fc);
-            $date = @date('YmdHisO', filemtime($file));
-            $md = 'D:' . substr($date, 0, -2) . "'" . substr($date, -2) . "'";;
-
-            $this->putNewObj();
-            $info['n'] = $this->objectNumber;
-            $this->put('<<');
-            $this->put('/Type /Filespec');
-            $this->put('/F (' . $this->escape($name) . ')');
-            $this->put('/UF ' . $this->textstring($name));
-            $this->put('/EF <</F ' . ($this->objectNumber + 1) . ' 0 R>>');
-            if ($desc) {
-                $this->put('/Desc ' . $this->textstring($desc));
-            }
-            $this->put('/AFRelationship /Unspecified');
-            $this->put('>>');
-            $this->put('endobj');
-
-            $this->putNewObj();
-            $this->put('<<');
-            $this->put('/Type /EmbeddedFile');
-            $this->put('/Subtype /application#2Foctet-stream');
-            $this->put('/Length ' . $size);
-            $this->put('/Params <</Size ' . $size . ' /ModDate ' . $this->textstring($md) . '>>');
-            $this->put('>>');
-            $this->putstream($fc);
-            $this->put('endobj');
-        }
-        unset($info);
-
-        $this->putNewObj();
-        $this->nFiles = $this->objectNumber;
-        $a = array();
-        foreach ($this->files as $i => $info) {
-            $a[] = $this->textstring(sprintf('%03d', $i)) . ' ' . $info['n'] . ' 0 R';
-        }
-        $this->put('<<');
-        $this->put('/Names [' . implode(' ', $a) . ']');
-        $this->put('>>');
-        $this->put('endobj');
-    }
-
-    protected function putResources(): void
-    {
-        parent::putResources();
-        if (!empty($this->files)) {
-            $this->putFiles();
-        }
-    }
-
-    protected function putCatalog(): void
-    {
-        parent::putCatalog();
-        if (!empty($this->files)) {
-            $this->put('/Names <</EmbeddedFiles ' . $this->nFiles . ' 0 R>>');
-            $a = array();
-            foreach ($this->files as $info) {
-                $a[] = $info['n'] . ' 0 R';
-            }
-            $this->put('/AF [' . implode(' ', $a) . ']');
-            if ($this->openAttachmentPane) {
-                $this->put('/PageMode /UseAttachments');
-            }
-        }
-    }
-
-    protected function error(string $msg)
-    {
-        // Fatal error
-        throw new Exception('FPDF2 error: ' . $msg);
-    }
 }
