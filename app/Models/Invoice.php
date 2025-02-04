@@ -129,7 +129,7 @@ class Invoice extends Model
      */
     public function getVatAttribute()
     {
-        return round($this->net * $this->vat_rate, 2);
+        return $this->taxable ? round($this->net * $this->vat_rate, 2) : 0;
     }
 
     /**

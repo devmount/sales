@@ -58,7 +58,7 @@ class ProjectService
             'disclaimerText' => __('disclaimerText', locale: $lang),
             'inHours' => __('inHours', locale: $lang),
             'inHoursEstimates' => $billedPerProject ? '' : __('inHours', locale: $lang),
-            'inquiries' => __('inquiries', locale: $lang),
+            'inquiries' => __('quote.explanation', locale: $lang) . __('inquiries', locale: $lang),
             'invoicing' => __('invoicing', locale: $lang),
             'invoicingText' => __('invoicingText', locale: $lang),
             'otherClients' => __('otherClients', locale: $lang),
