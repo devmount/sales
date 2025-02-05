@@ -430,8 +430,11 @@ class InvoiceService
                             $x->text($invoice->vat);
                         $x->endElement();
                         $x->startElement('cac:TaxCategory');
-                            $x->writeElement('cbc:ID', 'S');
-                            $x->writeElement('cbc:Percent', $invoice->vat_rate*100);
+                            $x->writeElement('cbc:ID', $invoice->taxable ? 'S' : 'G');
+                            $x->writeElement('cbc:Percent', $invoice->taxable ? $invoice->vat_rate*100 : 0);
+                            if (!$invoice->taxable) {
+                                $x->writeElement('cbc:TaxExemptionReasonCode', 'VATEX-EU-G');
+                            }
                             $x->startElement('cac:TaxScheme');
                                 $x->writeElement('cbc:ID', 'VAT');
                             $x->endElement();
@@ -477,8 +480,8 @@ class InvoiceService
                             $x->writeElement('cbc:Description', $position->description);
                             $x->writeElement('cbc:Name', trans_choice('position', 1, locale: $lang));
                             $x->startElement('cac:ClassifiedTaxCategory');
-                                $x->writeElement('cbc:ID', 'S');
-                                $x->writeElement('cbc:Percent', $invoice->vat_rate*100);
+                                $x->writeElement('cbc:ID', $invoice->taxable ? 'S' : 'G');
+                                $x->writeElement('cbc:Percent', $invoice->taxable ? $invoice->vat_rate*100 : 0);
                                 $x->startElement('cac:TaxScheme');
                                     $x->writeElement('cbc:ID', 'VAT');
                                 $x->endElement();
