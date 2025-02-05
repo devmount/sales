@@ -310,6 +310,7 @@ class InvoiceService
 
     /**
      * Generate invoice XML (EN16931 conform), save it and return path/filename
+     * @see https://validator.invoice-portal.de for validation check
      *
      * @param Invoice $invoice Record to export
      * @return string
@@ -430,6 +431,7 @@ class InvoiceService
                             $x->text($invoice->vat);
                         $x->endElement();
                         $x->startElement('cac:TaxCategory');
+                            // See https://developer.vertexinc.com/einvoicing/docs/en-16931-tax-categories
                             $x->writeElement('cbc:ID', $invoice->taxable ? 'S' : 'G');
                             $x->writeElement('cbc:Percent', $invoice->taxable ? $invoice->vat_rate*100 : 0);
                             if (!$invoice->taxable) {
