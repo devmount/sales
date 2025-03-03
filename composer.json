@@ -10,9 +10,9 @@
     "require": {
         "php": "^8.3",
         "filament/filament": "^3.2.42",
-        "flowframe/laravel-trend": "^0.3.0",
+        "flowframe/laravel-trend": "^0.4.0",
         "guzzlehttp/guzzle": "^7.2",
-        "laravel/framework": "^11.0.7",
+        "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0.0",
         "laravel/tinker": "^2.8",
         "laurentmuller/fpdf2": "^2.0",
