@@ -196,8 +196,9 @@ class Invoice extends Model
             TimeUnit::YEAR => $d->endOfYear()->toDateString(),
         };
         $records = self::where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->get();
-        $net = array_sum($records->map(fn (self $r) => $r->net)->toArray());
-        $vat = array_sum($records->map(fn (self $r) => $r->vat)->toArray());
-        return [$net, $vat];
+        $netTaxable = $records->filter(fn (self $r) => $r->taxable)->map(fn (self $r) => $r->net)->sum();
+        $netUntaxable = $records->filter(fn (self $r) => !$r->taxable)->map(fn (self $r) => $r->net)->sum();
+        $vat = $records->map(fn (self $r) => $r->vat)->sum();
+        return [$netTaxable, $netUntaxable, $vat];
     }
 }

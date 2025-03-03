@@ -25,15 +25,14 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
     use InteractsWithInfolists;
     use InteractsWithForms;
 
-    protected int | string | array $columnSpan = 6;
+    protected int | string | array $columnSpan = 8;
     protected static string $view = 'filament.widgets.tax-overview';
-    protected static ?string $maxHeight = '265px';
-    protected static int $entryCount = 6;
+    protected static int $entryCount = 14;
     public ?string $filter = 'm';
 
     public function getHeading(): string
     {
-        return __('vatTax');
+        return __('advanceVat');
     }
 
     public function infolist(Infolist $infolist): Infolist
@@ -71,108 +70,131 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         ];
     }
 
-    private function generateEntries($heading, $labels, $netIncome, $vatExpenses, $totalVat): array
+    private function generateEntries($heading, $labels, $netTaxable, $netUntaxable, $vatExpenses, $totalVat): array
     {
         return [
             Components\TextEntry::make('timeUnit')
                 ->label($heading)
-                ->columnSpan(3)
+                ->columnSpan(2)
                 ->fontFamily(FontFamily::Mono)
                 ->state($labels)
                 ->listWithLineBreaks(),
-            Components\TextEntry::make('netIncome')
-                ->label(__('netIncome'))
+            Components\TextEntry::make('netTaxable')
+                ->label(__('netTaxable'))
                 ->columnSpan(3)
                 ->money('eur')
                 ->fontFamily(FontFamily::Mono)
-                ->state($netIncome)
+                ->state($netTaxable)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->alignRight()
-                ->copyable()
-                ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
+                ->copyable(fn (string $state): string => floatval($state) > 0)
+                ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+            Components\TextEntry::make('netUntaxable')
+                ->label(__('netUntaxable'))
+                ->columnSpan(3)
+                ->money('eur')
+                ->fontFamily(FontFamily::Mono)
+                ->state($netUntaxable)
+                ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
+                ->listWithLineBreaks()
+                ->alignRight()
+                ->copyable(fn (string $state): string => floatval($state) > 0)
+                ->copyableState(fn (string $state): string => Number::format(floatval($state))),
             Components\TextEntry::make('vatExpenses')
                 ->label(__('vatExpenses'))
-                ->columnSpan(3)
+                ->columnSpan(2)
                 ->money('eur')
                 ->fontFamily(FontFamily::Mono)
                 ->state($vatExpenses)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->alignRight()
-                ->copyable()
-                ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
+                ->copyable(fn (string $state): string => floatval($state) > 0)
+                ->copyableState(fn (string $state): string => Number::format(floatval($state))),
             Components\TextEntry::make('totalVat')
                 ->label(__('totalVat'))
-                ->columnSpan(3)
+                ->columnSpan(2)
                 ->money('eur')
                 ->fontFamily(FontFamily::Mono)
                 ->state($totalVat)
                 ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
                 ->listWithLineBreaks()
                 ->alignRight()
-                ->copyable()
-                ->copyableState(fn (string $state): string => Number::format(floatVal($state))),
+                ->copyable(fn (string $state): string => floatval($state) > 0)
+                ->copyableState(fn (string $state): string => Number::format(floatval($state))),
             ];
     }
 
     private function getMonthData(): array
     {
         $labels = [];
-        $netIncome = [];
+        $netIncomeTaxable = [];
+        $netIncomeUntaxable = [];
         $vatExpenses = [];
         $totalVat = [];
 
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->locale(app()->getLocale())->monthName;
-            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::MONTH);
+            [$netTaxable, $netUntaxable, $vatEarned] = Invoice::ofTime($dt, TimeUnit::MONTH);
             [, $vatExpended] = Expense::ofTime($dt, TimeUnit::MONTH);
-            $netIncome[] = $netEarned;
+            $netIncomeTaxable[] = $netTaxable;
+            $netIncomeUntaxable[] = $netUntaxable;
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subMonthsNoOverflow();
         }
-        return $this->generateEntries(__('month'), $labels, $netIncome, $vatExpenses, $totalVat);
+        return $this->generateEntries(
+            __('month'), $labels, $netIncomeTaxable, $netIncomeUntaxable, $vatExpenses, $totalVat
+        );
     }
 
     private function getQuarterData(): array
     {
         $labels = [];
-        $netIncome = [];
+        $netIncomeTaxable = [];
+        $netIncomeUntaxable = [];
         $vatExpenses = [];
         $totalVat = [];
 
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = "$dt->year Q$dt->quarter";
-            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::QUARTER);
+            [$netTaxable, $netUntaxable, $vatEarned] = Invoice::ofTime($dt, TimeUnit::QUARTER);
             [, $vatExpended] = Expense::ofTime($dt, TimeUnit::QUARTER);
-            $netIncome[] = $netEarned;
+            $netIncomeTaxable[] = $netTaxable;
+            $netIncomeUntaxable[] = $netUntaxable;
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subQuarterNoOverflow();
         }
-        return $this->generateEntries(__('quarter'), $labels, $netIncome, $vatExpenses, $totalVat);
+        return $this->generateEntries(
+            __('quarter'), $labels, $netIncomeTaxable, $netIncomeUntaxable, $vatExpenses, $totalVat
+        );
     }
 
     private function getYearData(): array
     {
         $labels = [];
-        $netIncome = [];
+        $netIncomeTaxable = [];
+        $netIncomeUntaxable = [];
         $vatExpenses = [];
         $totalVat = [];
 
         $dt = Carbon::today();
         for ($i=0; $i < static::$entryCount; $i++) {
             $labels[] = $dt->year;
-            [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
+            [$netTaxable, $netUntaxable, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
             [, $vatExpended] = Expense::ofTime($dt, TimeUnit::YEAR);
-            $netIncome[] = $netEarned;
+            $netIncomeTaxable[] = $netTaxable;
+            $netIncomeUntaxable[] = $netUntaxable;
             $vatExpenses[] = $vatExpended;
             $totalVat[] = $vatEarned - $vatExpended;
             $dt->subYearNoOverflow();
         }
-        return $this->generateEntries(__('year'), $labels, $netIncome, $vatExpenses, $totalVat);
+        return $this->generateEntries(
+            __('year'), $labels, $netIncomeTaxable, $netIncomeUntaxable, $vatExpenses, $totalVat
+        );
     }
 }

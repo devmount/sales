@@ -246,6 +246,12 @@ class InvoiceResource extends Resource
                             $file = InvoiceService::generateEn16931Xml($record);
                             return response()->download(Storage::path($file));
                         }),
+                    Actions\Action::make('send')
+                        ->label(__('send'))
+                        ->icon('tabler-mail-forward')
+                        ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
+                            . '?subject=' . rawurlencode(trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
+                            . '&body=' . rawurlencode(__('email.template.invoicing.body.url', ['title' => $record->project?->title], $record->project?->client?->language))),
                     Actions\Action::make('issue')
                         ->label(__('invoiceIssued'))
                         ->icon('tabler-calendar-up')
@@ -274,12 +280,6 @@ class InvoiceResource extends Resource
                             Notification::make()->title(__('PaidDateSet'))->success()->send();
                             return true;
                         }),
-                    Actions\Action::make('send')
-                        ->label(__('send'))
-                        ->icon('tabler-mail-forward')
-                        ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
-                            . '?subject=' . rawurlencode(trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
-                            . '&body=' . rawurlencode(__('email.template.invoicing.body.url', ['title' => $record->project?->title], $record->project?->client?->language))),
                     Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')

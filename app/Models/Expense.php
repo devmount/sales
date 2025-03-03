@@ -62,7 +62,7 @@ class Expense extends Model
 
     public static function saveLastAdvanceVat(): bool
     {
-        [, $vatIn] = Invoice::ofTime(now()->subMonth(), TimeUnit::MONTH);
+        [,, $vatIn] = Invoice::ofTime(now()->subMonth(), TimeUnit::MONTH);
         [, $vatOut] = self::ofTime(now()->subMonth(), TimeUnit::MONTH);
         $obj = new self([
             'expended_at' => now(),
