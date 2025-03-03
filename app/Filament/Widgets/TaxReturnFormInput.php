@@ -45,7 +45,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
     protected function getData(): ?array
     {
         $dt = Carbon::create($this->filter, 1, 1);
-        [$netEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
+        [$netEarned,, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR); // TODO: Untaxable income
         [$netGoodExpended, $vatGoodExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Good);
         [$netServiceExpended, $vatServiceExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Service);
         $netExpended = $netGoodExpended + $netServiceExpended;
@@ -118,6 +118,9 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
         ];
     }
 
+    /**
+     * @return array<Components\TextEntry>
+     */
     private function renderData(): array
     {
         $entries = [];
@@ -147,7 +150,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
                 ->alignRight()
                 ->tooltip($line['help'])
                 ->copyable()
-                ->copyableState(fn (string $state): string => Number::format(floatVal($state)));
+                ->copyableState(fn (string $state): string => Number::format(floatval($state)));
         }
         return $entries;
     }
