@@ -262,6 +262,13 @@ class InvoiceResource extends Resource
                             Notification::make()->title(__('invoiceDateSet'))->success()->send();
                             return true;
                         }),
+                    Actions\Action::make('remind')
+                        ->label(__('paymentReminder'))
+                        ->icon('tabler-mail-exclamation')
+                        ->hidden(fn(Invoice $record) => ($record->invoiced_at === null && $record->paid_at === null) || $record->paid_at !== null)
+                        ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
+                            . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
+                            . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->current_number], $record->project?->client?->language))),
                     Actions\Action::make('paid')
                         ->label(__('invoicePaid'))
                         ->icon('tabler-calendar-down')
