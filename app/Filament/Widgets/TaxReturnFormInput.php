@@ -62,7 +62,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
             [
                 'itr' => null,
                 'vr' => '22',
-                'rsc' => '14',
+                'rsc' => '15',
                 'value' => $netEarned,
                 'help' => __('formLabels')['rsc14'],
                 'color' => 'primary',
@@ -70,7 +70,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
             [
                 'itr' => null,
                 'vr' => null,
-                'rsc' => '16',
+                'rsc' => '17',
                 'value' => $vatEarned,
                 'help' => __('formLabels')['rsc16'],
                 'color' => 'primary',
@@ -78,7 +78,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
             [
                 'itr' => null,
                 'vr' => null,
-                'rsc' => '26',
+                'rsc' => '27',
                 'value' => $netGoodExpended,
                 'help' => __('formLabels')['rsc26'],
                 'color' => 'danger',
@@ -86,7 +86,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
             [
                 'itr' => null,
                 'vr' => null,
-                'rsc' => '27',
+                'rsc' => '29',
                 'value' => $netServiceExpended,
                 'help' => __('formLabels')['rsc27'],
                 'color' => 'danger',
@@ -94,7 +94,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
             [
                 'itr' => null,
                 'vr' => '79',
-                'rsc' => '55',
+                'rsc' => '57',
                 'value' => $vatExpended,
                 'help' => __('formLabels')['rsc55'],
                 'color' => 'danger',
