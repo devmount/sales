@@ -41,4 +41,14 @@ enum OfftimeCategory: string implements HasLabel, HasColor
             self::Incident => false,
         };
     }
+
+    public static function options(): array
+    {
+        return [
+            self::Vacation->value => __('vacation'),
+            self::Holiday->value => __('holiday'),
+            self::Sick->value => __('sick'),
+            self::Incident->value => __('incident'),
+        ];
+    }
 }

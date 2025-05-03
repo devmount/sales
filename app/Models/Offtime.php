@@ -33,7 +33,7 @@ class Offtime extends Model
     public function getDaysCountAttribute(): int
     {
         return $this->end
-            ? $this->start->diffInDays($this->end)
+            ? $this->start->diffInDays($this->end) + 1
             : 1;
     }
 

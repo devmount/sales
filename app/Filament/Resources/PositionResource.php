@@ -41,7 +41,7 @@ class PositionResource extends Resource
                     ->inline(false)
                     ->default(true)
                     ->columnSpan(4),
-                    Components\DateTimePicker::make('started_at')
+                Components\DateTimePicker::make('started_at')
                     ->label(__('startedAt'))
                     ->weekStartsOnMonday()
                     ->seconds(false)
