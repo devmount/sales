@@ -10,6 +10,7 @@ enum OfftimeCategory: string implements HasLabel, HasColor
     case Vacation = 'vacation';
     case Holiday = 'holiday';
     case Sick = 'sick';
+    case Incident = 'incident';
 
     public function getLabel(): ?string
     {
@@ -17,6 +18,7 @@ enum OfftimeCategory: string implements HasLabel, HasColor
             self::Vacation => __('vacation'),
             self::Holiday => __('holiday'),
             self::Sick => __('sick'),
+            self::Incident => __('incident'),
         };
     }
 
@@ -26,6 +28,17 @@ enum OfftimeCategory: string implements HasLabel, HasColor
             self::Vacation => 'blue',
             self::Holiday => 'teal',
             self::Sick => 'purple',
+            self::Incident => 'purple',
+        };
+    }
+
+    public function isPlanned(): bool
+    {
+        return match ($this) {
+            self::Vacation => true,
+            self::Holiday => true,
+            self::Sick => false,
+            self::Incident => false,
         };
     }
 }
