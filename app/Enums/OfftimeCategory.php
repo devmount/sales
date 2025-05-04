@@ -4,6 +4,7 @@ namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Colors\Color;
 
 enum OfftimeCategory: string implements HasLabel, HasColor
 {
@@ -25,10 +26,20 @@ enum OfftimeCategory: string implements HasLabel, HasColor
     public function getColor(): string | array | null
     {
         return match ($this) {
-            self::Vacation => 'blue',
-            self::Holiday => 'teal',
-            self::Sick => 'purple',
-            self::Incident => 'purple',
+            self::Vacation => Color::Lime,
+            self::Holiday => Color::Lime,
+            self::Sick => Color::Rose,
+            self::Incident => Color::Rose,
+        };
+    }
+
+    public function hexColor(): string
+    {
+        return match ($this) {
+            self::Vacation => '#9ae600',
+            self::Holiday => '#9ae600',
+            self::Sick => '#ff2056',
+            self::Incident => '#ff2056',
         };
     }
 
