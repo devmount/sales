@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
 use App\Enums\TimeUnit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -156,6 +157,27 @@ class Invoice extends Model
     public function getCurrentNumberAttribute()
     {
         return now()->format('Ymd') . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Calculate the final invoice number of format YYYYMMDD##ID
+     */
+    public function getFinalNumberAttribute(): string
+    {
+        $date = Carbon::parse($this->invoiced_at)?->format('Ymd') ?? '';
+        return $date . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Calculate the final invoice number of format YYYYMMDD##ID
+     */
+    public function getStatusAttribute(): InvoiceStatus
+    {
+        return match (true) {
+            !$this->invoiced_at && !$this->paid_at => InvoiceStatus::RUNNING,
+            $this->invoiced_at && !$this->paid_at => InvoiceStatus::SENT,
+            $this->invoiced_at && $this->paid_at => InvoiceStatus::PAID,
+        };
     }
 
     /**
