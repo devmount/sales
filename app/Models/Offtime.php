@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class Offtime extends Model
 {
@@ -50,6 +51,39 @@ class Offtime extends Model
                 $query->where('start', '<', $date)->where('end', '>', $date);
             })
             ->first();
+    }
+
+    /**
+     * Calculate number of days of for a given year
+     */
+    public static function daysCountByYear(int $year): int
+    {
+        $start = Carbon::create($year, 1, 1);
+        $end = Carbon::create($year, 12, 31);
+        $offDays = collect();
+
+        // Get number of weekend days
+        foreach (CarbonPeriod::create($start, $end) as $date) {
+            if ($date->isWeekend()) {
+                $offDays->put($date->format('Y-m-d'), true);
+            }
+        }
+
+        // Get number of manual off times
+        $records = Offtime::where('start', '>=', $start)->where('start', '<=', $end)->get();
+        foreach ($records as $offtime) {
+            if (!$offtime->end) {
+                $offDays->put($offtime->start->format('Y-m-d'), true);
+                continue;
+            }
+            foreach (CarbonPeriod::create($offtime->start, $offtime->end) as $date) {
+                if ($date->year === $year) {
+                    $offDays->put($date->format('Y-m-d'), true);
+                }
+            }
+        }
+
+        return $offDays->count();
     }
 
 
