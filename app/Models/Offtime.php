@@ -47,9 +47,8 @@ class Offtime extends Model
         return Offtime::where('start', $date->format('Y-m-d'))
             ->orWhere('end', $date->format('Y-m-d'))
             ->orWhere(function (Builder $query) use ($date) {
-                $query->where('start', '>', $date->format('Y-m-d'))
-                    ->where('end', '<', $date->format('Y-m-d'));
-                })
+                $query->where('start', '<', $date)->where('end', '>', $date);
+            })
             ->first();
     }
 
