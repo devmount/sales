@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
@@ -249,30 +250,24 @@ class InvoiceResource extends Resource
                     Actions\Action::make('send')
                         ->label(__('send'))
                         ->icon('tabler-mail-forward')
+                        ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::RUNNING)
                         ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
                             . '?subject=' . rawurlencode(trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
                             . '&body=' . rawurlencode(__('email.template.invoicing.body.url', ['title' => $record->project?->title], $record->project?->client?->language))),
                     Actions\Action::make('issue')
                         ->label(__('invoiceIssued'))
                         ->icon('tabler-calendar-up')
-                        ->hidden(fn(Invoice $record) => $record->invoiced_at !== null)
+                        ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::RUNNING)
                         ->action(function (Invoice $record) {
                             $record->invoiced_at = now();
                             $record->save();
                             Notification::make()->title(__('invoiceDateSet'))->success()->send();
                             return true;
                         }),
-                    Actions\Action::make('remind')
-                        ->label(__('paymentReminder'))
-                        ->icon('tabler-mail-exclamation')
-                        ->hidden(fn(Invoice $record) => ($record->invoiced_at === null && $record->paid_at === null) || $record->paid_at !== null)
-                        ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
-                            . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
-                            . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->current_number], $record->project?->client?->language))),
                     Actions\Action::make('paid')
                         ->label(__('invoicePaid'))
                         ->icon('tabler-calendar-down')
-                        ->hidden(fn(Invoice $record) => ($record->invoiced_at === null && $record->paid_at === null) || $record->paid_at !== null)
+                        ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::SENT)
                         ->form([
                             Components\DatePicker::make('paid_at')
                                 ->label(__('paidAt'))
@@ -287,6 +282,14 @@ class InvoiceResource extends Resource
                             Notification::make()->title(__('PaidDateSet'))->success()->send();
                             return true;
                         }),
+                    Actions\Action::make('remind')
+                        ->label(__('paymentReminder'))
+                        ->icon('tabler-mail-exclamation')
+                        ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::SENT)
+                        ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
+                            . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->final_number
+                            . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->final_number], $record->project?->client?->language))),
+
                     Actions\DeleteAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical')
