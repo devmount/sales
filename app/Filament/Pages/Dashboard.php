@@ -26,6 +26,7 @@ class Dashboard extends BaseDashboard
             AppWidgets\MonthlyIncomeChart::class,
             AppWidgets\SumProductiveHoursChart::class,
             AppWidgets\WeeklyHoursChart::class,
+            AppWidgets\OfftimeChart::class,
         ];
     }
 }
