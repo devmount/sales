@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('start')->index();
             $table->date('end')->index()->nullable();
             $table->enum('category', array_column(OfftimeCategory::cases(), 'value'))->index();
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
