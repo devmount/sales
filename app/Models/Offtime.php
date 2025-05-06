@@ -54,36 +54,49 @@ class Offtime extends Model
     }
 
     /**
-     * Calculate number of days of for a given year
+     * Calculate number of days off for a given year
+     *
+     * @param  int $year
+     * @return array [weekends, planned, unplanned, total] counts
      */
-    public static function daysCountByYear(int $year): int
+    public static function daysCountByYear(int $year): array
     {
         $start = Carbon::create($year, 1, 1);
         $end = Carbon::create($year, 12, 31);
-        $offDays = collect();
+        $total = collect();
+        $weekends = 0;
+        $cat = ['planned' => 0, 'unplanned' => 0];
 
         // Get number of weekend days
         foreach (CarbonPeriod::create($start, $end) as $date) {
             if ($date->isWeekend()) {
-                $offDays->put($date->format('Y-m-d'), true);
+                $weekends += 1;
+                $total->put($date->format('Y-m-d'), true);
             }
         }
 
         // Get number of manual off times
         $records = Offtime::where('start', '>=', $start)->where('start', '<=', $end)->get();
         foreach ($records as $offtime) {
+            $state = $offtime->category->isPlanned() ? 'planned' : 'unplanned';
+
+            // Single day offtime
             if (!$offtime->end) {
-                $offDays->put($offtime->start->format('Y-m-d'), true);
+                $cat[$state] += 1;
+                $total->put($offtime->start->format('Y-m-d'), true);
                 continue;
             }
+
+            // Multiday offtimes
             foreach (CarbonPeriod::create($offtime->start, $offtime->end) as $date) {
                 if ($date->year === $year) {
-                    $offDays->put($date->format('Y-m-d'), true);
+                    $cat[$state] += 1;
+                    $total->put($date->format('Y-m-d'), true);
                 }
             }
         }
 
-        return $offDays->count();
+        return [$weekends, $cat['planned'], $cat['unplanned'], $total->count()];
     }
 
 
