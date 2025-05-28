@@ -12,6 +12,7 @@ use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Filters;
@@ -26,62 +27,7 @@ class ClientResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Components\Section::make()
-                    ->columns(12)
-                    ->schema([
-                        Components\TextInput::make('name')
-                            ->label(__('name'))
-                            ->hint(__('client.name.hint'))
-                            ->hintIcon('tabler-info-circle')
-                            ->columnSpan(6)
-                            ->required(),
-                        Components\TextInput::make('short')
-                            ->label(__('short'))
-                            ->columnSpan(3)
-                            ->suffixIcon('tabler-letter-spacing'),
-                        Components\ColorPicker::make('color')
-                            ->label(__('color'))
-                            ->columnSpan(3)
-                            ->suffixIcon('tabler-palette'),
-                        Components\TextInput::make('address')
-                            ->label(__('address'))
-                            ->columnSpan(6),
-                        Components\Select::make('language')
-                            ->label(__('language'))
-                            ->columnSpan(6)
-                            ->suffixIcon('tabler-language')
-                            ->options(LanguageCode::class)
-                            ->required(),
-                        Components\TextInput::make('street')
-                            ->label(__('street'))
-                            ->columnSpan(6),
-                        Components\TextInput::make('vat_id')
-                            ->label(__('vatId'))
-                            ->suffixIcon('tabler-tax-euro')
-                            ->columnSpan(6),
-                        Components\TextInput::make('zip')
-                            ->label(__('zip'))
-                            ->columnSpan(3),
-                        Components\TextInput::make('city')
-                            ->label(__('city'))
-                            ->columnSpan(3),
-                        Components\TextInput::make('email')
-                            ->label(__('email'))
-                            ->columnSpan(6)
-                            ->suffixIcon('tabler-mail')
-                            ->email(),
-                        Components\TextInput::make('country')
-                            ->label(__('country'))
-                            ->columnSpan(6),
-                        Components\TextInput::make('phone')
-                            ->label(__('phone'))
-                            ->columnSpan(6)
-                            ->suffixIcon('tabler-phone')
-                            ->tel(),
-                    ])
-            ]);
+        return $form->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -128,7 +74,10 @@ class ClientResource extends Resource
                     ->options(LanguageCode::class),
             ])
             ->actions(Actions\ActionGroup::make([
-                Actions\EditAction::make()->icon('tabler-edit'),
+                Actions\EditAction::make()
+                    ->icon('tabler-edit')
+                    ->form(self::formFields())
+                    ->modalWidth(MaxWidth::FiveExtraLarge),
                 Actions\Action::make('kontaktieren')
                     ->disabled(fn (Client $record) => !boolval($record->email))
                     ->icon('tabler-mail')
@@ -149,8 +98,8 @@ class ClientResource extends Resource
                             (new ContactClient(body: $data['content']))->subject($data['subject'])
                         );
                     }),
-                Actions\ReplicateAction::make()->icon('tabler-copy'),
-                Actions\DeleteAction::make()->icon('tabler-trash'),
+                Actions\ReplicateAction::make()->icon('tabler-copy')->form(self::formFields()),
+                Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
             ]))
             ->bulkActions([
                 Actions\BulkActionGroup::make([
@@ -159,7 +108,7 @@ class ClientResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -178,8 +127,6 @@ class ClientResource extends Resource
     {
         return [
             'index' => Pages\ListClients::route('/'),
-            'create' => Pages\CreateClient::route('/create'),
-            'edit' => Pages\EditClient::route('/{record}/edit'),
         ];
     }
 
@@ -201,5 +148,65 @@ class ClientResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('client', 2);
+    }
+
+    public static function formFields(): array
+    {
+        return [
+            Components\Section::make()
+                ->columns(12)
+                ->schema([
+                    Components\TextInput::make('name')
+                        ->label(__('name'))
+                        ->hint(__('client.name.hint'))
+                        ->hintIcon('tabler-info-circle')
+                        ->columnSpan(6)
+                        ->required(),
+                    Components\TextInput::make('short')
+                        ->label(__('short'))
+                        ->columnSpan(3)
+                        ->suffixIcon('tabler-letter-spacing'),
+                    Components\ColorPicker::make('color')
+                        ->label(__('color'))
+                        ->columnSpan(3)
+                        ->suffixIcon('tabler-palette'),
+                    Components\TextInput::make('address')
+                        ->label(__('address'))
+                        ->columnSpan(6),
+                    Components\Select::make('language')
+                        ->label(__('language'))
+                        ->columnSpan(6)
+                        ->suffixIcon('tabler-language')
+                        ->options(LanguageCode::class)
+                        ->required(),
+                    Components\TextInput::make('street')
+                        ->label(__('street'))
+                        ->columnSpan(6),
+                    Components\TextInput::make('vat_id')
+                        ->label(__('vatId'))
+                        ->suffixIcon('tabler-tax-euro')
+                        ->columnSpan(6),
+                    Components\TextInput::make('zip')
+                        ->label(__('zip'))
+                        ->columnSpan(3),
+                    Components\TextInput::make('city')
+                        ->label(__('city'))
+                        ->columnSpan(3),
+                    Components\TextInput::make('email')
+                        ->label(__('email'))
+                        ->columnSpan(6)
+                        ->suffixIcon('tabler-mail')
+                        ->email(),
+                    Components\TextInput::make('country')
+                        ->label(__('country'))
+                        ->columnSpan(6),
+                    Components\TextInput::make('phone')
+                        ->label(__('phone'))
+                        ->columnSpan(6)
+                        ->suffixIcon('tabler-phone')
+                        ->tel(),
+                ]
+            )
+        ];
     }
 }
