@@ -25,76 +25,7 @@ class ProjectResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Components\Section::make()
-                    ->columns(12)
-                    ->schema([
-                        Components\Select::make('client_id')
-                            ->label(trans_choice('client', 1))
-                            ->relationship('client', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->suffixIcon('tabler-users')
-                            ->columnSpan(6)
-                            ->required(),
-                        Components\Toggle::make('aborted')
-                            ->label(__('aborted'))
-                            ->inline(false)
-                            ->columnSpan(6),
-                        Components\TextInput::make('title')
-                            ->label(__('title'))
-                            ->columnSpan(6)
-                            ->required(),
-                        Components\Textarea::make('description')
-                            ->label(__('description'))
-                            ->autosize()
-                            ->maxLength(65535)
-                            ->columnSpan(6),
-                        Components\DatePicker::make('start_at')
-                            ->label(__('startAt'))
-                            ->weekStartsOnMonday()
-                            ->suffixIcon('tabler-calendar-plus')
-                            ->required()
-                            ->columnSpan(6),
-                        Components\DatePicker::make('due_at')
-                            ->label(__('dueAt'))
-                            ->weekStartsOnMonday()
-                            ->suffixIcon('tabler-calendar-check')
-                            ->columnSpan(6),
-                        Components\TextInput::make('minimum')
-                            ->label(__('minimum'))
-                            ->numeric()
-                            ->step(0.1)
-                            ->minValue(0.1)
-                            ->suffix('h')
-                            ->suffixIcon('tabler-clock-check')
-                            ->columnSpan(6),
-                        Components\TextInput::make('scope')
-                            ->label(__('scope'))
-                            ->numeric()
-                            ->step(0.1)
-                            ->minValue(0.1)
-                            ->suffix('h')
-                            ->suffixIcon('tabler-clock-exclamation')
-                            ->required()
-                            ->columnSpan(6),
-                        Components\TextInput::make('price')
-                            ->label(__('price'))
-                            ->numeric()
-                            ->step(0.01)
-                            ->minValue(0.01)
-                            ->suffixIcon('tabler-currency-euro')
-                            ->columnSpan(6)
-                            ->required(),
-                        Components\Select::make('pricing_unit')
-                            ->label(__('pricingUnit'))
-                            ->options(PricingUnit::class)
-                            ->suffixIcon('tabler-clock-2')
-                            ->columnSpan(6)
-                            ->required(),
-                ])
-            ]);
+        return $form->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -143,7 +74,7 @@ class ProjectResource extends Resource
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\EditAction::make()->icon('tabler-edit')->form(self::formFields()),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->beforeFormFilled(function (Actions\ReplicateAction $action, Project $record) {
@@ -212,7 +143,7 @@ class ProjectResource extends Resource
                                 $file = ProjectService::generateQuotePdf($record);
                                 return response()->download(Storage::path($file));
                             }),
-                        Actions\DeleteAction::make()->icon('tabler-trash'),
+                        Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                     ])
                 ->icon('tabler-dots-vertical')
             )
@@ -223,7 +154,7 @@ class ProjectResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('due_at', 'desc')
@@ -242,8 +173,6 @@ class ProjectResource extends Resource
     {
         return [
             'index' => Pages\ListProjects::route('/'),
-            'create' => Pages\CreateProject::route('/create'),
-            'edit' => Pages\EditProject::route('/{record}/edit'),
         ];
     }
 
@@ -265,6 +194,79 @@ class ProjectResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('project', 2);
+    }
+
+    public static function formFields(): array
+    {
+        return [
+            Components\Section::make()
+                ->columns(12)
+                ->schema([
+                    Components\Select::make('client_id')
+                        ->label(trans_choice('client', 1))
+                        ->relationship('client', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->suffixIcon('tabler-users')
+                        ->columnSpan(6)
+                        ->required(),
+                    Components\Toggle::make('aborted')
+                        ->label(__('aborted'))
+                        ->inline(false)
+                        ->columnSpan(6),
+                    Components\TextInput::make('title')
+                        ->label(__('title'))
+                        ->columnSpan(6)
+                        ->required(),
+                    Components\Textarea::make('description')
+                        ->label(__('description'))
+                        ->autosize()
+                        ->maxLength(65535)
+                        ->columnSpan(6),
+                    Components\DatePicker::make('start_at')
+                        ->label(__('startAt'))
+                        ->weekStartsOnMonday()
+                        ->suffixIcon('tabler-calendar-plus')
+                        ->required()
+                        ->columnSpan(6),
+                    Components\DatePicker::make('due_at')
+                        ->label(__('dueAt'))
+                        ->weekStartsOnMonday()
+                        ->suffixIcon('tabler-calendar-check')
+                        ->columnSpan(6),
+                    Components\TextInput::make('minimum')
+                        ->label(__('minimum'))
+                        ->numeric()
+                        ->step(0.1)
+                        ->minValue(0.1)
+                        ->suffix('h')
+                        ->suffixIcon('tabler-clock-check')
+                        ->columnSpan(6),
+                    Components\TextInput::make('scope')
+                        ->label(__('scope'))
+                        ->numeric()
+                        ->step(0.1)
+                        ->minValue(0.1)
+                        ->suffix('h')
+                        ->suffixIcon('tabler-clock-exclamation')
+                        ->required()
+                        ->columnSpan(6),
+                    Components\TextInput::make('price')
+                        ->label(__('price'))
+                        ->numeric()
+                        ->step(0.01)
+                        ->minValue(0.01)
+                        ->suffixIcon('tabler-currency-euro')
+                        ->columnSpan(6)
+                        ->required(),
+                    Components\Select::make('pricing_unit')
+                        ->label(__('pricingUnit'))
+                        ->options(PricingUnit::class)
+                        ->suffixIcon('tabler-clock-2')
+                        ->columnSpan(6)
+                        ->required(),
+                ])
+        ];
     }
 
 }
