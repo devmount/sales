@@ -4,12 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EstimateResource\Pages;
 use App\Models\Estimate;
+use App\Models\Project;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
+use Filament\Tables\Filters;
 
 class EstimateResource extends Resource
 {
@@ -20,36 +22,7 @@ class EstimateResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Components\Select::make('project_id')
-                    ->label(trans_choice('project', 1))
-                    ->relationship('project', 'title')
-                    ->searchable()
-                    ->suffixIcon('tabler-package')
-                    ->required(),
-                Components\TextInput::make('title')
-                    ->label(__('title'))
-                    ->required(),
-                Components\Textarea::make('description')
-                    ->label(__('description'))
-                    ->autosize()
-                    ->columnSpanFull()
-                    ->maxLength(65535),
-                Components\TextInput::make('amount')
-                    ->label(__('estimatedHours'))
-                    ->numeric()
-                    ->step(0.1)
-                    ->minValue(0.1)
-                    ->suffix('h')
-                    ->suffixIcon('tabler-clock-exclamation')
-                    ->required(),
-                Components\TextInput::make('weight')
-                    ->label(__('weight'))
-                    ->numeric()
-                    ->step(1)
-                    ->helperText(__('definesEstimateSorting'))
-                    ->suffixIcon('tabler-arrows-sort'),
-            ]);
+            ->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -85,13 +58,15 @@ class EstimateResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filters\SelectFilter::make('project')
+                    ->label(trans_choice('project', 1))
+                    ->relationship('project', 'title')
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit'),
-                    Actions\ReplicateAction::make()->icon('tabler-copy'),
-                    Actions\DeleteAction::make()->icon('tabler-trash'),
+                    Actions\EditAction::make()->icon('tabler-edit')->form(self::formFields()),
+                    Actions\ReplicateAction::make()->icon('tabler-copy')->form(self::formFields()),
+                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
@@ -102,7 +77,7 @@ class EstimateResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
             ])
             ->emptyStateIcon('tabler-ban')
             ->deferLoading();
@@ -133,5 +108,39 @@ class EstimateResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('estimate', 2);
+    }
+
+    public static function formFields(): array
+    {
+        return [
+            Components\Select::make('project_id')
+                ->label(trans_choice('project', 1))
+                ->relationship('project', 'title')
+                ->searchable()
+                ->suffixIcon('tabler-package')
+                ->required(),
+            Components\TextInput::make('title')
+                ->label(__('title'))
+                ->required(),
+            Components\Textarea::make('description')
+                ->label(__('description'))
+                ->autosize()
+                ->columnSpanFull()
+                ->maxLength(65535),
+            Components\TextInput::make('amount')
+                ->label(__('estimatedHours'))
+                ->numeric()
+                ->step(0.1)
+                ->minValue(0.1)
+                ->suffix('h')
+                ->suffixIcon('tabler-clock-exclamation')
+                ->required(),
+            Components\TextInput::make('weight')
+                ->label(__('weight'))
+                ->numeric()
+                ->step(1)
+                ->helperText(__('definesEstimateSorting'))
+                ->suffixIcon('tabler-arrows-sort'),
+        ];
     }
 }
