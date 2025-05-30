@@ -122,7 +122,7 @@ class InvoiceResource extends Resource
                     ->relationship('project', 'title'),
                 Filters\SelectFilter::make('client')
                     ->label(trans_choice('client', 1))
-                    ->relationship('client', 'name'),
+                    ->relationship('project.client', 'name'),
             ])
             ->actions(
                 Actions\ActionGroup::make([
@@ -200,7 +200,7 @@ class InvoiceResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->modalWidth(MaxWidth::Screen),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -218,6 +218,7 @@ class InvoiceResource extends Resource
     {
         return [
             'index' => Pages\ListInvoices::route('/'),
+            'edit' => Pages\EditInvoice::route('/{record}/edit'),
         ];
     }
 
