@@ -30,7 +30,7 @@ class OfftimeResource extends Resource
                             ->label(__('startAt'))
                             ->columnSpan(3)
                             ->weekStartsOnMonday()
-                            ->suffixIcon('tabler-calendar-play')
+                            ->suffixIcon('tabler-calendar-dot')
                             ->required(),
                         Components\DatePicker::make('end')
                             ->label(__('finished'))
@@ -38,15 +38,14 @@ class OfftimeResource extends Resource
                             ->weekStartsOnMonday()
                             ->suffixIcon('tabler-calendar-pause'),
                         Components\Select::make('category')
-                            ->label(__('pricingUnit'))
+                            ->label(__('category'))
                             ->columnSpan(3)
                             ->options(OfftimeCategory::class)
                             ->suffixIcon('tabler-category')
                             ->required(),
-                        Components\TextInput::make('description')
+                        Components\TextArea::make('description')
                             ->label(__('description'))
-                            ->columnSpan(6)
-                            ->suffixIcon('tabler-text'),
+                            ->columnSpan(6),
                     ])
             ]);
     }
