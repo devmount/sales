@@ -26,69 +26,7 @@ class PositionResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->columns(12)
-            ->schema([
-                Components\Select::make('invoice_id')
-                    ->label(trans_choice('invoice', 1))
-                    ->relationship('invoice', 'title')
-                    ->searchable()
-                    ->suffixIcon('tabler-file-stack')
-                    ->required()
-                    ->columnSpan(8),
-                Components\Toggle::make('remote')
-                    ->label(__('remote'))
-                    ->inline(false)
-                    ->default(true)
-                    ->columnSpan(4),
-                Components\DateTimePicker::make('started_at')
-                    ->label(__('startedAt'))
-                    ->weekStartsOnMonday()
-                    ->seconds(false)
-                    ->minutesStep(30)
-                    ->default(now()->setHour(9)->setMinute(0))
-                    ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
-                        $previous = Carbon::parse($old);
-                        $started = Carbon::parse($state);
-                        $finished = Carbon::parse($get('finished_at'));
-                        // handle start is set after finish or day change
-                        if ($started >= $finished || !$started->isSameDay($finished)) {
-                            $set(
-                                'finished_at',
-                                $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
-                            );
-                        }
-                    })
-                    ->required()
-                    ->suffixIcon('tabler-clock-play')
-                    ->columnSpan(4),
-                Components\DateTimePicker::make('finished_at')
-                    ->label(__('finishedAt'))
-                    ->weekStartsOnMonday()
-                    ->seconds(false)
-                    ->minutesStep(30)
-                    ->default(now()->setHour(17)->setMinute(0))
-                    ->after('started_at')
-                    ->required()
-                    ->suffixIcon('tabler-clock-pause')
-                    ->columnSpan(4),
-                Components\TextInput::make('pause_duration')
-                    ->label(__('pauseDuration'))
-                    ->numeric()
-                    ->step(.01)
-                    ->minValue(0)
-                    ->default(0)
-                    ->suffix('h')
-                    ->suffixIcon('tabler-coffee')
-                    ->columnSpan(4),
-                Components\Textarea::make('description')
-                    ->label(__('description'))
-                    ->autosize()
-                    ->maxLength(65535)
-                    ->required()
-                    ->columnSpan(12),
-            ]);
+        return $form->columns(12)->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -123,6 +61,16 @@ class PositionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Filters\SelectFilter::make('client')
+                    ->label(trans_choice('client', 1))
+                    ->relationship('invoice.project.client', 'name')
+                    ->searchable()
+                    ->preload(),
+                Filters\SelectFilter::make('project')
+                    ->label(trans_choice('project', 1))
+                    ->relationship('invoice.project', 'title')
+                    ->searchable()
+                    ->preload(),
                 Filters\SelectFilter::make('invoice')
                     ->label(trans_choice('invoice', 1))
                     ->relationship('invoice', 'title', fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderByDesc('created_at'))
@@ -149,13 +97,13 @@ class PositionResource extends Resource
                     }),
                 Filters\TernaryFilter::make('remote')
                     ->nullable(),
-            ], layout: FiltersLayout::AboveContent)
+            ])
             ->filtersFormColumns(3)
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit'),
-                    Actions\ReplicateAction::make()->icon('tabler-copy'),
-                    Actions\DeleteAction::make()->icon('tabler-trash'),
+                    Actions\EditAction::make()->icon('tabler-edit')->form(self::formFields()),
+                    Actions\ReplicateAction::make()->icon('tabler-copy')->form(self::formFields()),
+                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
@@ -166,7 +114,7 @@ class PositionResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -198,6 +146,71 @@ class PositionResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('position', 2);
+    }
+
+    public static function formFields(): array
+    {
+        return [
+            Components\Select::make('invoice_id')
+                ->label(trans_choice('invoice', 1))
+                ->relationship('invoice', 'title')
+                ->searchable()
+                ->suffixIcon('tabler-file-stack')
+                ->required()
+                ->columnSpan(8),
+            Components\Toggle::make('remote')
+                ->label(__('remote'))
+                ->inline(false)
+                ->default(true)
+                ->columnSpan(4),
+            Components\DateTimePicker::make('started_at')
+                ->label(__('startedAt'))
+                ->weekStartsOnMonday()
+                ->seconds(false)
+                ->minutesStep(30)
+                ->default(now()->setHour(9)->setMinute(0))
+                ->live()
+                ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+                    $previous = Carbon::parse($old);
+                    $started = Carbon::parse($state);
+                    $finished = Carbon::parse($get('finished_at'));
+                    // handle start is set after finish or day change
+                    if ($started >= $finished || !$started->isSameDay($finished)) {
+                        $set(
+                            'finished_at',
+                            $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
+                        );
+                    }
+                })
+                ->required()
+                ->suffixIcon('tabler-clock-play')
+                ->columnSpan(4),
+            Components\DateTimePicker::make('finished_at')
+                ->label(__('finishedAt'))
+                ->weekStartsOnMonday()
+                ->seconds(false)
+                ->minutesStep(30)
+                ->default(now()->setHour(17)->setMinute(0))
+                ->after('started_at')
+                ->required()
+                ->suffixIcon('tabler-clock-pause')
+                ->columnSpan(4),
+            Components\TextInput::make('pause_duration')
+                ->label(__('pauseDuration'))
+                ->numeric()
+                ->step(.01)
+                ->minValue(0)
+                ->default(0)
+                ->suffix('h')
+                ->suffixIcon('tabler-coffee')
+                ->columnSpan(4),
+            Components\Textarea::make('description')
+                ->label(__('description'))
+                ->autosize()
+                ->maxLength(65535)
+                ->required()
+                ->columnSpan(12),
+        ];
     }
 
 }

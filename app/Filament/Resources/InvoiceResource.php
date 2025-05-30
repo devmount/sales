@@ -126,7 +126,7 @@ class InvoiceResource extends Resource
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit')->modalWidth(MaxWidth::SevenExtraLarge),
+                    Actions\EditAction::make()->icon('tabler-edit'),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->excludeAttributes(['invoiced_at', 'paid_at'])
@@ -200,7 +200,7 @@ class InvoiceResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->modalWidth(MaxWidth::Screen),
+                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')

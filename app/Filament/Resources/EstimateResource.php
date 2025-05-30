@@ -20,8 +20,7 @@ class EstimateResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema(self::formFields());
+        return $form->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
