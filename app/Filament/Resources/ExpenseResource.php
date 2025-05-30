@@ -11,6 +11,7 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
+use Filament\Tables\Filters;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
@@ -23,64 +24,7 @@ class ExpenseResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Components\Section::make()
-                    ->columns(12)
-                    ->schema([
-                        Components\DatePicker::make('expended_at')
-                            ->label(__('expendedAt'))
-                            ->weekStartsOnMonday()
-                            ->required()
-                            ->default(now())
-                            ->suffixIcon('tabler-calendar-dollar')
-                            ->columnSpan(6),
-                        Components\Select::make('category')
-                            ->label(__('category'))
-                            ->options(ExpenseCategory::class)
-                            ->required()
-                            ->default(ExpenseCategory::Good)
-                            ->suffixIcon('tabler-tag')
-                            ->columnSpan(6),
-                        Components\TextInput::make('price')
-                            ->label(__('price'))
-                            ->numeric()
-                            ->step(0.01)
-                            ->suffixIcon('tabler-currency-euro')
-                            ->required()
-                            ->columnSpan(3),
-                        Components\TextInput::make('quantity')
-                            ->label(__('quantity'))
-                            ->numeric()
-                            ->step(1)
-                            ->minValue(1)
-                            ->default(1)
-                            ->suffixIcon('tabler-stack')
-                            ->required()
-                            ->columnSpan(3),
-                        Components\Toggle::make('taxable')
-                            ->label(__('taxable'))
-                            ->inline(false)
-                            ->default(true)
-                            ->columnSpan(1)
-                            ->live(),
-                        Components\TextInput::make('vat_rate')
-                            ->label(__('vatRate'))
-                            ->numeric()
-                            ->step(0.01)
-                            ->minValue(0.01)
-                            ->maxValue(1)
-                            ->default(0.19)
-                            ->suffixIcon('tabler-receipt-tax')
-                            ->required()
-                            ->columnSpan(5)
-                            ->hidden(fn (Get $get): bool => !$get('taxable')),
-                        Components\Textarea::make('description')
-                            ->label(__('description'))
-                            ->maxLength(65535)
-                            ->columnSpan(12),
-                    ])
-            ]);
+        return $form->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -90,6 +34,7 @@ class ExpenseResource extends Resource
                 Columns\TextColumn::make('expended_at')
                     ->label(__('expendedAt'))
                     ->date('j. F Y')
+                    ->searchable()
                     ->sortable(),
                 Columns\TextColumn::make('price')
                     ->label(__('gross'))
@@ -120,7 +65,8 @@ class ExpenseResource extends Resource
                     ->badge()
                     ->sortable(),
                 Columns\TextColumn::make('description')
-                    ->label(__('description')),
+                    ->label(__('description'))
+                    ->searchable(),
                 Columns\TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
@@ -133,13 +79,15 @@ class ExpenseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filters\SelectFilter::make('category')
+                    ->label(__('category'))
+                    ->options(ExpenseCategory::options())
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit'),
-                    Actions\ReplicateAction::make()->icon('tabler-copy'),
-                    Actions\DeleteAction::make()->icon('tabler-trash'),
+                    Actions\EditAction::make()->icon('tabler-edit')->form(self::formFields()), // TODO
+                    Actions\ReplicateAction::make()->icon('tabler-copy')->form(self::formFields()),
+                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
@@ -150,7 +98,7 @@ class ExpenseResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('expended_at', 'desc')
@@ -168,8 +116,6 @@ class ExpenseResource extends Resource
     {
         return [
             'index' => Pages\ListExpenses::route('/'),
-            'create' => Pages\CreateExpense::route('/create'),
-            'edit' => Pages\EditExpense::route('/{record}/edit'),
         ];
     }
 
@@ -191,5 +137,67 @@ class ExpenseResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('expense', 2);
+    }
+
+    public static function formFields(): array
+    {
+        return [
+            Components\Section::make()
+                ->columns(12)
+                ->schema([
+                    Components\DatePicker::make('expended_at')
+                        ->label(__('expendedAt'))
+                        ->weekStartsOnMonday()
+                        ->required()
+                        ->default(now())
+                        ->suffixIcon('tabler-calendar-dollar')
+                        ->columnSpan(6),
+                    Components\Select::make('category')
+                        ->label(__('category'))
+                        ->options(ExpenseCategory::class)
+                        ->required()
+                        ->default(ExpenseCategory::Good)
+                        ->suffixIcon('tabler-tag')
+                        ->columnSpan(6),
+                    Components\TextInput::make('price')
+                        ->label(__('price'))
+                        ->numeric()
+                        ->step(0.01)
+                        ->suffixIcon('tabler-currency-euro')
+                        ->required()
+                        ->columnSpan(3),
+                    Components\TextInput::make('quantity')
+                        ->label(__('quantity'))
+                        ->numeric()
+                        ->step(1)
+                        ->minValue(1)
+                        ->default(1)
+                        ->suffixIcon('tabler-stack')
+                        ->required()
+                        ->columnSpan(3),
+                    Components\Toggle::make('taxable')
+                        ->label(__('taxable'))
+                        ->inline(false)
+                        ->default(true)
+                        ->columnSpan(1)
+                        ->live(),
+                    Components\TextInput::make('vat_rate')
+                        ->label(__('vatRate'))
+                        ->numeric()
+                        ->step(0.01)
+                        ->minValue(0.01)
+                        ->maxValue(1)
+                        ->default(0.19)
+                        ->suffixIcon('tabler-receipt-tax')
+                        ->required()
+                        ->columnSpan(5)
+                        ->hidden(fn (Get $get): bool => !$get('taxable')),
+                    Components\Textarea::make('description')
+                        ->label(__('description'))
+                        ->maxLength(65535)
+                        ->columnSpan(12),
+                ]
+            )
+        ];
     }
 }

@@ -47,4 +47,14 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Tax,
         ];
     }
+
+    public static function options(): array
+    {
+        return [
+            self::Vat->value => __('vat'),
+            self::Good->value => __('good'),
+            self::Service->value => __('service'),
+            self::Tax->value => __('incomeTax'),
+        ];
+    }
 }
