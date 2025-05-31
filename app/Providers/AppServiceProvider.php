@@ -3,13 +3,13 @@
 namespace App\Providers;
 
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
 use Filament\Support\Assets\Css;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\IconSize;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -39,12 +39,18 @@ class AppServiceProvider extends ServiceProvider
         // Filament only saves valid data to models so the models can be unguarded safely
         Model::unguard();
 
-        Action::configureUsing(function (Action $obj): void {
-            $obj->iconSize(IconSize::Large);
-        });
+        // Form
         Select::configureUsing(function (Select $obj): void {
             $obj->native(false);
         });
+        DatePicker::configureUsing(function (DatePicker $obj): void {
+            $obj->native(false)->locale(config('locale'));
+        });
+        DateTimePicker::configureUsing(function (DateTimePicker $obj): void {
+            $obj->native(false)->locale(config('locale'));
+        });
+
+        // Filter
         TernaryFilter::configureUsing(function (TernaryFilter $obj): void {
             $obj->native(false);
         });
