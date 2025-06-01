@@ -126,11 +126,13 @@ class InvoiceResource extends Resource
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->excludeAttributes(['invoiced_at', 'paid_at'])
-                        ->form(self::formFields()),
+                        ->form(self::formFields())
+                        ->slideOver()
+                        ->modalWidth(MaxWidth::ExtraLarge),
                     Actions\Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
@@ -200,7 +202,7 @@ class InvoiceResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
+                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -245,90 +247,92 @@ class InvoiceResource extends Resource
     public static function formFields(): array
     {
         return [
-            Components\Select::make('project_id')
-                ->label(trans_choice('project', 1))
-                ->columnSpan(6)
-                ->relationship('project', 'title')
-                ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
-                ->searchable()
-                ->preload()
-                ->suffixIcon('tabler-package')
-                ->required(),
-            Components\Toggle::make('transitory')
-                ->label(__('transitory'))
-                ->columnSpan(3)
-                ->inline(false)
-                ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory')),
-            Components\Toggle::make('undated')
-                ->label(__('undated'))
-                ->columnSpan(3)
-                ->inline(false)
-                ->hintIcon('tabler-info-circle', __('hidePositionsDate')),
-            Components\TextInput::make('title')
-                ->label(__('title'))
-                ->columnSpan(6)
-                ->required(),
-            Components\Textarea::make('description')
-                ->label(__('description'))
-                ->columnSpan(6)
-                ->autosize()
-                ->maxLength(65535),
-            Components\TextInput::make('price')
-                ->label(__('price'))
-                ->columnSpan(3)
-                ->numeric()
-                ->step(0.01)
-                ->minValue(0.01)
-                ->suffixIcon('tabler-currency-euro')
-                ->required(),
-            Components\Select::make('pricing_unit')
-                ->label(__('pricingUnit'))
-                ->columnSpan(3)
-                ->options(PricingUnit::class)
-                ->suffixIcon('tabler-clock-2')
-                ->required(),
-            Components\TextInput::make('discount')
-                ->label(__('discount'))
-                ->columnSpan(3)
-                ->numeric()
-                ->step(0.01)
-                ->minValue(0.01)
-                ->suffixIcon('tabler-currency-euro')
-                ->helperText(__('priceBeforeTax')),
-            Components\TextInput::make('deduction')
-                ->label(__('deduction'))
-                ->columnSpan(3)
-                ->numeric()
-                ->step(0.01)
-                ->minValue(0.01)
-                ->suffixIcon('tabler-currency-euro')
-                ->helperText(__('priceAfterTax')),
-            Components\Toggle::make('taxable')
-                ->label(__('taxable'))
-                ->columnSpan(3)
-                ->inline(false)
-                ->default(true)
-                ->live(),
-            Components\TextInput::make('vat_rate')
-                ->label(__('vatRate'))
-                ->columnSpan(3)
-                ->numeric()
-                ->step(0.01)
-                ->minValue(0.01)
-                ->default(0.19)
-                ->suffixIcon('tabler-receipt-tax')
-                ->hidden(fn (Get $get): bool => ! $get('taxable')),
-            Components\DatePicker::make('invoiced_at')
-                ->label(__('invoicedAt'))
-                ->columnSpan(3)
-                ->columnStart(7)
-                ->weekStartsOnMonday()
-                ->suffixIcon('tabler-calendar-up'),
-            Components\DatePicker::make('paid_at')
-                ->label(__('paidAt'))
-                ->columnSpan(3)
-                ->weekStartsOnMonday()
-                ->suffixIcon('tabler-calendar-down'),
+            Components\Grid::make()->columns(12)->schema([
+                Components\Select::make('project_id')
+                    ->label(trans_choice('project', 1))
+                    ->columnSpan(6)
+                    ->relationship('project', 'title')
+                    ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
+                    ->searchable()
+                    ->preload()
+                    ->suffixIcon('tabler-package')
+                    ->required(),
+                Components\Toggle::make('transitory')
+                    ->label(__('transitory'))
+                    ->columnSpan(3)
+                    ->inline(false)
+                    ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory')),
+                Components\Toggle::make('undated')
+                    ->label(__('undated'))
+                    ->columnSpan(3)
+                    ->inline(false)
+                    ->hintIcon('tabler-info-circle', __('hidePositionsDate')),
+                Components\TextInput::make('title')
+                    ->label(__('title'))
+                    ->columnSpan(6)
+                    ->required(),
+                Components\Textarea::make('description')
+                    ->label(__('description'))
+                    ->columnSpan(6)
+                    ->autosize()
+                    ->maxLength(65535),
+                Components\TextInput::make('price')
+                    ->label(__('price'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->suffixIcon('tabler-currency-euro')
+                    ->required(),
+                Components\Select::make('pricing_unit')
+                    ->label(__('pricingUnit'))
+                    ->columnSpan(3)
+                    ->options(PricingUnit::class)
+                    ->suffixIcon('tabler-clock-2')
+                    ->required(),
+                Components\TextInput::make('discount')
+                    ->label(__('discount'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->suffixIcon('tabler-currency-euro')
+                    ->helperText(__('priceBeforeTax')),
+                Components\TextInput::make('deduction')
+                    ->label(__('deduction'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->suffixIcon('tabler-currency-euro')
+                    ->helperText(__('priceAfterTax')),
+                Components\Toggle::make('taxable')
+                    ->label(__('taxable'))
+                    ->columnSpan(3)
+                    ->inline(false)
+                    ->default(true)
+                    ->live(),
+                Components\TextInput::make('vat_rate')
+                    ->label(__('vatRate'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->default(0.19)
+                    ->suffixIcon('tabler-receipt-tax')
+                    ->hidden(fn (Get $get): bool => ! $get('taxable')),
+                Components\DatePicker::make('invoiced_at')
+                    ->label(__('invoicedAt'))
+                    ->columnSpan(3)
+                    ->columnStart(7)
+                    ->weekStartsOnMonday()
+                    ->suffixIcon('tabler-calendar-up'),
+                Components\DatePicker::make('paid_at')
+                    ->label(__('paidAt'))
+                    ->columnSpan(3)
+                    ->weekStartsOnMonday()
+                    ->suffixIcon('tabler-calendar-down'),
+            ])
         ];
     }
 
