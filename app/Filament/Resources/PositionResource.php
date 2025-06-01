@@ -11,9 +11,9 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,7 +26,7 @@ class PositionResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form->columns(12)->schema(self::formFields());
+        return $form->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -101,8 +101,12 @@ class PositionResource extends Resource
             ->filtersFormColumns(3)
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit')->form(self::formFields()),
-                    Actions\ReplicateAction::make()->icon('tabler-copy')->form(self::formFields()),
+                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::TwoExtraLarge),
+                    Actions\ReplicateAction::make()
+                        ->icon('tabler-copy')
+                        ->form(self::formFields())
+                        ->slideOver()
+                        ->modalWidth(MaxWidth::TwoExtraLarge),
                     Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
@@ -114,7 +118,7 @@ class PositionResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->form(self::formFields()),
+                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::TwoExtraLarge),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -124,7 +128,7 @@ class PositionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManagePositions::route('/'),
+            'index' => Pages\ListPositions::route('/'),
         ];
     }
 
@@ -151,65 +155,64 @@ class PositionResource extends Resource
     public static function formFields(): array
     {
         return [
-            Components\Select::make('invoice_id')
-                ->label(trans_choice('invoice', 1))
-                ->relationship('invoice', 'title')
-                ->searchable()
-                ->suffixIcon('tabler-file-stack')
-                ->required()
-                ->columnSpan(8),
-            Components\Toggle::make('remote')
-                ->label(__('remote'))
-                ->inline(false)
-                ->default(true)
-                ->columnSpan(4),
-            Components\DateTimePicker::make('started_at')
-                ->label(__('startedAt'))
-                ->weekStartsOnMonday()
-                ->seconds(false)
-                ->minutesStep(30)
-                ->default(now()->setHour(9)->setMinute(0))
-                ->live()
-                ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
-                    $previous = Carbon::parse($old);
-                    $started = Carbon::parse($state);
-                    $finished = Carbon::parse($get('finished_at'));
-                    // handle start is set after finish or day change
-                    if ($started >= $finished || !$started->isSameDay($finished)) {
-                        $set(
-                            'finished_at',
-                            $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
-                        );
-                    }
-                })
-                ->required()
-                ->suffixIcon('tabler-clock-play')
-                ->columnSpan(4),
-            Components\DateTimePicker::make('finished_at')
-                ->label(__('finishedAt'))
-                ->weekStartsOnMonday()
-                ->seconds(false)
-                ->minutesStep(30)
-                ->default(now()->setHour(17)->setMinute(0))
-                ->after('started_at')
-                ->required()
-                ->suffixIcon('tabler-clock-pause')
-                ->columnSpan(4),
-            Components\TextInput::make('pause_duration')
-                ->label(__('pauseDuration'))
-                ->numeric()
-                ->step(.01)
-                ->minValue(0)
-                ->default(0)
-                ->suffix('h')
-                ->suffixIcon('tabler-coffee')
-                ->columnSpan(4),
-            Components\Textarea::make('description')
-                ->label(__('description'))
-                ->autosize()
-                ->maxLength(65535)
-                ->required()
-                ->columnSpan(12),
+            Components\Grid::make()->columns(2)->schema([
+                Components\Select::make('invoice_id')
+                    ->label(trans_choice('invoice', 1))
+                    ->relationship('invoice', 'title')
+                    ->searchable()
+                    ->suffixIcon('tabler-file-stack')
+                    ->required()
+                    ->columnSpanFull(),
+                Components\DateTimePicker::make('started_at')
+                    ->label(__('startedAt'))
+                    ->weekStartsOnMonday()
+                    ->seconds(false)
+                    ->minutesStep(30)
+                    ->default(now()->setHour(9)->setMinute(0))
+                    ->live()
+                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+                        $previous = Carbon::parse($old);
+                        $started = Carbon::parse($state);
+                        $finished = Carbon::parse($get('finished_at'));
+                        // handle start is set after finish or day change
+                        if ($started >= $finished || !$started->isSameDay($finished)) {
+                            $set(
+                                'finished_at',
+                                $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
+                            );
+                        }
+                    })
+                    ->required()
+                    ->suffixIcon('tabler-clock-play'),
+                Components\DateTimePicker::make('finished_at')
+                    ->label(__('finishedAt'))
+                    ->weekStartsOnMonday()
+                    ->seconds(false)
+                    ->minutesStep(30)
+                    ->default(now()->setHour(17)->setMinute(0))
+                    ->after('started_at')
+                    ->required()
+                    ->suffixIcon('tabler-clock-pause'),
+                Components\TextInput::make('pause_duration')
+                    ->label(__('pauseDuration'))
+                    ->numeric()
+                    ->step(.01)
+                    ->minValue(0)
+                    ->default(0)
+                    ->suffix('h')
+                    ->suffixIcon('tabler-coffee'),
+                Components\Toggle::make('remote')
+                    ->label(__('remote'))
+                    ->inline(false)
+                    ->default(true),
+                Components\Textarea::make('description')
+                    ->label(__('description'))
+                    ->autosize()
+                    ->maxLength(65535)
+                    ->required()
+                    ->columnSpanFull()
+                    ->extraInputAttributes(['class' => 'position-limit']),
+            ])
         ];
     }
 

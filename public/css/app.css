@@ -24,3 +24,8 @@ abbr {
 iframe#preview {
     height: calc(100vh - 8.5rem);
 }
+
+/* Visual indicator of max line length for position descriptions */
+textarea.position-limit {
+  background-image: linear-gradient(90deg, transparent, transparent 580px, rgb(var(--gray-500)) 581px, transparent 581px);
+}
