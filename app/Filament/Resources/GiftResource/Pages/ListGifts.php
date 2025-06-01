@@ -14,10 +14,7 @@ class ListGifts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->icon('tabler-plus')
-                ->slideOver()
-                ->modalWidth(MaxWidth::Large),
+            Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
         ];
     }
 }
