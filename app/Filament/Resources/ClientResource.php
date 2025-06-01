@@ -94,7 +94,9 @@ class ClientResource extends Resource
                         Mail::to($record->email)->send(
                             (new ContactClient(body: $data['content']))->subject($data['subject'])
                         );
-                    }),
+                    })
+                    ->slideOver()
+                    ->modalWidth(MaxWidth::Large),
                 Actions\ReplicateAction::make()
                     ->icon('tabler-copy')
                     ->form(self::formFields())
