@@ -74,7 +74,7 @@ class ClientResource extends Resource
                     ->options(LanguageCode::class),
             ])
             ->actions(Actions\ActionGroup::make([
-                Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
+                Actions\EditAction::make()->icon('tabler-edit'),
                 Actions\Action::make('kontaktieren')
                     ->disabled(fn (Client $record) => !boolval($record->email))
                     ->icon('tabler-mail')
@@ -99,7 +99,7 @@ class ClientResource extends Resource
                     ->modalWidth(MaxWidth::Large),
                 Actions\ReplicateAction::make()
                     ->icon('tabler-copy')
-                    ->form(self::formFields())
+                    ->form(self::formFields(6, false))
                     ->slideOver()
                     ->modalWidth(MaxWidth::Large),
                 Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
@@ -111,7 +111,11 @@ class ClientResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
+                Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->form(self::formFields(6, false))
+                    ->slideOver()
+                    ->modalWidth(MaxWidth::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -130,6 +134,7 @@ class ClientResource extends Resource
     {
         return [
             'index' => Pages\ListClients::route('/'),
+            'edit'  => Pages\EditClient::route('/{record}/edit'),
         ];
     }
 
@@ -153,60 +158,62 @@ class ClientResource extends Resource
         return trans_choice('client', 2);
     }
 
-    public static function formFields(): array
+    public static function formFields($columns = 12, $useSection = true): array
     {
-        return [
-            Components\Grid::make()->columns(2)->schema([
-                Components\TextInput::make('name')
-                    ->label(__('name'))
-                    ->hint(__('client.name.hint'))
-                    ->hintIcon('tabler-info-circle')
-                    ->columnSpan(6)
-                    ->required(),
-                Components\TextInput::make('short')
-                    ->label(__('short'))
-                    ->columnSpan(3)
-                    ->suffixIcon('tabler-letter-spacing'),
-                Components\ColorPicker::make('color')
-                    ->label(__('color'))
-                    ->columnSpan(3)
-                    ->suffixIcon('tabler-palette'),
-                Components\TextInput::make('address')
-                    ->label(__('address'))
-                    ->columnSpan(6),
-                Components\Select::make('language')
-                    ->label(__('language'))
-                    ->columnSpan(6)
-                    ->suffixIcon('tabler-language')
-                    ->options(LanguageCode::class)
-                    ->required(),
-                Components\TextInput::make('street')
-                    ->label(__('street'))
-                    ->columnSpan(6),
-                Components\TextInput::make('vat_id')
-                    ->label(__('vatId'))
-                    ->suffixIcon('tabler-tax-euro')
-                    ->columnSpan(6),
-                Components\TextInput::make('zip')
-                    ->label(__('zip'))
-                    ->columnSpan(3),
-                Components\TextInput::make('city')
-                    ->label(__('city'))
-                    ->columnSpan(3),
-                Components\TextInput::make('email')
-                    ->label(__('email'))
-                    ->columnSpan(6)
-                    ->suffixIcon('tabler-mail')
-                    ->email(),
-                Components\TextInput::make('country')
-                    ->label(__('country'))
-                    ->columnSpan(6),
-                Components\TextInput::make('phone')
-                    ->label(__('phone'))
-                    ->columnSpan(6)
-                    ->suffixIcon('tabler-phone')
-                    ->tel(),
-            ])
+        $fields = [
+            Components\TextInput::make('name')
+                ->label(__('name'))
+                ->hint(__('client.name.hint'))
+                ->hintIcon('tabler-info-circle')
+                ->columnSpan(6)
+                ->required(),
+            Components\TextInput::make('short')
+                ->label(__('short'))
+                ->columnSpan(3)
+                ->suffixIcon('tabler-letter-spacing'),
+            Components\ColorPicker::make('color')
+                ->label(__('color'))
+                ->columnSpan(3)
+                ->suffixIcon('tabler-palette'),
+            Components\TextInput::make('address')
+                ->label(__('address'))
+                ->columnSpan(6),
+            Components\Select::make('language')
+                ->label(__('language'))
+                ->columnSpan(6)
+                ->suffixIcon('tabler-language')
+                ->options(LanguageCode::class)
+                ->required(),
+            Components\TextInput::make('street')
+                ->label(__('street'))
+                ->columnSpan(6),
+            Components\TextInput::make('vat_id')
+                ->label(__('vatId'))
+                ->suffixIcon('tabler-tax-euro')
+                ->columnSpan(6),
+            Components\TextInput::make('zip')
+                ->label(__('zip'))
+                ->columnSpan(3),
+            Components\TextInput::make('city')
+                ->label(__('city'))
+                ->columnSpan(3),
+            Components\TextInput::make('email')
+                ->label(__('email'))
+                ->columnSpan(6)
+                ->suffixIcon('tabler-mail')
+                ->email(),
+            Components\TextInput::make('country')
+                ->label(__('country'))
+                ->columnSpan(6),
+            Components\TextInput::make('phone')
+                ->label(__('phone'))
+                ->columnSpan(6)
+                ->suffixIcon('tabler-phone')
+                ->tel(),
         ];
+
+        return $useSection
+            ? [Components\Section::make()->columns($columns)->schema($fields)]
+            : [Components\Grid::make()->columns($columns)->schema($fields)];
     }
 }
