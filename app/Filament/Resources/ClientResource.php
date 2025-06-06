@@ -158,7 +158,10 @@ class ClientResource extends Resource
         return trans_choice('client', 2);
     }
 
-    public static function formFields($columns = 12, $useSection = true): array
+    /**
+     * Return a list of components containing form fields
+     */
+    public static function formFields(int $columns = 12, bool $useSection = true): array
     {
         $fields = [
             Components\TextInput::make('name')

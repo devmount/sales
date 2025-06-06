@@ -16,6 +16,7 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Filters;
@@ -23,7 +24,6 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
-use Filament\Support\Enums\MaxWidth;
 
 class InvoiceResource extends Resource
 {
@@ -244,10 +244,13 @@ class InvoiceResource extends Resource
         return trans_choice('invoice', 2);
     }
 
-    public static function formFields(): array
+    /**
+     * Return a list of components containing form fields
+     */
+    public static function formFields(int $columns = 12): array
     {
         return [
-            Components\Grid::make()->columns(12)->schema([
+            Components\Grid::make($columns)->schema([
                 Components\Select::make('project_id')
                     ->label(trans_choice('project', 1))
                     ->columnSpan(6)

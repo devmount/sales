@@ -78,8 +78,7 @@ class ProjectsRelationManager extends RelationManager
                         ->modalWidth(MaxWidth::Large),
                 ])
                 ->icon('tabler-dots-vertical')
-            ])
-            ->bulkActions([]);
+            ]);
     }
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
