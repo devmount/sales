@@ -4,7 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Enums\PricingUnit;
 use App\Filament\Resources\ProjectResource\Pages;
-use App\Filament\Resources\ProjectResource\RelationManagers;
+use App\Filament\Resources\ProjectResource\RelationManagers\EstimatesRelationManager;
+use App\Filament\Resources\ClientResource\RelationManagers\InvoicesRelationManager;
 use App\Models\Project;
 use App\Services\ProjectService;
 use Carbon\Carbon;
@@ -75,7 +76,7 @@ class ProjectResource extends Resource
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
+                    Actions\EditAction::make()->icon('tabler-edit'),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->beforeFormFilled(function (Actions\ReplicateAction $action, Project $record) {
@@ -83,7 +84,7 @@ class ProjectResource extends Resource
                             $record->start_at = Carbon::create($year)->format('Y-m-d');
                             $record->due_at = Carbon::create($year, 12, 31)->format('Y-m-d');
                         })
-                        ->form(self::formFields())
+                        ->form(self::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(MaxWidth::Large),
                     Actions\Action::make('download')
@@ -105,7 +106,11 @@ class ProjectResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
+                Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->form(self::formFields(6, false))
+                    ->slideOver()
+                    ->modalWidth(MaxWidth::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('due_at', 'desc')
@@ -115,8 +120,8 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\EstimatesRelationManager::class,
-            RelationManagers\InvoicesRelationManager::class,
+            EstimatesRelationManager::class,
+            InvoicesRelationManager::class,
         ];
     }
 
@@ -124,6 +129,7 @@ class ProjectResource extends Resource
     {
         return [
             'index' => Pages\ListProjects::route('/'),
+            'edit' => Pages\EditProject::route('/{record}/edit'),
         ];
     }
 
@@ -147,76 +153,81 @@ class ProjectResource extends Resource
         return trans_choice('project', 2);
     }
 
-    public static function formFields(): array
+    /**
+     * Return a list of components containing form fields
+     */
+    public static function formFields(int $columns = 12, bool $useSection = true): array
     {
-        return [
-            Components\Grid::make()->columns(12)->schema([
-                Components\Select::make('client_id')
-                    ->label(trans_choice('client', 1))
-                    ->relationship('client', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->suffixIcon('tabler-users')
-                    ->columnSpan(9)
-                    ->required(),
-                Components\Toggle::make('aborted')
-                    ->label(__('aborted'))
-                    ->inline(false)
-                    ->columnSpan(3),
-                Components\TextInput::make('title')
-                    ->label(__('title'))
-                    ->columnSpanFull()
-                    ->required(),
-                Components\Textarea::make('description')
-                    ->label(__('description'))
-                    ->autosize()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Components\DatePicker::make('start_at')
-                    ->label(__('startAt'))
-                    ->weekStartsOnMonday()
-                    ->suffixIcon('tabler-calendar-plus')
-                    ->required()
-                    ->columnSpan(6),
-                Components\DatePicker::make('due_at')
-                    ->label(__('dueAt'))
-                    ->weekStartsOnMonday()
-                    ->suffixIcon('tabler-calendar-check')
-                    ->columnSpan(6),
-                Components\TextInput::make('minimum')
-                    ->label(__('minimum'))
-                    ->numeric()
-                    ->step(0.1)
-                    ->minValue(0.1)
-                    ->suffix('h')
-                    ->suffixIcon('tabler-clock-check')
-                    ->columnSpan(6),
-                Components\TextInput::make('scope')
-                    ->label(__('scope'))
-                    ->numeric()
-                    ->step(0.1)
-                    ->minValue(0.1)
-                    ->suffix('h')
-                    ->suffixIcon('tabler-clock-exclamation')
-                    ->required()
-                    ->columnSpan(6),
-                Components\TextInput::make('price')
-                    ->label(__('price'))
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->suffixIcon('tabler-currency-euro')
-                    ->columnSpan(6)
-                    ->required(),
-                Components\Select::make('pricing_unit')
-                    ->label(__('pricingUnit'))
-                    ->options(PricingUnit::class)
-                    ->suffixIcon('tabler-clock-2')
-                    ->columnSpan(6)
-                    ->placeholder('')
-                    ->required(),
-            ])
+        $fields = [
+            Components\Select::make('client_id')
+                ->label(trans_choice('client', 1))
+                ->relationship('client', 'name')
+                ->searchable()
+                ->preload()
+                ->suffixIcon('tabler-users')
+                ->columnSpan($columns > 6 ? 9 : 6)
+                ->required(),
+            Components\Toggle::make('aborted')
+                ->label(__('aborted'))
+                ->inline(false)
+                ->columnSpan($columns > 6 ? 3 : 6),
+            Components\TextInput::make('title')
+                ->label(__('title'))
+                ->columnSpanFull()
+                ->required(),
+            Components\Textarea::make('description')
+                ->label(__('description'))
+                ->autosize()
+                ->maxLength(65535)
+                ->columnSpanFull(),
+            Components\DatePicker::make('start_at')
+                ->label(__('startAt'))
+                ->weekStartsOnMonday()
+                ->suffixIcon('tabler-calendar-plus')
+                ->required()
+                ->columnSpan($columns / 2),
+            Components\DatePicker::make('due_at')
+                ->label(__('dueAt'))
+                ->weekStartsOnMonday()
+                ->suffixIcon('tabler-calendar-check')
+                ->columnSpan($columns / 2),
+            Components\TextInput::make('minimum')
+                ->label(__('minimum'))
+                ->numeric()
+                ->step(0.1)
+                ->minValue(0.1)
+                ->suffix('h')
+                ->suffixIcon('tabler-clock-check')
+                ->columnSpan($columns / 2),
+            Components\TextInput::make('scope')
+                ->label(__('scope'))
+                ->numeric()
+                ->step(0.1)
+                ->minValue(0.1)
+                ->suffix('h')
+                ->suffixIcon('tabler-clock-exclamation')
+                ->required()
+                ->columnSpan($columns / 2),
+            Components\TextInput::make('price')
+                ->label(__('price'))
+                ->numeric()
+                ->step(0.01)
+                ->minValue(0.01)
+                ->suffixIcon('tabler-currency-euro')
+                ->columnSpan($columns / 2)
+                ->required(),
+            Components\Select::make('pricing_unit')
+                ->label(__('pricingUnit'))
+                ->options(PricingUnit::class)
+                ->suffixIcon('tabler-clock-2')
+                ->columnSpan($columns / 2)
+                ->placeholder('')
+                ->required(),
         ];
+
+        return $useSection
+            ? [Components\Section::make()->columns($columns)->schema($fields)]
+            : [Components\Grid::make()->columns($columns)->schema($fields)];
     }
 
 }
