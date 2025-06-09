@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
-use App\Filament\Resources\InvoiceResource\RelationManagers;
+use App\Filament\Relations;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Services\InvoiceService;
@@ -212,7 +212,7 @@ class InvoiceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\PositionsRelationManager::class,
+            Relations\PositionsRelationManager::class,
         ];
     }
 

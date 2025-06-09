@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ClientResource\RelationManagers;
+namespace App\Filament\Relations;
 
 use App\Filament\Resources\ProjectResource;
 use App\Models\Project;
@@ -60,7 +60,7 @@ class ProjectsRelationManager extends RelationManager
                     ->beforeFormFilled(function (Component $livewire) {
                         $livewire->mountedTableActionsData[0]['client_id'] = $this->ownerRecord->id;
                     })
-                    ->form(ProjectResource::formFields())
+                    ->form(ProjectResource::formFields(useSection: false))
                     ->slideOver()
                     ->modalWidth(MaxWidth::Large),
             ])
@@ -68,12 +68,12 @@ class ProjectsRelationManager extends RelationManager
                 Actions\ActionGroup::make([
                     Actions\EditAction::make()
                         ->icon('tabler-edit')
-                        ->form(ProjectResource::formFields())
+                        ->form(ProjectResource::formFields(useSection: false))
                         ->slideOver()
                         ->modalWidth(MaxWidth::Large),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->form(ProjectResource::formFields())
+                        ->form(ProjectResource::formFields(useSection: false))
                         ->slideOver()
                         ->modalWidth(MaxWidth::Large),
                 ])

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\RelationManagers;
+namespace App\Filament\Relations;
 
 use App\Models\Position;
 use Carbon\Carbon;

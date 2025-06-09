@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ProjectResource\RelationManagers;
+namespace App\Filament\Relations;
 
 use App\Filament\Resources\EstimateResource;
 use Filament\Resources\RelationManagers\RelationManager;

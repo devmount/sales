@@ -4,8 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\PricingUnit;
 use App\Filament\Resources\ProjectResource\Pages;
-use App\Filament\Resources\ProjectResource\RelationManagers\EstimatesRelationManager;
-use App\Filament\Resources\ClientResource\RelationManagers\InvoicesRelationManager;
+use App\Filament\Relations;
 use App\Models\Project;
 use App\Services\ProjectService;
 use Carbon\Carbon;
@@ -17,6 +16,7 @@ use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Filters;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Storage;
 
 class ProjectResource extends Resource
@@ -120,8 +120,8 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
-            EstimatesRelationManager::class,
-            InvoicesRelationManager::class,
+            Relations\EstimatesRelationManager::class,
+            Relations\InvoicesRelationManager::class,
         ];
     }
 

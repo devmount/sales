@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\LanguageCode;
 use App\Filament\Resources\ClientResource\Pages;
-use App\Filament\Resources\ClientResource\RelationManagers;
+use App\Filament\Relations;
 use App\Mail\ContactClient;
 use App\Models\Client;
 use App\Models\Setting;
@@ -17,6 +17,7 @@ use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Filters;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Mail;
 
 class ClientResource extends Resource
@@ -125,8 +126,8 @@ class ClientResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\ProjectsRelationManager::class,
-            RelationManagers\InvoicesRelationManager::class,
+            Relations\ProjectsRelationManager::class,
+            Relations\InvoicesRelationManager::class,
         ];
     }
 
