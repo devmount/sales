@@ -24,7 +24,7 @@ class PdfTemplate extends PdfDocument
     protected int $nFiles;
     protected bool $openAttachmentPane = false;
 
-    public function __construct(string $lang = null, DocumentType $type = DocumentType::INVOICE)
+    public function __construct(?string $lang = null, DocumentType $type = DocumentType::INVOICE)
     {
         // Init
         $this->lang = $lang ?? config('app.locale');
