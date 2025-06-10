@@ -270,7 +270,7 @@ class InvoiceService
 
                 $posdata = collect([
                     'description' => trim($position->description),
-                    'hours' => Number::format($billedPerProject ? '' : $poshours, 1, locale: $lang),
+                    'hours' => $billedPerProject ? '' : Number::format($poshours, 1, locale: $lang),
                     'price' => $billedPerProject ? '' : Number::currency($invoice->price, 'EUR', locale: $lang),
                     'title' => $invoice->undated ? "{$num}. {$label['position']}" : $posdate,
                     'total' => $billedPerProject ? '' : Number::currency($invoice->price * $poshours, 'EUR', locale: $lang),
