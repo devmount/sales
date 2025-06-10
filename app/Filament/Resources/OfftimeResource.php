@@ -7,9 +7,10 @@ use App\Filament\Resources\OfftimeResource\Pages;
 use App\Models\Offtime;
 use Filament\Forms\Components;
 use Filament\Forms\Form;
-use Filament\Tables\Columns;
-use Filament\Tables\Actions;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions;
+use Filament\Tables\Columns;
 use Filament\Tables\Filters;
 use Filament\Tables\Table;
 
@@ -21,34 +22,7 @@ class OfftimeResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Components\Section::make()
-                    ->columns(12)
-                    ->schema([
-                        Components\DatePicker::make('start')
-                            ->label(__('startAt'))
-                            ->columnSpan(3)
-                            ->weekStartsOnMonday()
-                            ->suffixIcon('tabler-calendar-play')
-                            ->required(),
-                        Components\DatePicker::make('end')
-                            ->label(__('finished'))
-                            ->columnSpan(3)
-                            ->weekStartsOnMonday()
-                            ->suffixIcon('tabler-calendar-pause'),
-                        Components\Select::make('category')
-                            ->label(__('pricingUnit'))
-                            ->columnSpan(3)
-                            ->options(OfftimeCategory::class)
-                            ->suffixIcon('tabler-category')
-                            ->required(),
-                        Components\TextInput::make('description')
-                            ->label(__('description'))
-                            ->columnSpan(6)
-                            ->suffixIcon('tabler-text'),
-                    ])
-            ]);
+        return $form->schema(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -78,19 +52,23 @@ class OfftimeResource extends Resource
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit'),
-                    // Actions\ReplicateAction::make()->icon('tabler-copy'),
-                    // Actions\DeleteAction::make()->icon('tabler-trash'),
+                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
+                    Actions\ReplicateAction::make()
+                        ->icon('tabler-copy')
+                        ->form(self::formFields())
+                        ->slideOver()
+                        ->modalWidth(MaxWidth::Large),
+                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
             ->bulkActions([
                 Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
                 ]),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('start', 'desc')
@@ -101,8 +79,6 @@ class OfftimeResource extends Resource
     {
         return [
             'index' => Pages\ListOfftimes::route('/'),
-            'create' => Pages\CreateOfftime::route('/create'),
-            'edit' => Pages\EditOfftime::route('/{record}/edit'),
         ];
     }
 
@@ -124,5 +100,31 @@ class OfftimeResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('offtime', 2);
+    }
+
+    public static function formFields(): array
+    {
+        return [
+            Components\Grid::make()->columns(2)->schema([
+                Components\DatePicker::make('start')
+                    ->label(__('startAt'))
+                    ->weekStartsOnMonday()
+                    ->suffixIcon('tabler-calendar-dot')
+                    ->required(),
+                Components\DatePicker::make('end')
+                    ->label(__('finished'))
+                    ->weekStartsOnMonday()
+                    ->suffixIcon('tabler-calendar-pause'),
+                Components\Select::make('category')
+                    ->label(__('category'))
+                    ->columnSpanFull()
+                    ->options(OfftimeCategory::class)
+                    ->suffixIcon('tabler-category')
+                    ->required(),
+                Components\Textarea::make('description')
+                    ->label(__('description'))
+                    ->columnSpanFull(),
+            ])
+        ];
     }
 }

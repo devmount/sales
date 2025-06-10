@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\ProjectResource\RelationManagers;
+namespace App\Filament\Relations;
 
+use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
+use Carbon\Carbon;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Number;
 
@@ -49,22 +51,28 @@ class InvoicesRelationManager extends RelationManager
                     ->state(fn (Invoice $record): float => $record->final)
                     ->description(fn (Invoice $record): string => Number::currency($record->vat, 'eur') . ' ' . __('vat')),
             ])
-            ->filters([
-                //
-            ])
             ->headerActions([
                 Actions\Action::make('create')
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->url(fn (): string => '/invoices/create'),
+                    ->form(InvoiceResource::formFields())
+                    ->slideOver()
+                    ->modalWidth(MaxWidth::ThreeExtraLarge),
             ])
             ->actions([
-                Actions\Action::make('edit')
-                    ->icon('tabler-edit')
-                    ->label('')
-                    ->url(fn (Invoice $obj): string => "/invoices/$obj->id/edit/"),
-                Actions\ReplicateAction::make()->icon('tabler-copy')->label(''),
-                Actions\DeleteAction::make()->icon('tabler-trash')->label(''),
+                Actions\ActionGroup::make([
+                    Actions\EditAction::make()
+                        ->icon('tabler-edit')
+                        ->form(InvoiceResource::formFields())
+                        ->slideOver()
+                        ->modalWidth(MaxWidth::ThreeExtraLarge),
+                    Actions\ReplicateAction::make()
+                        ->icon('tabler-copy')
+                        ->form(InvoiceResource::formFields())
+                        ->slideOver()
+                        ->modalWidth(MaxWidth::ThreeExtraLarge),
+                ])
+                ->icon('tabler-dots-vertical')
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([
@@ -76,7 +84,9 @@ class InvoicesRelationManager extends RelationManager
                 Actions\Action::make('create')
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->url(fn (): string => '/invoices/create'),
+                    ->form(InvoiceResource::formFields())
+                    ->slideOver()
+                    ->modalWidth(MaxWidth::ThreeExtraLarge),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')

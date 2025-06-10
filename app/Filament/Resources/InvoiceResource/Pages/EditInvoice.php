@@ -33,8 +33,7 @@ class EditInvoice extends EditRecord
                     $file = InvoiceService::generateEn16931Xml($record);
                     return response()->download(Storage::path($file));
                 }),
-            Actions\DeleteAction::make()
-                ->icon('tabler-trash'),
+            Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
         ];
     }
 

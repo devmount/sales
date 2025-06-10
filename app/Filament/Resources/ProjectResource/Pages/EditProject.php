@@ -24,8 +24,7 @@ class EditProject extends EditRecord
                     $file = ProjectService::generateQuotePdf($record);
                     return response()->download(Storage::path($file));
                 }),
-            Actions\DeleteAction::make()
-                ->icon('tabler-trash'),
+            Actions\DeleteAction::make()->icon('tabler-trash'),
         ];
     }
 }

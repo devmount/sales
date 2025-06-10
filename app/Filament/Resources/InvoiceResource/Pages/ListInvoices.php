@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 
@@ -17,7 +18,11 @@ class ListInvoices extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('tabler-plus'),
+            Actions\CreateAction::make()
+                ->icon('tabler-plus')
+                ->form(InvoiceResource::formFields())
+                ->slideOver()
+                ->modalWidth(MaxWidth::ExtraLarge),
         ];
     }
 

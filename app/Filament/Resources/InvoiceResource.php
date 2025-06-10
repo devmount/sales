@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource\Pages;
-use App\Filament\Resources\InvoiceResource\RelationManagers;
+use App\Filament\Relations;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Services\InvoiceService;
@@ -16,6 +16,7 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Filters;
@@ -38,92 +39,7 @@ class InvoiceResource extends Resource
                 Components\Section::make()
                     ->columnSpan(['lg' => fn (?Invoice $obj) => !$obj?->project ? 10 : 8])
                     ->columns(12)
-                    ->schema([
-                        Components\Select::make('project_id')
-                            ->label(trans_choice('project', 1))
-                            ->columnSpan(6)
-                            ->relationship('project', 'title')
-                            ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
-                            ->searchable()
-                            ->preload()
-                            ->suffixIcon('tabler-package')
-                            ->required(),
-                        Components\Toggle::make('transitory')
-                            ->label(__('transitory'))
-                            ->columnSpan(3)
-                            ->inline(false)
-                            ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory')),
-                        Components\Toggle::make('undated')
-                            ->label(__('undated'))
-                            ->columnSpan(3)
-                            ->inline(false)
-                            ->hintIcon('tabler-info-circle', __('hidePositionsDate')),
-                        Components\TextInput::make('title')
-                            ->label(__('title'))
-                            ->columnSpan(6)
-                            ->required(),
-                        Components\Textarea::make('description')
-                            ->label(__('description'))
-                            ->columnSpan(6)
-                            ->autosize()
-                            ->maxLength(65535),
-                        Components\TextInput::make('price')
-                            ->label(__('price'))
-                            ->columnSpan(3)
-                            ->numeric()
-                            ->step(0.01)
-                            ->minValue(0.01)
-                            ->suffixIcon('tabler-currency-euro')
-                            ->required(),
-                        Components\Select::make('pricing_unit')
-                            ->label(__('pricingUnit'))
-                            ->columnSpan(3)
-                            ->options(PricingUnit::class)
-                            ->suffixIcon('tabler-clock-2')
-                            ->required(),
-                        Components\TextInput::make('discount')
-                            ->label(__('discount'))
-                            ->columnSpan(3)
-                            ->numeric()
-                            ->step(0.01)
-                            ->minValue(0.01)
-                            ->suffixIcon('tabler-currency-euro')
-                            ->helperText(__('priceBeforeTax')),
-                        Components\TextInput::make('deduction')
-                            ->label(__('deduction'))
-                            ->columnSpan(3)
-                            ->numeric()
-                            ->step(0.01)
-                            ->minValue(0.01)
-                            ->suffixIcon('tabler-currency-euro')
-                            ->helperText(__('priceAfterTax')),
-                        Components\Toggle::make('taxable')
-                            ->label(__('taxable'))
-                            ->columnSpan(3)
-                            ->inline(false)
-                            ->default(true)
-                            ->live(),
-                        Components\TextInput::make('vat_rate')
-                            ->label(__('vatRate'))
-                            ->columnSpan(3)
-                            ->numeric()
-                            ->step(0.01)
-                            ->minValue(0.01)
-                            ->default(0.19)
-                            ->suffixIcon('tabler-receipt-tax')
-                            ->hidden(fn (Get $get): bool => ! $get('taxable')),
-                        Components\DatePicker::make('invoiced_at')
-                            ->label(__('invoicedAt'))
-                            ->columnSpan(3)
-                            ->columnStart(7)
-                            ->weekStartsOnMonday()
-                            ->suffixIcon('tabler-calendar-up'),
-                        Components\DatePicker::make('paid_at')
-                            ->label(__('paidAt'))
-                            ->columnSpan(3)
-                            ->weekStartsOnMonday()
-                            ->suffixIcon('tabler-calendar-down'),
-                    ]),
+                    ->schema(self::formFields()),
                 Components\Section::make()
                     ->heading(__('currentState'))
                     ->hidden(fn (?Invoice $obj) => !$obj?->project)
@@ -204,33 +120,19 @@ class InvoiceResource extends Resource
                 Filters\SelectFilter::make('project')
                     ->label(trans_choice('project', 1))
                     ->relationship('project', 'title'),
+                Filters\SelectFilter::make('client')
+                    ->label(trans_choice('client', 1))
+                    ->relationship('project.client', 'name'),
             ])
             ->actions(
                 Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit'),
+                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->excludeAttributes(['invoiced_at', 'paid_at'])
-                        ->form([
-                            Components\Select::make('project_id')
-                                ->label(trans_choice('project', 1))
-                                ->relationship('project', 'title')
-                                ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
-                                ->searchable()
-                                ->preload()
-                                ->suffixIcon('tabler-package')
-                                ->required()
-                                ->columnSpan(1),
-                            Components\TextInput::make('title')
-                                ->label(__('title'))
-                                ->required()
-                                ->columnSpan(1),
-                            Components\Textarea::make('description')
-                                ->label(__('description'))
-                                ->autosize()
-                                ->maxLength(65535)
-                                ->columnSpan(2),
-                        ]),
+                        ->form(self::formFields())
+                        ->slideOver()
+                        ->modalWidth(MaxWidth::ExtraLarge),
                     Actions\Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
@@ -289,8 +191,7 @@ class InvoiceResource extends Resource
                         ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
                             . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->final_number
                             . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->final_number], $record->project?->client?->language))),
-
-                    Actions\DeleteAction::make()->icon('tabler-trash'),
+                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
@@ -301,7 +202,7 @@ class InvoiceResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -311,7 +212,7 @@ class InvoiceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\PositionsRelationManager::class,
+            Relations\PositionsRelationManager::class,
         ];
     }
 
@@ -319,7 +220,6 @@ class InvoiceResource extends Resource
     {
         return [
             'index' => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
         ];
     }
@@ -342,6 +242,101 @@ class InvoiceResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return trans_choice('invoice', 2);
+    }
+
+    /**
+     * Return a list of components containing form fields
+     */
+    public static function formFields(int $columns = 12): array
+    {
+        return [
+            Components\Grid::make($columns)->schema([
+                Components\Select::make('project_id')
+                    ->label(trans_choice('project', 1))
+                    ->columnSpan(6)
+                    ->relationship('project', 'title')
+                    ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
+                    ->searchable()
+                    ->preload()
+                    ->suffixIcon('tabler-package')
+                    ->required(),
+                Components\Toggle::make('transitory')
+                    ->label(__('transitory'))
+                    ->columnSpan(3)
+                    ->inline(false)
+                    ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory')),
+                Components\Toggle::make('undated')
+                    ->label(__('undated'))
+                    ->columnSpan(3)
+                    ->inline(false)
+                    ->hintIcon('tabler-info-circle', __('hidePositionsDate')),
+                Components\TextInput::make('title')
+                    ->label(__('title'))
+                    ->columnSpan(6)
+                    ->required(),
+                Components\Textarea::make('description')
+                    ->label(__('description'))
+                    ->columnSpan(6)
+                    ->autosize()
+                    ->maxLength(65535),
+                Components\TextInput::make('price')
+                    ->label(__('price'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->suffixIcon('tabler-currency-euro')
+                    ->required(),
+                Components\Select::make('pricing_unit')
+                    ->label(__('pricingUnit'))
+                    ->columnSpan(3)
+                    ->options(PricingUnit::class)
+                    ->suffixIcon('tabler-clock-2')
+                    ->required(),
+                Components\TextInput::make('discount')
+                    ->label(__('discount'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->suffixIcon('tabler-currency-euro')
+                    ->helperText(__('priceBeforeTax')),
+                Components\TextInput::make('deduction')
+                    ->label(__('deduction'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->suffixIcon('tabler-currency-euro')
+                    ->helperText(__('priceAfterTax')),
+                Components\Toggle::make('taxable')
+                    ->label(__('taxable'))
+                    ->columnSpan(3)
+                    ->inline(false)
+                    ->default(true)
+                    ->live(),
+                Components\TextInput::make('vat_rate')
+                    ->label(__('vatRate'))
+                    ->columnSpan(3)
+                    ->numeric()
+                    ->step(0.01)
+                    ->minValue(0.01)
+                    ->default(0.19)
+                    ->suffixIcon('tabler-receipt-tax')
+                    ->hidden(fn (Get $get): bool => ! $get('taxable')),
+                Components\DatePicker::make('invoiced_at')
+                    ->label(__('invoicedAt'))
+                    ->columnSpan(3)
+                    ->columnStart(7)
+                    ->weekStartsOnMonday()
+                    ->suffixIcon('tabler-calendar-up'),
+                Components\DatePicker::make('paid_at')
+                    ->label(__('paidAt'))
+                    ->columnSpan(3)
+                    ->weekStartsOnMonday()
+                    ->suffixIcon('tabler-calendar-down'),
+            ])
+        ];
     }
 
 }

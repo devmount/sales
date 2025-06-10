@@ -7,6 +7,7 @@ use App\Models\Project;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListProjects extends ListRecords
@@ -16,7 +17,11 @@ class ListProjects extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('tabler-plus'),
+            Actions\CreateAction::make()
+                ->icon('tabler-plus')
+                ->form(ProjectResource::formFields(6, false))
+                ->slideOver()
+                ->modalWidth(MaxWidth::Large),
         ];
     }
 
