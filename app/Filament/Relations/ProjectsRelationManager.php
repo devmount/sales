@@ -57,7 +57,7 @@ class ProjectsRelationManager extends RelationManager
                 Actions\Action::make('create')
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->beforeFormFilled(function (Component $livewire) {
+                    ->afterFormFilled(function (Component $livewire) {
                         $livewire->mountedTableActionsData[0]['client_id'] = $this->ownerRecord->id;
                     })
                     ->form(ProjectResource::formFields(useSection: false))

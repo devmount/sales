@@ -10,6 +10,7 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions;
 use Filament\Tables\Columns;
 use Filament\Tables\Table;
+use Livewire\Component;
 
 class PositionsRelationManager extends RelationManager
 {
@@ -35,12 +36,12 @@ class PositionsRelationManager extends RelationManager
                 Columns\ToggleColumn::make('remote')
                     ->label(__('remote')),
             ])
-            ->filters([
-                //
-            ])
             ->headerActions([
                 Actions\CreateAction::make()
                     ->icon('tabler-plus')
+                    ->afterFormFilled(function (Component $livewire) {
+                        $livewire->mountedTableActionsData[0]['invoice_id'] = $this->ownerRecord->id;
+                    })
                     ->form(PositionResource::formFields())
                     ->slideOver()
                     ->modalWidth(MaxWidth::TwoExtraLarge),
