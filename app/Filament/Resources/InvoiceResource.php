@@ -38,13 +38,11 @@ class InvoiceResource extends Resource
             ->schema([
                 Components\Section::make()
                     ->columnSpan(['lg' => fn (?Invoice $obj) => !$obj?->project ? 10 : 8])
-                    ->columns(12)
-                    ->schema(self::formFields()),
+                    ->schema(self::formFields(12, false)),
                 Components\Section::make()
                     ->heading(__('currentState'))
                     ->hidden(fn (?Invoice $obj) => !$obj?->project)
                     ->columnSpan(['lg' => 2])
-                    ->columns(2)
                     ->schema([
                         Components\Placeholder::make('project')
                             ->label(trans_choice('project', 1))
@@ -129,8 +127,11 @@ class InvoiceResource extends Resource
                     Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->excludeAttributes(['invoiced_at', 'paid_at'])
-                        ->form(self::formFields())
+                        ->beforeFormFilled(function (Invoice $record) {
+                            $record->invoiced_at = null;
+                            $record->paid_at = null;
+                        })
+                        ->form(self::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(MaxWidth::ExtraLarge),
                     Actions\Action::make('pdf')
@@ -247,96 +248,98 @@ class InvoiceResource extends Resource
     /**
      * Return a list of components containing form fields
      */
-    public static function formFields(int $columns = 12): array
+    public static function formFields(int $columns = 12, bool $useSection = true): array
     {
-        return [
-            Components\Grid::make($columns)->schema([
-                Components\Select::make('project_id')
-                    ->label(trans_choice('project', 1))
-                    ->columnSpan(6)
-                    ->relationship('project', 'title')
-                    ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
-                    ->searchable()
-                    ->preload()
-                    ->suffixIcon('tabler-package')
-                    ->required(),
-                Components\Toggle::make('transitory')
-                    ->label(__('transitory'))
-                    ->columnSpan(3)
-                    ->inline(false)
-                    ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory')),
-                Components\Toggle::make('undated')
-                    ->label(__('undated'))
-                    ->columnSpan(3)
-                    ->inline(false)
-                    ->hintIcon('tabler-info-circle', __('hidePositionsDate')),
-                Components\TextInput::make('title')
-                    ->label(__('title'))
-                    ->columnSpan(6)
-                    ->required(),
-                Components\Textarea::make('description')
-                    ->label(__('description'))
-                    ->columnSpan(6)
-                    ->autosize()
-                    ->maxLength(65535),
-                Components\TextInput::make('price')
-                    ->label(__('price'))
-                    ->columnSpan(3)
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->suffixIcon('tabler-currency-euro')
-                    ->required(),
-                Components\Select::make('pricing_unit')
-                    ->label(__('pricingUnit'))
-                    ->columnSpan(3)
-                    ->options(PricingUnit::class)
-                    ->suffixIcon('tabler-clock-2')
-                    ->required(),
-                Components\TextInput::make('discount')
-                    ->label(__('discount'))
-                    ->columnSpan(3)
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->suffixIcon('tabler-currency-euro')
-                    ->helperText(__('priceBeforeTax')),
-                Components\TextInput::make('deduction')
-                    ->label(__('deduction'))
-                    ->columnSpan(3)
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->suffixIcon('tabler-currency-euro')
-                    ->helperText(__('priceAfterTax')),
-                Components\Toggle::make('taxable')
-                    ->label(__('taxable'))
-                    ->columnSpan(3)
-                    ->inline(false)
-                    ->default(true)
-                    ->live(),
-                Components\TextInput::make('vat_rate')
-                    ->label(__('vatRate'))
-                    ->columnSpan(3)
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0.01)
-                    ->default(0.19)
-                    ->suffixIcon('tabler-receipt-tax')
-                    ->hidden(fn (Get $get): bool => ! $get('taxable')),
-                Components\DatePicker::make('invoiced_at')
-                    ->label(__('invoicedAt'))
-                    ->columnSpan(3)
-                    ->columnStart(7)
-                    ->weekStartsOnMonday()
-                    ->suffixIcon('tabler-calendar-up'),
-                Components\DatePicker::make('paid_at')
-                    ->label(__('paidAt'))
-                    ->columnSpan(3)
-                    ->weekStartsOnMonday()
-                    ->suffixIcon('tabler-calendar-down'),
-            ])
+        $half = intval($columns / ($columns > 6 ? 2 : 1));
+        $fields = [
+            Components\Select::make('project_id')
+                ->label(trans_choice('project', 1))
+                ->relationship('project', 'title')
+                ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
+                ->searchable()
+                ->preload()
+                ->suffixIcon('tabler-package')
+                ->required()
+                ->columnSpan($half),
+            Components\Toggle::make('transitory')
+                ->label(__('transitory'))
+                ->inline(false)
+                ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory'))
+                ->columnSpan($half/2),
+            Components\Toggle::make('undated')
+                ->label(__('undated'))
+                ->inline(false)
+                ->hintIcon('tabler-info-circle', __('hidePositionsDate'))
+                ->columnSpan($half/2),
+            Components\TextInput::make('title')
+                ->label(__('title'))
+                ->required()
+                ->columnSpan($half),
+            Components\Textarea::make('description')
+                ->label(__('description'))
+                ->autosize()
+                ->maxLength(65535)
+                ->columnSpan($half),
+            Components\TextInput::make('price')
+                ->label(__('price'))
+                ->numeric()
+                ->step(0.01)
+                ->minValue(0.01)
+                ->suffixIcon('tabler-currency-euro')
+                ->required()
+                ->columnSpan($half/2),
+            Components\Select::make('pricing_unit')
+                ->label(__('pricingUnit'))
+                ->options(PricingUnit::class)
+                ->suffixIcon('tabler-clock-2')
+                ->required()
+                ->columnSpan($half/2),
+            Components\TextInput::make('discount')
+                ->label(__('discount'))
+                ->numeric()
+                ->step(0.01)
+                ->minValue(0.01)
+                ->suffixIcon('tabler-currency-euro')
+                ->helperText(__('priceBeforeTax'))
+                ->columnSpan($half/2),
+            Components\TextInput::make('deduction')
+                ->label(__('deduction'))
+                ->numeric()
+                ->step(0.01)
+                ->minValue(0.01)
+                ->suffixIcon('tabler-currency-euro')
+                ->helperText(__('priceAfterTax'))
+                ->columnSpan($half/2),
+            Components\Toggle::make('taxable')
+                ->label(__('taxable'))
+                ->inline(false)
+                ->default(true)
+                ->live()
+                ->columnSpan($half/2),
+            Components\TextInput::make('vat_rate')
+                ->label(__('vatRate'))
+                ->numeric()
+                ->step(0.01)
+                ->minValue(0.01)
+                ->default(0.19)
+                ->suffixIcon('tabler-receipt-tax')
+                ->hidden(fn (Get $get): bool => ! $get('taxable'))
+                ->columnSpan($half/2),
+            Components\DatePicker::make('invoiced_at')
+                ->label(__('invoicedAt'))
+                ->weekStartsOnMonday()
+                ->suffixIcon('tabler-calendar-up')
+                ->columnSpan($half/2),
+            Components\DatePicker::make('paid_at')
+                ->label(__('paidAt'))
+                ->weekStartsOnMonday()
+                ->suffixIcon('tabler-calendar-down')
+                ->columnSpan($half/2),
         ];
+
+        return $useSection
+            ? [Components\Section::make()->columns($columns)->schema($fields)]
+            : [Components\Grid::make($columns)->schema($fields)];
     }
 
 }
