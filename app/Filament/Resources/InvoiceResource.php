@@ -129,7 +129,10 @@ class InvoiceResource extends Resource
                     Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->excludeAttributes(['invoiced_at', 'paid_at'])
+                        ->beforeFormFilled(function (Invoice $record) {
+                            $record->invoiced_at = null;
+                            $record->paid_at = null;
+                        })
                         ->form(self::formFields())
                         ->slideOver()
                         ->modalWidth(MaxWidth::ExtraLarge),

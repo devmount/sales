@@ -79,7 +79,7 @@ class ProjectResource extends Resource
                     Actions\EditAction::make()->icon('tabler-edit'),
                     Actions\ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->beforeFormFilled(function (Actions\ReplicateAction $action, Project $record) {
+                        ->beforeFormFilled(function (Project $record) {
                             $year = Carbon::parse($record->due_at)->year + 1;
                             $record->start_at = Carbon::create($year)->format('Y-m-d');
                             $record->due_at = Carbon::create($year, 12, 31)->format('Y-m-d');
