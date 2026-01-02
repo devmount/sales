@@ -1,6 +1,6 @@
 <x-filament-widgets::widget>
     <x-filament::section :heading="$this->getHeading()">
-        <x-slot name="headerEnd">
+        <x-slot name="afterHeader">
             <x-filament::input.wrapper
                 inline-prefix
                 wire:target="filter"

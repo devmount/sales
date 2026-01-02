@@ -67,6 +67,7 @@
         "rsc27": "Purchased services",
         "rsc55": "Input tax paid",
         "rsc97": "Taxable profit/loss",
+        "vr75": "Other non-taxable transactions (place of performance not in the country)",
         "vr118": "Prepayment target"
     },
     "gift": "Gift|Gifts",

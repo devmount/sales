@@ -26,6 +26,10 @@ class StatsOverview extends BaseWidget
         $hoursDiff = $hours[count($hours)-1] - $previousHours;
         $hoursIncrease = $hoursDiff >= 0;
         $hoursDiffPercent = $previousHours ? round(abs($hoursDiff)/$previousHours*100) : 0;
+
+        $vFilament = InstalledVersions::getPrettyVersion('filament/filament');
+        $vLaravel = InstalledVersions::getPrettyVersion('laravel/framework');
+
         return [
             Stat::make('weeklyRevenue', $revenueStat)
                 ->label(__('weeklyRevenue'))
@@ -40,8 +44,8 @@ class StatsOverview extends BaseWidget
                 ->chart($hours)
                 ->color($hoursIncrease ? Color::Blue : Color::Red),
             Stat::make('info', filament()->getBrandName() . ' v' . config('app.version'))
-                ->label('Filament ' . InstalledVersions::getPrettyVersion('filament/filament'))
-                ->description('Laravel ' . InstalledVersions::getPrettyVersion('laravel/framework')),
+                ->label("Filament $vFilament · Laravel $vLaravel")
+                ->description('PHP v' . phpversion()),
         ];
     }
 
