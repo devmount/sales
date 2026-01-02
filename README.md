@@ -19,7 +19,7 @@ A service sales manager especially for freelancers. Built in German, available i
 
 Prerequisites:
 
-- PHP 8.2+
+- PHP 8.4+
 - PHP extensions: mbstring, zip, xml, curl, dom, intl, mysql
 - Composer 2.5+
 

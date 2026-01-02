@@ -35,14 +35,14 @@ jobs:
         passphrase: ${{ secrets.DEPLOY_SSH_PHRASE }}
         script: |
           cd ${{ secrets.DEPLOY_PATH_STAGE }}
-          php8.3 -f /usr/bin/composer update -qn
-          php8.3 -f /usr/bin/composer install -qno --no-ansi --no-scripts --no-progress
-          php8.3 artisan migrate --force
-          php8.3 artisan config:clear
-          php8.3 artisan config:cache
-          php8.3 artisan route:clear
-          php8.3 artisan route:cache
-          php8.3 artisan view:clear
-          php8.3 artisan view:cache
-          php8.3 artisan icons:cache
+          php8.4 -f /usr/bin/composer update -qn
+          php8.4 -f /usr/bin/composer install -qno --no-ansi --no-scripts --no-progress
+          php8.4 artisan migrate --force
+          php8.4 artisan config:clear
+          php8.4 artisan config:cache
+          php8.4 artisan route:clear
+          php8.4 artisan route:cache
+          php8.4 artisan view:clear
+          php8.4 artisan view:cache
+          php8.4 artisan icons:cache
           rm -rf node_modules .git* .editorconfig .env.* *.config.js
