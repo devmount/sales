@@ -8,9 +8,9 @@ use App\Filament\Widgets as AppWidgets;
 
 class Dashboard extends BaseDashboard
 {
-    protected static ?string $navigationIcon = 'tabler-chart-pie';
+    protected static string | \BackedEnum | null $navigationIcon = 'tabler-chart-pie';
 
-    public function getColumns(): int | string | array
+    public function getColumns(): int|array
     {
         return 12;
     }

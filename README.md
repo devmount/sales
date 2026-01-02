@@ -8,8 +8,8 @@ A service sales manager especially for freelancers. Built in German, available i
 - Keep track of clients
 - Create projects for clients and provide estimations
 - Create invoices and fill them with descriptive positions
-- PDF export invoices from projects
-- Keep track of expenses
+- PDF export quotes or invoices from projects
+- Keep track of expenses and taxes
 - Keep track of gifts/donations (e.g. if you're an OS maintainer)
 - Anonymize data in staging/dev environments
 
@@ -19,9 +19,9 @@ A service sales manager especially for freelancers. Built in German, available i
 
 Prerequisites:
 
-- PHP 8.2 or later
+- PHP 8.2+
 - PHP extensions: mbstring, zip, xml, curl, dom, intl, mysql
-- Composer 2.5 or later
+- Composer 2.5+
 
 ```bash
 git clone https://github.com/devmount/sales # get files

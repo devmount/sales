@@ -4,10 +4,10 @@ namespace App\Filament\Resources\ExpenseResource\Pages;
 
 use App\Enums\ExpenseCategory;
 use App\Filament\Resources\ExpenseResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListExpenses extends ListRecords
@@ -17,7 +17,11 @@ class ListExpenses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
+            CreateAction::make()
+                ->icon('tabler-plus')
+                ->schema(ExpenseResource::formFields(6, false))
+                ->slideOver()
+                ->modalWidth(Width::Large),
         ];
     }
 

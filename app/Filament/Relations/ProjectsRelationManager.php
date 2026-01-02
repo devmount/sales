@@ -4,13 +4,16 @@ namespace App\Filament\Relations;
 
 use App\Filament\Resources\ProjectResource;
 use App\Models\Project;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions;
-use Filament\Tables\Table;
-use Filament\Tables\Columns;
-use Filament\Support\Enums\MaxWidth;
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 
 class ProjectsRelationManager extends RelationManager
@@ -22,31 +25,31 @@ class ProjectsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('title')
             ->columns([
-                Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->tooltip(fn (Project $record): ?string => $record->description),
-                Columns\TextColumn::make('date_range')
+                TextColumn::make('date_range')
                     ->label(__('dateRange'))
                     ->state(fn (Project $record): string => Carbon::parse($record->start_at)
                         ->isoFormat('ll') . ' - ' . ($record->due_at ? Carbon::parse($record->due_at)->isoFormat('ll') : '∞')
                     ),
-                Columns\TextColumn::make('scope')
+                TextColumn::make('scope')
                     ->label(__('scope'))
                     ->state(fn (Project $record): string => $record->scope_range),
-                Columns\TextColumn::make('price_per_unit')
+                TextColumn::make('price_per_unit')
                     ->label(__('price'))
                     ->state(fn (Project $record): string => $record->price_per_unit),
-                Columns\TextColumn::make('progress')
+                TextColumn::make('progress')
                     ->label(__('progress'))
                     ->state(fn (Project $record): string => $record->hours_with_label),
-                Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
@@ -54,28 +57,28 @@ class ProjectsRelationManager extends RelationManager
             ])
             ->defaultSort('start_at', 'desc')
             ->headerActions([
-                Actions\Action::make('create')
+                Action::make('create')
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->afterFormFilled(function (Component $livewire) {
-                        $livewire->mountedTableActionsData[0]['client_id'] = $this->ownerRecord->id;
+                        $livewire->mountedActions[0]['data']['client_id'] = $this->ownerRecord->id;
                     })
-                    ->form(ProjectResource::formFields(useSection: false))
+                    ->schema(ProjectResource::formFields(useSection: false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::Large),
+                    ->modalWidth(Width::Large),
             ])
-            ->actions([
-                Actions\ActionGroup::make([
-                    Actions\EditAction::make()
+            ->recordActions([
+                ActionGroup::make([
+                    EditAction::make()
                         ->icon('tabler-edit')
-                        ->form(ProjectResource::formFields(useSection: false))
+                        ->schema(ProjectResource::formFields(useSection: false))
                         ->slideOver()
-                        ->modalWidth(MaxWidth::Large),
-                    Actions\ReplicateAction::make()
+                        ->modalWidth(Width::Large),
+                    ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->form(ProjectResource::formFields(useSection: false))
+                        ->schema(ProjectResource::formFields(useSection: false))
                         ->slideOver()
-                        ->modalWidth(MaxWidth::Large),
+                        ->modalWidth(Width::Large),
                 ])
                 ->icon('tabler-dots-vertical')
             ]);

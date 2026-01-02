@@ -3,87 +3,101 @@
 namespace App\Filament\Resources;
 
 use App\Enums\LanguageCode;
-use App\Filament\Resources\ClientResource\Pages;
-use App\Filament\Relations;
+use App\Filament\Relations\InvoicesRelationManager;
+use App\Filament\Relations\ProjectsRelationManager;
+use App\Filament\Resources\ClientResource\Pages\EditClient;
+use App\Filament\Resources\ClientResource\Pages\ListClients;
 use App\Mail\ContactClient;
 use App\Models\Client;
 use App\Models\Setting;
-use Filament\Forms\Components;
-use Filament\Forms\Form;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions;
-use Filament\Tables\Columns;
-use Filament\Tables\Filters;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Mail;
 
 class ClientResource extends Resource
 {
     protected static ?string $model = Client::class;
-    protected static ?string $navigationIcon = 'tabler-users';
+    protected static string | \BackedEnum | null $navigationIcon = 'tabler-users';
     protected static ?int $navigationSort = 10;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formFields());
+        return $schema->components(self::formFields());
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Columns\ColorColumn::make('color')
+                ColorColumn::make('color')
                     ->label(''),
-                Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label(__('name'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Client $record): string => $record->full_address)
                     ->wrap(),
-                Columns\TextColumn::make('language')
+                TextColumn::make('language')
                     ->label(__('language'))
                     ->badge()
                     ->sortable(),
-                Columns\TextColumn::make('net')
+                TextColumn::make('net')
                     ->label(__('net'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Client $record): float => $record->net)
                     ->description(fn (Client $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
-                Columns\TextColumn::make('days_to_pay')
+                TextColumn::make('days_to_pay')
                     ->label(__('payment'))
                     ->abbr(__('averagePaymentDuration'), asTooltip: true)
                     ->numeric(1)
                     ->state(fn (Client $record): float => $record->avg_payment_delay)
                     ->description(trans_choice('day', 2)),
-                Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->since()
                     ->sortable(),
-                Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filters\SelectFilter::make('language')
+                SelectFilter::make('language')
                     ->label(__('language'))
                     ->options(LanguageCode::class),
             ])
-            ->actions(Actions\ActionGroup::make([
-                Actions\EditAction::make()->icon('tabler-edit'),
-                Actions\Action::make('kontaktieren')
+            ->recordActions(ActionGroup::make([
+                EditAction::make()->icon('tabler-edit'),
+                Action::make('kontaktieren')
                     ->disabled(fn (Client $record) => !boolval($record->email))
                     ->icon('tabler-mail')
-                    ->form(fn (Client $record) => [
-                        Components\TextInput::make('subject')
+                    ->schema(fn (Client $record) => [
+                        TextInput::make('subject')
                             ->label(__('subject'))
                             ->required(),
-                        Components\RichEditor::make('content')
+                        RichEditor::make('content')
                             ->label(__('content'))
                             ->required()
                             ->default(__("email.template.contact.body", [
@@ -97,26 +111,26 @@ class ClientResource extends Resource
                         );
                     })
                     ->slideOver()
-                    ->modalWidth(MaxWidth::Large),
-                Actions\ReplicateAction::make()
+                    ->modalWidth(Width::Large),
+                ReplicateAction::make()
                     ->icon('tabler-copy')
-                    ->form(self::formFields(6, false))
+                    ->schema(self::formFields(6, false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::Large),
-                Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
+                    ->modalWidth(Width::Large),
+                DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
             ]))
-            ->bulkActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->form(self::formFields(6, false))
+                    ->schema(self::formFields(6, false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::Large),
+                    ->modalWidth(Width::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -126,16 +140,16 @@ class ClientResource extends Resource
     public static function getRelations(): array
     {
         return [
-            Relations\ProjectsRelationManager::class,
-            Relations\InvoicesRelationManager::class,
+            ProjectsRelationManager::class,
+            InvoicesRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClients::route('/'),
-            'edit'  => Pages\EditClient::route('/{record}/edit'),
+            'index' => ListClients::route('/'),
+            'edit'  => EditClient::route('/{record}/edit'),
         ];
     }
 
@@ -165,51 +179,51 @@ class ClientResource extends Resource
     public static function formFields(int $columns = 12, bool $useSection = true): array
     {
         $fields = [
-            Components\TextInput::make('name')
+            TextInput::make('name')
                 ->label(__('name'))
                 ->hint(__('client.name.hint'))
                 ->hintIcon('tabler-info-circle')
                 ->columnSpan(6)
                 ->required(),
-            Components\TextInput::make('short')
+            TextInput::make('short')
                 ->label(__('short'))
                 ->columnSpan(3)
                 ->suffixIcon('tabler-letter-spacing'),
-            Components\ColorPicker::make('color')
+            ColorPicker::make('color')
                 ->label(__('color'))
                 ->columnSpan(3)
                 ->suffixIcon('tabler-palette'),
-            Components\TextInput::make('address')
+            TextInput::make('address')
                 ->label(__('address'))
                 ->columnSpan(6),
-            Components\Select::make('language')
+            Select::make('language')
                 ->label(__('language'))
                 ->columnSpan(6)
                 ->suffixIcon('tabler-language')
                 ->options(LanguageCode::class)
                 ->required(),
-            Components\TextInput::make('street')
+            TextInput::make('street')
                 ->label(__('street'))
                 ->columnSpan(6),
-            Components\TextInput::make('vat_id')
+            TextInput::make('vat_id')
                 ->label(__('vatId'))
                 ->suffixIcon('tabler-tax-euro')
                 ->columnSpan(6),
-            Components\TextInput::make('zip')
+            TextInput::make('zip')
                 ->label(__('zip'))
                 ->columnSpan(3),
-            Components\TextInput::make('city')
+            TextInput::make('city')
                 ->label(__('city'))
                 ->columnSpan(3),
-            Components\TextInput::make('email')
+            TextInput::make('email')
                 ->label(__('email'))
                 ->columnSpan(6)
                 ->suffixIcon('tabler-mail')
                 ->email(),
-            Components\TextInput::make('country')
+            TextInput::make('country')
                 ->label(__('country'))
                 ->columnSpan(6),
-            Components\TextInput::make('phone')
+            TextInput::make('phone')
                 ->label(__('phone'))
                 ->columnSpan(6)
                 ->suffixIcon('tabler-phone')
@@ -217,7 +231,7 @@ class ClientResource extends Resource
         ];
 
         return $useSection
-            ? [Components\Section::make()->columns($columns)->schema($fields)]
-            : [Components\Grid::make()->columns($columns)->schema($fields)];
+            ? [Section::make()->columnSpan($columns)->schema($fields)->columns($columns)]
+            : [Grid::make()->columns($columns)->schema($fields)];
     }
 }

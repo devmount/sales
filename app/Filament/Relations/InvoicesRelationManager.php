@@ -5,14 +5,20 @@ namespace App\Filament\Relations;
 use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Enums\FontFamily;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions;
-use Filament\Tables\Columns;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Number;
+use Livewire\Component;
 
 class InvoicesRelationManager extends RelationManager
 {
@@ -25,7 +31,7 @@ class InvoicesRelationManager extends RelationManager
             ->heading(trans_choice('invoice', 2))
             ->defaultSort('started_at', 'asc')
             ->columns([
-                Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__('title'))
                     ->sortable()
                     ->description(fn (Invoice $record): string =>
@@ -33,18 +39,18 @@ class InvoicesRelationManager extends RelationManager
                         ($record->paid_at ? ', ' . __('paidAt') . ' ' . Carbon::parse($record->paid_at)->isoFormat('LL') : '')
                     )
                     ->tooltip(fn (Invoice $record): ?string => $record->description),
-                Columns\TextColumn::make('price')
+                TextColumn::make('price')
                     ->label(__('price'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel()),
-                Columns\TextColumn::make('net')
+                TextColumn::make('net')
                     ->label(__('net'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->net)
                     ->description(fn (Invoice $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
-                Columns\TextColumn::make('total')
+                TextColumn::make('total')
                     ->label(__('total'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
@@ -52,41 +58,44 @@ class InvoicesRelationManager extends RelationManager
                     ->description(fn (Invoice $record): string => Number::currency($record->vat, 'eur') . ' ' . __('vat')),
             ])
             ->headerActions([
-                Actions\Action::make('create')
+                Action::make('create')
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->form(InvoiceResource::formFields())
+                    ->afterFormFilled(function (Component $livewire) {
+                        $livewire->mountedActions[0]['data']['project_id'] = $this->ownerRecord->id;
+                    })
+                    ->schema(InvoiceResource::formFields(6, false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::ThreeExtraLarge),
+                    ->modalWidth(Width::ExtraLarge),
             ])
-            ->actions([
-                Actions\ActionGroup::make([
-                    Actions\EditAction::make()
+            ->recordActions([
+                ActionGroup::make([
+                    EditAction::make()
                         ->icon('tabler-edit')
-                        ->form(InvoiceResource::formFields())
+                        ->schema(InvoiceResource::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(MaxWidth::ThreeExtraLarge),
-                    Actions\ReplicateAction::make()
+                        ->modalWidth(Width::ExtraLarge),
+                    ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->form(InvoiceResource::formFields())
+                        ->schema(InvoiceResource::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(MaxWidth::ThreeExtraLarge),
+                        ->modalWidth(Width::ExtraLarge),
                 ])
                 ->icon('tabler-dots-vertical')
             ])
-            ->bulkActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\Action::make('create')
+                Action::make('create')
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->form(InvoiceResource::formFields())
+                    ->schema(InvoiceResource::formFields(6, false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::ThreeExtraLarge),
+                    ->modalWidth(Width::ExtraLarge),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')

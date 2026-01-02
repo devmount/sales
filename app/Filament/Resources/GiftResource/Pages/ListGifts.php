@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\GiftResource\Pages;
 
 use App\Filament\Resources\GiftResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 
 class ListGifts extends ListRecords
 {
@@ -14,7 +14,11 @@ class ListGifts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
+            CreateAction::make()
+                ->icon('tabler-plus')
+                ->schema(GiftResource::formFields(6, false))
+                ->slideOver()
+                ->modalWidth(Width::Large),
         ];
     }
 }

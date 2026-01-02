@@ -14,7 +14,8 @@ class MonthlyIncomeChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 4;
     public ?string $filter = 'net';
-    protected static ?string $pollingInterval = null;
+    protected ?string $maxHeight = '150px';
+    protected ?string $pollingInterval = null;
 
     public function getHeading(): string
     {

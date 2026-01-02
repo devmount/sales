@@ -4,22 +4,38 @@ namespace App\Filament\Resources;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
-use App\Filament\Resources\InvoiceResource\Pages;
-use App\Filament\Relations;
+use App\Filament\Relations\PositionsRelationManager;
+use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
+use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Services\InvoiceService;
 use Carbon\Carbon;
-use Filament\Forms\Components;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions;
-use Filament\Tables\Columns;
-use Filament\Tables\Filters;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -28,25 +44,25 @@ use Illuminate\Support\Number;
 class InvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
-    protected static ?string $navigationIcon = 'tabler-file-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'tabler-file-stack';
     protected static ?int $navigationSort = 30;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->columns(10)
-            ->schema([
-                Components\Section::make()
+            ->components([
+                Section::make()
                     ->columnSpan(['lg' => fn (?Invoice $obj) => !$obj?->project ? 10 : 8])
                     ->schema(self::formFields(12, false)),
-                Components\Section::make()
+                Section::make()
                     ->heading(__('currentState'))
                     ->hidden(fn (?Invoice $obj) => !$obj?->project)
                     ->columnSpan(['lg' => 2])
                     ->schema([
-                        Components\Placeholder::make('project')
+                        TextEntry::make('project')
                             ->label(trans_choice('project', 1))
-                            ->content(fn (Invoice $obj) => new HtmlString(
+                            ->state(fn (Invoice $obj) => new HtmlString(
                                 $obj->project?->hours
                                 . ' / ' . $obj->project?->scope_range
                                 . ($obj->project?->scope
@@ -55,9 +71,9 @@ class InvoiceResource extends Resource
                                 )
                             ))
                             ->columnSpanFull(),
-                        Components\Placeholder::make('invoice')
+                        TextEntry::make('invoice')
                             ->label(trans_choice('invoice', 1))
-                            ->content(fn (Invoice $obj) => new HtmlString(
+                            ->state(fn (Invoice $obj) => new HtmlString(
                                 count($obj->positions) . ' ' . trans_choice('position', count($obj->positions))
                                 . '<br />' . $obj->hours_formatted
                                 . '<br />' . $obj->net_formatted . ' ' . __('net')
@@ -71,70 +87,70 @@ class InvoiceResource extends Resource
     {
         return $table
             ->columns([
-                Columns\ColorColumn::make('project.client.color')
+                ColorColumn::make('project.client.color')
                     ->label(''),
-                Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Invoice $record): string => $record->project?->client?->name)
                     ->tooltip(fn (Invoice $record): ?string => $record->description),
-                Columns\TextColumn::make('price')
+                TextColumn::make('price')
                     ->label(__('price'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel()),
-                Columns\TextColumn::make('net')
+                TextColumn::make('net')
                     ->label(__('net'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->net)
                     ->description(fn (Invoice $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
-                Columns\TextColumn::make('total')
+                TextColumn::make('total')
                     ->label(__('total'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Invoice $record): float => $record->final)
                     ->description(fn (Invoice $record): string => Number::currency($record->vat, 'eur') . ' ' . __('vat')),
-                Columns\TextColumn::make('invoiced_at')
+                TextColumn::make('invoiced_at')
                     ->label(__('invoiceDates'))
                     ->date('j. F Y')
                     ->description(fn (Invoice $record): string => $record->paid_at
                         ? Carbon::parse($record->paid_at)->isoFormat('LL')
                         : ''
                     ),
-                Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filters\SelectFilter::make('project')
+                SelectFilter::make('project')
                     ->label(trans_choice('project', 1))
                     ->relationship('project', 'title'),
-                Filters\SelectFilter::make('client')
+                SelectFilter::make('client')
                     ->label(trans_choice('client', 1))
                     ->relationship('project.client', 'name'),
             ])
-            ->actions(
-                Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
-                    Actions\ReplicateAction::make()
+            ->recordActions(
+                ActionGroup::make([
+                    EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(Width::Large),
+                    ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->beforeFormFilled(function (Invoice $record) {
                             $record->invoiced_at = null;
                             $record->paid_at = null;
                         })
-                        ->form(self::formFields(6, false))
+                        ->schema(self::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(MaxWidth::ExtraLarge),
-                    Actions\Action::make('pdf')
+                        ->modalWidth(Width::ExtraLarge),
+                    Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
                         ->action(function (Invoice $record) {
@@ -142,7 +158,7 @@ class InvoiceResource extends Resource
                             $file = InvoiceService::generatePdf($record);
                             return response()->download(Storage::path($file));
                         }),
-                    Actions\Action::make('xml')
+                    Action::make('xml')
                         ->label(__('downloadFiletype', ['type' => 'xml']))
                         ->icon('tabler-file-type-xml')
                         ->action(function (Invoice $record) {
@@ -150,14 +166,14 @@ class InvoiceResource extends Resource
                             $file = InvoiceService::generateEn16931Xml($record);
                             return response()->download(Storage::path($file));
                         }),
-                    Actions\Action::make('send')
+                    Action::make('send')
                         ->label(__('send'))
                         ->icon('tabler-mail-forward')
                         ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::RUNNING)
                         ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
                             . '?subject=' . rawurlencode(trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
                             . '&body=' . rawurlencode(__('email.template.invoicing.body.url', ['title' => $record->project?->title], $record->project?->client?->language))),
-                    Actions\Action::make('issue')
+                    Action::make('issue')
                         ->label(__('invoiceIssued'))
                         ->icon('tabler-calendar-up')
                         ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::RUNNING)
@@ -167,12 +183,12 @@ class InvoiceResource extends Resource
                             Notification::make()->title(__('invoiceDateSet'))->success()->send();
                             return true;
                         }),
-                    Actions\Action::make('paid')
+                    Action::make('paid')
                         ->label(__('invoicePaid'))
                         ->icon('tabler-calendar-down')
                         ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::SENT)
-                        ->form([
-                            Components\DatePicker::make('paid_at')
+                        ->schema([
+                            DatePicker::make('paid_at')
                                 ->label(__('paidAt'))
                                 ->weekStartsOnMonday()
                                 ->suffixIcon('tabler-calendar-down')
@@ -185,25 +201,25 @@ class InvoiceResource extends Resource
                             Notification::make()->title(__('PaidDateSet'))->success()->send();
                             return true;
                         }),
-                    Actions\Action::make('remind')
+                    Action::make('remind')
                         ->label(__('paymentReminder'))
                         ->icon('tabler-mail-exclamation')
                         ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::SENT)
                         ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
                             . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->final_number
                             . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->final_number], $record->project?->client?->language))),
-                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
+                    DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
-            ->bulkActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
+                CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(Width::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
@@ -213,15 +229,15 @@ class InvoiceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            Relations\PositionsRelationManager::class,
+            PositionsRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListInvoices::route('/'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            'index' => ListInvoices::route('/'),
+            'edit' => EditInvoice::route('/{record}/edit'),
         ];
     }
 
@@ -252,7 +268,7 @@ class InvoiceResource extends Resource
     {
         $half = intval($columns / ($columns > 6 ? 2 : 1));
         $fields = [
-            Components\Select::make('project_id')
+            Select::make('project_id')
                 ->label(trans_choice('project', 1))
                 ->relationship('project', 'title')
                 ->getOptionLabelFromRecordUsing(fn (Project $record) => "{$record->title} ({$record->client->name})")
@@ -261,26 +277,26 @@ class InvoiceResource extends Resource
                 ->suffixIcon('tabler-package')
                 ->required()
                 ->columnSpan($half),
-            Components\Toggle::make('transitory')
+            Toggle::make('transitory')
                 ->label(__('transitory'))
                 ->inline(false)
                 ->hintIcon('tabler-info-circle', __('invoice.onlyTransitory'))
                 ->columnSpan($half/2),
-            Components\Toggle::make('undated')
+            Toggle::make('undated')
                 ->label(__('undated'))
                 ->inline(false)
                 ->hintIcon('tabler-info-circle', __('hidePositionsDate'))
                 ->columnSpan($half/2),
-            Components\TextInput::make('title')
+            TextInput::make('title')
                 ->label(__('title'))
                 ->required()
                 ->columnSpan($half),
-            Components\Textarea::make('description')
+            Textarea::make('description')
                 ->label(__('description'))
                 ->autosize()
                 ->maxLength(65535)
                 ->columnSpan($half),
-            Components\TextInput::make('price')
+            TextInput::make('price')
                 ->label(__('price'))
                 ->numeric()
                 ->step(0.01)
@@ -288,13 +304,13 @@ class InvoiceResource extends Resource
                 ->suffixIcon('tabler-currency-euro')
                 ->required()
                 ->columnSpan($half/2),
-            Components\Select::make('pricing_unit')
+            Select::make('pricing_unit')
                 ->label(__('pricingUnit'))
                 ->options(PricingUnit::class)
                 ->suffixIcon('tabler-clock-2')
                 ->required()
                 ->columnSpan($half/2),
-            Components\TextInput::make('discount')
+            TextInput::make('discount')
                 ->label(__('discount'))
                 ->numeric()
                 ->step(0.01)
@@ -302,7 +318,7 @@ class InvoiceResource extends Resource
                 ->suffixIcon('tabler-currency-euro')
                 ->helperText(__('priceBeforeTax'))
                 ->columnSpan($half/2),
-            Components\TextInput::make('deduction')
+            TextInput::make('deduction')
                 ->label(__('deduction'))
                 ->numeric()
                 ->step(0.01)
@@ -310,13 +326,13 @@ class InvoiceResource extends Resource
                 ->suffixIcon('tabler-currency-euro')
                 ->helperText(__('priceAfterTax'))
                 ->columnSpan($half/2),
-            Components\Toggle::make('taxable')
+            Toggle::make('taxable')
                 ->label(__('taxable'))
                 ->inline(false)
                 ->default(true)
                 ->live()
                 ->columnSpan($half/2),
-            Components\TextInput::make('vat_rate')
+            TextInput::make('vat_rate')
                 ->label(__('vatRate'))
                 ->numeric()
                 ->step(0.01)
@@ -325,12 +341,12 @@ class InvoiceResource extends Resource
                 ->suffixIcon('tabler-receipt-tax')
                 ->hidden(fn (Get $get): bool => ! $get('taxable'))
                 ->columnSpan($half/2),
-            Components\DatePicker::make('invoiced_at')
+            DatePicker::make('invoiced_at')
                 ->label(__('invoicedAt'))
                 ->weekStartsOnMonday()
                 ->suffixIcon('tabler-calendar-up')
                 ->columnSpan($half/2),
-            Components\DatePicker::make('paid_at')
+            DatePicker::make('paid_at')
                 ->label(__('paidAt'))
                 ->weekStartsOnMonday()
                 ->suffixIcon('tabler-calendar-down')
@@ -338,8 +354,8 @@ class InvoiceResource extends Resource
         ];
 
         return $useSection
-            ? [Components\Section::make()->columns($columns)->schema($fields)]
-            : [Components\Grid::make($columns)->schema($fields)];
+            ? [Section::make()->columnSpan($columns)->schema($fields)->columns($columns)]
+            : [Grid::make($columns)->schema($fields)];
     }
 
 }

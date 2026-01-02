@@ -2,26 +2,37 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EstimateResource\Pages;
+use App\Filament\Resources\EstimateResource\Pages\ListEstimates;
 use App\Models\Estimate;
-use Filament\Forms\Components;
-use Filament\Forms\Form;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions;
-use Filament\Tables\Columns;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables\Filters;
 
 class EstimateResource extends Resource
 {
     protected static ?string $model = Estimate::class;
-    protected static ?string $navigationIcon = 'tabler-clock-code';
+    protected static string | \BackedEnum | null $navigationIcon = 'tabler-clock-code';
     protected static ?int $navigationSort = 25;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formFields());
+        return $schema->components(self::formFields());
     }
 
     public static function table(Table $table): Table
@@ -29,58 +40,66 @@ class EstimateResource extends Resource
         return $table
             ->defaultGroup('project.title')
             ->columns([
-                Columns\ColorColumn::make('project.client.color')
+                ColorColumn::make('project.client.color')
                     ->label('')
                     ->tooltip(fn (Estimate $record): ?string => $record->project?->client?->name),
-                Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn (Estimate $record): string => substr($record->description, 0, 75) . '...'),
-                Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->numeric()
                     ->sortable(),
-                Columns\TextColumn::make('weight')
+                TextColumn::make('weight')
                     ->label(__('weight'))
                     ->numeric()
                     ->sortable(),
-                Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('updatedAt'))
                     ->datetime('j. F Y, H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filters\SelectFilter::make('project')
+                SelectFilter::make('project')
                     ->label(trans_choice('project', 1))
                     ->relationship('project', 'title')
             ])
-            ->actions(
-                Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
-                    Actions\ReplicateAction::make()
-                        ->icon('tabler-copy')
-                        ->form(self::formFields())
+            ->recordActions(
+                ActionGroup::make([
+                    EditAction::make()
+                        ->icon('tabler-edit')
+                        ->schema(self::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(MaxWidth::Large),
-                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
+                        ->modalWidth(Width::Large),
+                    ReplicateAction::make()
+                        ->icon('tabler-copy')
+                        ->schema(self::formFields(6, false))
+                        ->slideOver()
+                        ->modalWidth(Width::Large),
+                    DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
-            ->bulkActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
+                CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->schema(self::formFields(6, false))
+                    ->slideOver()
+                    ->modalWidth(Width::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->deferLoading();
@@ -89,7 +108,7 @@ class EstimateResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEstimates::route('/'),
+            'index' => ListEstimates::route('/'),
         ];
     }
 
@@ -113,41 +132,48 @@ class EstimateResource extends Resource
         return trans_choice('estimate', 2);
     }
 
-    public static function formFields(): array
+    /**
+     * Return a list of components containing form fields
+     */
+    public static function formFields(int $columns = 12, bool $useSection = true): array
     {
-        return [
-            Components\Grid::make()->columns(2)->schema([
-                Components\Select::make('project_id')
-                    ->label(trans_choice('project', 1))
-                    ->relationship('project', 'title')
-                    ->searchable()
-                    ->suffixIcon('tabler-package')
-                    ->columnSpanFull()
-                    ->required(),
-                Components\TextInput::make('title')
-                    ->label(__('title'))
-                    ->columnSpanFull()
-                    ->required(),
-                Components\Textarea::make('description')
-                    ->label(__('description'))
-                    ->autosize()
-                    ->columnSpanFull()
-                    ->maxLength(65535),
-                Components\TextInput::make('amount')
-                    ->label(__('estimatedHours'))
-                    ->numeric()
-                    ->step(0.1)
-                    ->minValue(0.1)
-                    ->suffix('h')
-                    ->suffixIcon('tabler-clock-exclamation')
-                    ->required(),
-                Components\TextInput::make('weight')
-                    ->label(__('weight'))
-                    ->numeric()
-                    ->step(1)
-                    ->helperText(__('definesEstimateSorting'))
-                    ->suffixIcon('tabler-arrows-sort'),
-            ])
+        $fields = [
+            Select::make('project_id')
+                ->label(trans_choice('project', 1))
+                ->relationship('project', 'title')
+                ->searchable()
+                ->suffixIcon('tabler-package')
+                ->columnSpanFull()
+                ->required(),
+            TextInput::make('title')
+                ->label(__('title'))
+                ->columnSpanFull()
+                ->required(),
+            Textarea::make('description')
+                ->label(__('description'))
+                ->autosize()
+                ->columnSpanFull()
+                ->maxLength(65535),
+            TextInput::make('amount')
+                ->label(__('estimatedHours'))
+                ->columnSpan($columns / 2)
+                ->numeric()
+                ->step(0.1)
+                ->minValue(0.1)
+                ->suffix('h')
+                ->suffixIcon('tabler-clock-exclamation')
+                ->required(),
+            TextInput::make('weight')
+                ->label(__('weight'))
+                ->columnSpan($columns / 2)
+                ->numeric()
+                ->step(1)
+                ->helperText(__('definesEstimateSorting'))
+                ->suffixIcon('tabler-arrows-sort'),
         ];
+
+        return $useSection
+            ? [Section::make()->columnSpan($columns)->schema($fields)->columns($columns)]
+            : [Grid::make()->columns($columns)->schema($fields)];
     }
 }

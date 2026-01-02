@@ -11,7 +11,8 @@ use Filament\Widgets\ChartWidget;
 class HourlyRateChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 4;
-    protected static ?string $pollingInterval = null;
+    protected ?string $maxHeight = '150px';
+    protected ?string $pollingInterval = null;
 
     public function getHeading(): string
     {

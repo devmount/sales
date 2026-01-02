@@ -4,10 +4,10 @@ namespace App\Filament\Resources\ProjectResource\Pages;
 
 use App\Filament\Resources\ProjectResource;
 use App\Models\Project;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListProjects extends ListRecords
@@ -17,11 +17,11 @@ class ListProjects extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->icon('tabler-plus')
-                ->form(ProjectResource::formFields(6, false))
+                ->schema(ProjectResource::formFields(6, false))
                 ->slideOver()
-                ->modalWidth(MaxWidth::Large),
+                ->modalWidth(Width::Large),
         ];
     }
 

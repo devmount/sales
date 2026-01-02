@@ -3,72 +3,90 @@
 namespace App\Filament\Resources;
 
 use App\Enums\OfftimeCategory;
-use App\Filament\Resources\OfftimeResource\Pages;
+use App\Filament\Resources\OfftimeResource\Pages\ListOfftimes;
 use App\Models\Offtime;
-use Filament\Forms\Components;
-use Filament\Forms\Form;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions;
-use Filament\Tables\Columns;
-use Filament\Tables\Filters;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class OfftimeResource extends Resource
 {
     protected static ?string $model = Offtime::class;
-    protected static ?string $navigationIcon = 'tabler-beach';
+    protected static string | \BackedEnum | null $navigationIcon = 'tabler-beach';
     protected static ?int $navigationSort = 60;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formFields());
+        return $schema->components(self::formFields());
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Columns\TextColumn::make('start')
+                TextColumn::make('start')
                     ->label(__('startAt'))
                     ->date('j. F Y')
                     ->sortable(),
-                Columns\TextColumn::make('days')
+                TextColumn::make('days')
                     ->label(trans_choice('day', 2))
                     ->state(fn (Offtime $record): string => $record->days_count ?? '')
                     ->sortable(),
-                Columns\TextColumn::make('category')
+                TextColumn::make('category')
                     ->label(__('category'))
                     ->badge()
                     ->sortable(),
-                Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label(__('description'))
                     ->searchable()
                     ->sortable(),
             ])
             ->filters([
-                Filters\SelectFilter::make('category')
+                SelectFilter::make('category')
                     ->options(OfftimeCategory::options())
             ])
-            ->actions(
-                Actions\ActionGroup::make([
-                    Actions\EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(MaxWidth::Large),
-                    Actions\ReplicateAction::make()
-                        ->icon('tabler-copy')
-                        ->form(self::formFields())
+            ->recordActions(
+                ActionGroup::make([
+                    EditAction::make()
+                        ->icon('tabler-edit')
+                        ->schema(self::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(MaxWidth::Large),
-                    Actions\DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
+                        ->modalWidth(Width::Large),
+                    ReplicateAction::make()
+                        ->icon('tabler-copy')
+                        ->schema(self::formFields(6, false))
+                        ->slideOver()
+                        ->modalWidth(Width::Large),
+                    DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')
             )
-            ->bulkActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->icon('tabler-trash'),
                 ]),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::Large),
+                CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->schema(self::formFields(6, false))
+                    ->slideOver()
+                    ->modalWidth(Width::Large),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('start', 'desc')
@@ -78,7 +96,7 @@ class OfftimeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOfftimes::route('/'),
+            'index' => ListOfftimes::route('/'),
         ];
     }
 
@@ -102,29 +120,36 @@ class OfftimeResource extends Resource
         return trans_choice('offtime', 2);
     }
 
-    public static function formFields(): array
+    /**
+     * Return a list of components containing form fields
+     */
+    public static function formFields(int $columns = 12, bool $useSection = true): array
     {
-        return [
-            Components\Grid::make()->columns(2)->schema([
-                Components\DatePicker::make('start')
-                    ->label(__('startAt'))
-                    ->weekStartsOnMonday()
-                    ->suffixIcon('tabler-calendar-dot')
-                    ->required(),
-                Components\DatePicker::make('end')
-                    ->label(__('finished'))
-                    ->weekStartsOnMonday()
-                    ->suffixIcon('tabler-calendar-pause'),
-                Components\Select::make('category')
-                    ->label(__('category'))
-                    ->columnSpanFull()
-                    ->options(OfftimeCategory::class)
-                    ->suffixIcon('tabler-category')
-                    ->required(),
-                Components\Textarea::make('description')
-                    ->label(__('description'))
-                    ->columnSpanFull(),
-            ])
+        $fields = [
+            DatePicker::make('start')
+                ->label(__('startAt'))
+                ->weekStartsOnMonday()
+                ->suffixIcon('tabler-calendar-dot')
+                ->columnSpan($columns / 2)
+                ->required(),
+            DatePicker::make('end')
+                ->label(__('finished'))
+                ->weekStartsOnMonday()
+                ->columnSpan($columns / 2)
+                ->suffixIcon('tabler-calendar-pause'),
+            Select::make('category')
+                ->label(__('category'))
+                ->columnSpanFull()
+                ->options(OfftimeCategory::class)
+                ->suffixIcon('tabler-category')
+                ->required(),
+            Textarea::make('description')
+                ->label(__('description'))
+                ->columnSpanFull(),
         ];
+
+        return $useSection
+            ? [Section::make()->columnSpan($columns)->schema($fields)->columns($columns)]
+            : [Grid::make()->columns($columns)->schema($fields)];
     }
 }

@@ -13,9 +13,9 @@ use Filament\Widgets\ChartWidget;
 class SalesChart extends ChartWidget
 {
     protected int | string | array $columnSpan = 6;
-    protected static ?string $maxHeight = '180px';
+    protected ?string $maxHeight = '180px';
     public ?string $filter = 'y';
-    protected static ?string $pollingInterval = null;
+    protected ?string $pollingInterval = null;
 
     public function getHeading(): string
     {

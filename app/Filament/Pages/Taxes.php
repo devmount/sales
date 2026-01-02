@@ -10,9 +10,9 @@ class Taxes extends BaseDashboard
 {
     protected static string $routePath = 'taxes';
     protected static ?string $title = 'Steuern';
-    protected static ?string $navigationIcon = 'tabler-tax-euro';
+    protected static string | \BackedEnum | null $navigationIcon = 'tabler-tax-euro';
 
-    public function getColumns(): int | string | array
+    public function getColumns(): int|array
     {
         return 12;
     }

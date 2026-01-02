@@ -4,9 +4,9 @@ namespace App\Filament\Resources\PositionResource\Pages;
 
 use App\Filament\Resources\PositionResource;
 use App\Filament\Resources\PositionResource\Widgets\RecentPositionsChart;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 
 class ListPositions extends ListRecords
 {
@@ -15,7 +15,11 @@ class ListPositions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(MaxWidth::TwoExtraLarge),
+            CreateAction::make()
+                ->icon('tabler-plus')
+                ->schema(PositionResource::formFields(6, false))
+                ->slideOver()
+                ->modalWidth(Width::TwoExtraLarge),
         ];
     }
 
