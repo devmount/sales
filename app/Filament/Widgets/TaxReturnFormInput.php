@@ -7,23 +7,27 @@ use App\Enums\TimeUnit;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Infolists\Infolist;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Number;
 
-class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
+class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithInfolists;
     use InteractsWithForms;
 
-    protected int | string | array $columnSpan = 6;
-    protected static string $view = 'filament.widgets.tax-report-revenue-surplus-calculation';
+    protected int | string | array $columnSpan = 8;
+    protected string $view = 'filament.widgets.tax-report-revenue-surplus-calculation';
     public ?int $filter = null;
 
     public function __construct()
@@ -124,25 +128,30 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
     private function renderData(): array
     {
         $entries = [];
-        foreach ($this->getData() as $key => $line) {
+        $firstLine = true;
+        foreach ($this->getData() as $line) {
             // Income tax return
-            $entries[] = Components\TextEntry::make('itr')
-                ->label($key === 0 ? __('itr') : '')
+            $entries[] = TextEntry::make('itr')
+                ->label(__('itr'))
+                ->hiddenLabel(!$firstLine)
                 ->fontFamily(FontFamily::Mono)
                 ->state($line['itr'] ? __('lineN', ['n' => $line['itr']]) : '');
             // VAT return
-            $entries[] = Components\TextEntry::make('vr')
-                ->label($key === 0 ? __('vr') : '')
+            $entries[] = TextEntry::make('vr')
+                ->label(__('vr'))
+                ->hiddenLabel(!$firstLine)
                 ->fontFamily(FontFamily::Mono)
                 ->state($line['vr'] ? __('lineN', ['n' => $line['vr']]) : '');
             // Revenue Surplus calculation
-            $entries[] = Components\TextEntry::make('rsc')
-                ->label($key === 0 ? __('rsc') : '')
+            $entries[] = TextEntry::make('rsc')
+                ->label(__('rsc'))
+                ->hiddenLabel(!$firstLine)
                 ->fontFamily(FontFamily::Mono)
                 ->state($line['rsc'] ? __('lineN', ['n' => $line['rsc']]) : '');
             // Values
-            $entries[] = Components\TextEntry::make('value')
-                ->label($key === 0 ? __('value') : '')
+            $entries[] = TextEntry::make('value')
+                ->label(__('value'))
+                ->hiddenLabel(!$firstLine)
                 ->money('eur')
                 ->state($line['value'])
                 ->fontFamily(FontFamily::Mono)
@@ -151,15 +160,17 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists
                 ->tooltip($line['help'])
                 ->copyable()
                 ->copyableState(fn (string $state): string => Number::format(floatval($state)));
+
+            $firstLine = false;
         }
         return $entries;
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema($this->renderData())
+        return $schema
+            ->components($this->renderData())
             ->columns(4)
-            ->extraAttributes(['class' => 'data-list']);
+            ->gap(false);
     }
 }

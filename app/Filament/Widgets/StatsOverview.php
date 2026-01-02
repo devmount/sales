@@ -5,9 +5,10 @@ namespace App\Filament\Widgets;
 use App\Models\Position;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Composer\InstalledVersions;
+use Filament\Support\Colors\Color;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Filament\Support\Colors\Color;
 use Illuminate\Support\Number;
 
 class StatsOverview extends BaseWidget
@@ -39,8 +40,8 @@ class StatsOverview extends BaseWidget
                 ->chart($hours)
                 ->color($hoursIncrease ? Color::Blue : Color::Red),
             Stat::make('info', filament()->getBrandName() . ' v' . config('app.version'))
-                ->label('Filament ' . \Composer\InstalledVersions::getPrettyVersion('filament/filament'))
-                ->description('Laravel ' . \Composer\InstalledVersions::getPrettyVersion('laravel/framework')),
+                ->label('Filament ' . InstalledVersions::getPrettyVersion('filament/filament'))
+                ->description('Laravel ' . InstalledVersions::getPrettyVersion('laravel/framework')),
         ];
     }
 

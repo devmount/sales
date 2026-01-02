@@ -3,13 +3,20 @@
 namespace App\Filament\Relations;
 
 use App\Filament\Resources\EstimateResource;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions;
-use Filament\Tables\Columns;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Component;
 
 class EstimatesRelationManager extends RelationManager
 {
@@ -22,55 +29,59 @@ class EstimatesRelationManager extends RelationManager
             ->defaultSort('weight', 'asc')
             ->reorderable('weight')
             ->columns([
-                Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__('title')),
-                Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label(__('description'))
                     ->copyable()
                     ->formatStateUsing(fn (string $state): string => nl2br($state))
                     ->html(),
-                Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->numeric()
                     ->weight(FontWeight::ExtraBold)
-                    ->summarize(Columns\Summarizers\Sum::make()),
+                    ->summarize(Sum::make()),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->form(EstimateResource::formFields())
+                    ->label(__('create'))
+                    ->afterFormFilled(function (Component $livewire) {
+                        $livewire->mountedActions[0]['data']['project_id'] = $this->ownerRecord->id;
+                    })
+                    ->schema(EstimateResource::formFields(useSection: false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::Large),
+                    ->modalWidth(Width::Large),
             ])
-            ->actions([
-                Actions\EditAction::make()
+            ->recordActions([
+                EditAction::make()
                     ->icon('tabler-edit')
                     ->label('')
-                    ->form(EstimateResource::formFields())
+                    ->schema(EstimateResource::formFields(useSection: false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::Large),
-                Actions\ReplicateAction::make()
+                    ->modalWidth(Width::Large),
+                ReplicateAction::make()
                     ->icon('tabler-copy')
                     ->label('')
-                    ->form(EstimateResource::formFields())
+                    ->schema(EstimateResource::formFields(useSection: false))
                     ->slideOver()
-                    ->modalWidth(MaxWidth::Large),
-                Actions\DeleteAction::make()
+                    ->modalWidth(Width::Large),
+                DeleteAction::make()
                     ->icon('tabler-trash')
                     ->label('')
                     ->requiresConfirmation(),
             ])
-            ->bulkActions([
-                Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make()->icon('tabler-trash'),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->icon('tabler-trash'),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Actions\CreateAction::make()->icon('tabler-plus'),
+                CreateAction::make()->icon('tabler-plus'),
             ])
             ->paginated(false);
     }

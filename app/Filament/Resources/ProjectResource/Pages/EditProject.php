@@ -5,7 +5,8 @@ namespace App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource;
 use App\Models\Project;
 use App\Services\ProjectService;
-use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,7 +17,7 @@ class EditProject extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('download')
+            Action::make('download')
                 ->label(__('quote'))
                 ->icon('tabler-file-type-pdf')
                 ->action(function (Project $record) {
@@ -24,7 +25,7 @@ class EditProject extends EditRecord
                     $file = ProjectService::generateQuotePdf($record);
                     return response()->download(Storage::path($file));
                 }),
-            Actions\DeleteAction::make()->icon('tabler-trash'),
+            DeleteAction::make()->icon('tabler-trash'),
         ];
     }
 }

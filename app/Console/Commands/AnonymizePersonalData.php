@@ -2,9 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models;
 use App\Enums\ExpenseCategory;
+use App\Models\Client;
+use App\Models\Estimate;
+use App\Models\Expense;
+use App\Models\Gift;
+use App\Models\Invoice;
+use App\Models\Position;
+use App\Models\Project;
+use Illuminate\Console\Command;
 
 class AnonymizePersonalData extends Command
 {
@@ -32,13 +38,13 @@ class AnonymizePersonalData extends Command
             exit;
         }
 
-        $clients = Models\Client::all();
-        $projects = Models\Project::all();
-        $estimates = Models\Estimate::all();
-        $invoices = Models\Invoice::all();
-        $positions = Models\Position::all();
-        $expenses = Models\Expense::all();
-        $gifts = Models\Gift::all();
+        $clients = Client::all();
+        $projects = Project::all();
+        $estimates = Estimate::all();
+        $invoices = Invoice::all();
+        $positions = Position::all();
+        $expenses = Expense::all();
+        $gifts = Gift::all();
         $total = array_sum([
             $clients->count(),
             $projects->count(),

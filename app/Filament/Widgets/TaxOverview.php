@@ -6,15 +6,18 @@ use App\Enums\TimeUnit;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Infolists\Components;
-use Filament\Notifications\Notification;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Number;
@@ -26,7 +29,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
     use InteractsWithForms;
 
     protected int | string | array $columnSpan = 8;
-    protected static string $view = 'filament.widgets.tax-overview';
+    protected string $view = 'filament.widgets.tax-overview';
     protected static int $entryCount = 14;
     public ?string $filter = 'm';
 
@@ -35,18 +38,18 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
         return __('advanceVat');
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->name('taxOverview')
-            ->schema([
+        return $schema
+            ->key('taxOverview')
+            ->components([
                 match($this->filter) {
-                    'm' => Components\Grid::make(12)->schema($this->getMonthData()),
-                    'q' => Components\Grid::make(12)->schema($this->getQuarterData()),
-                    'y' => Components\Grid::make(12)->schema($this->getYearData()),
+                    'm' => Grid::make(12)->schema($this->getMonthData()),
+                    'q' => Grid::make(12)->schema($this->getQuarterData()),
+                    'y' => Grid::make(12)->schema($this->getYearData()),
                 },
-                Components\Actions::make([
-                    Components\Actions\Action::make('lastAdvanceVat')
+                Actions::make([
+                    Action::make('lastAdvanceVat')
                         ->label(__('createLatestVatExpense'))
                         ->icon('tabler-credit-card')
                         ->outlined()
@@ -73,13 +76,13 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
     private function generateEntries($heading, $labels, $netTaxable, $netUntaxable, $vatExpenses, $totalVat): array
     {
         return [
-            Components\TextEntry::make('timeUnit')
+            TextEntry::make('timeUnit')
                 ->label($heading)
                 ->columnSpan(2)
                 ->fontFamily(FontFamily::Mono)
                 ->state($labels)
                 ->listWithLineBreaks(),
-            Components\TextEntry::make('netTaxable')
+            TextEntry::make('netTaxable')
                 ->label(__('netTaxable'))
                 ->columnSpan(3)
                 ->money('eur')
@@ -90,7 +93,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->alignRight()
                 ->copyable(fn (string $state): string => floatval($state) > 0)
                 ->copyableState(fn (string $state): string => Number::format(floatval($state))),
-            Components\TextEntry::make('netUntaxable')
+            TextEntry::make('netUntaxable')
                 ->label(__('netUntaxable'))
                 ->columnSpan(3)
                 ->money('eur')
@@ -101,7 +104,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->alignRight()
                 ->copyable(fn (string $state): string => floatval($state) > 0)
                 ->copyableState(fn (string $state): string => Number::format(floatval($state))),
-            Components\TextEntry::make('vatExpenses')
+            TextEntry::make('vatExpenses')
                 ->label(__('vatExpenses'))
                 ->columnSpan(2)
                 ->money('eur')
@@ -112,7 +115,7 @@ class TaxOverview extends Widget implements HasForms, HasInfolists, HasActions
                 ->alignRight()
                 ->copyable(fn (string $state): string => floatval($state) > 0)
                 ->copyableState(fn (string $state): string => Number::format(floatval($state))),
-            Components\TextEntry::make('totalVat')
+            TextEntry::make('totalVat')
                 ->label(__('totalVat'))
                 ->columnSpan(2)
                 ->money('eur')

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\ClientResource\Pages;
 
 use App\Filament\Resources\ClientResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 
 class ListClients extends ListRecords
 {
@@ -14,11 +14,11 @@ class ListClients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->icon('tabler-plus')
-                ->form(ClientResource::formFields(6, false))
+                ->schema(ClientResource::formFields(6, false))
                 ->slideOver()
-                ->modalWidth(MaxWidth::Large),
+                ->modalWidth(Width::Large),
         ];
     }
 }

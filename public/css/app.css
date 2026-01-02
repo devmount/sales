@@ -1,24 +1,5 @@
-.data-list.fi-fo-component-ctn {
-    gap: 0;
-}
 abbr {
     cursor: help;
-}
-.fi-sidebar-header {
-    background-color: transparent !important;
-    box-shadow: none !important;
-}
-
-@media (min-width: 1024px) {
-    .fi-topbar {
-        position: fixed !important;
-        right: 0 !important;
-
-        nav {
-            background: transparent !important;
-            box-shadow: none !important;
-        }
-    }
 }
 
 iframe#preview {
@@ -27,5 +8,5 @@ iframe#preview {
 
 /* Visual indicator of max line length for position descriptions */
 textarea.position-limit {
-  background-image: linear-gradient(90deg, transparent, transparent 580px, rgb(var(--gray-500)) 581px, transparent 581px);
+  background-image: linear-gradient(90deg, transparent, transparent 580px, color-mix(in oklab, var(--color-white) 20%, transparent) 581px, transparent 581px);
 }
