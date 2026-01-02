@@ -45,4 +45,4 @@ jobs:
           php8.4 artisan view:clear
           php8.4 artisan view:cache
           php8.4 artisan icons:cache
-          rm -rf node_modules .git* .editorconfig .env.* *.config.js
+          rm -rf node_modules .git* .editorconfig .env.* *.config.js .ddev
