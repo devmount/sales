@@ -14,6 +14,8 @@ iframe#preview {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 
     h2 {
         font-size: var(--text-base);

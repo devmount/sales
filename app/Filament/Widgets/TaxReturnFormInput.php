@@ -46,6 +46,9 @@ class TaxReturnFormInput extends TableWidget
                     ->label(__('rsc'))
                     ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
+                TextColumn::make('help')
+                    ->color('gray')
+                    ->label(__('helpText')),
                 TextColumn::make('value')
                     ->label(__('value'))
                     ->money('eur')
@@ -54,9 +57,6 @@ class TaxReturnFormInput extends TableWidget
                     ->color(fn(array $record) => $record['color'] ?? false)
                     ->copyable()
                     ->copyableState(fn (string $state): string => Number::format(floatval($state))),
-                TextColumn::make('help')
-                    ->color('gray')
-                    ->label(__('helpText')),
             ]);
     }
 
