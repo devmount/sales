@@ -11,9 +11,13 @@ use Filament\Widgets\ChartWidget;
 
 class RecentPositionsChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 6;
     protected ?string $maxHeight = '180px';
     public ?string $filter = '60';
+
+    protected int | string | array $columnSpan = [
+        'sm' => 12,
+        'xl' => 6,
+    ];
 
     public function getHeading(): string
     {

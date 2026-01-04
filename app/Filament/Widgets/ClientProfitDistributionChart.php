@@ -10,10 +10,14 @@ use Filament\Widgets\ChartWidget;
 
 class ClientProfitDistributionChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 4;
     protected ?string $maxHeight = '150px';
     public ?string $filter = '';
     protected ?string $pollingInterval = null;
+
+    protected int | string | array $columnSpan = [
+        'sm' => 12,
+        'xl' => 4,
+    ];
 
     public function getHeading(): string
     {

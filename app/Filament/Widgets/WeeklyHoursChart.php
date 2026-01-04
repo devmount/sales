@@ -10,9 +10,13 @@ use Filament\Widgets\ChartWidget;
 
 class WeeklyHoursChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 6;
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
+
+    protected int | string | array $columnSpan = [
+        'sm' => 12,
+        'xl' => 6,
+    ];
 
     public function getHeading(): string
     {

@@ -10,10 +10,14 @@ use Filament\Widgets\ChartWidget;
 
 class SumProductiveHoursChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 6;
     protected ?string $maxHeight = '180px';
     public ?string $filter = 'y';
     protected ?string $pollingInterval = null;
+
+    protected int | string | array $columnSpan = [
+        'sm' => 12,
+        'xl' => 6,
+    ];
 
     public function getHeading(): string
     {

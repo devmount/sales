@@ -12,10 +12,14 @@ use Filament\Widgets\ChartWidget;
 
 class MonthlyIncomeChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 4;
     public ?string $filter = 'net';
     protected ?string $maxHeight = '150px';
     protected ?string $pollingInterval = null;
+
+    protected int | string | array $columnSpan = [
+        'sm' => 12,
+        'xl' => 4,
+    ];
 
     public function getHeading(): string
     {
