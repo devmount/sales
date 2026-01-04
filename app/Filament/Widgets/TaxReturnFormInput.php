@@ -7,7 +7,7 @@ use App\Enums\TimeUnit;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
-use Filament\Support\Enums\FontFamily as EnumsFontFamily;
+use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -31,24 +31,25 @@ class TaxReturnFormInput extends TableWidget
             ->header(view('filament.widgets.table-header', [
                 'heading' => __('taxReport'),
                 'options' => Invoice::getYearList(),
+                'actions' => null,
             ]))
             ->columns([
                 TextColumn::make('itr')
                     ->label(__('itr'))
-                    ->fontFamily(EnumsFontFamily::Mono)
+                    ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
                 TextColumn::make('vr')
                     ->label(__('vr'))
-                    ->fontFamily(EnumsFontFamily::Mono)
+                    ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
                 TextColumn::make('rsc')
                     ->label(__('rsc'))
-                    ->fontFamily(EnumsFontFamily::Mono)
+                    ->fontFamily(FontFamily::Mono)
                     ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
                 TextColumn::make('value')
                     ->label(__('value'))
                     ->money('eur')
-                    ->fontFamily(EnumsFontFamily::Mono)
+                    ->fontFamily(FontFamily::Mono)
                     ->alignRight()
                     ->color(fn(array $record) => $record['color'] ?? false)
                     ->copyable()

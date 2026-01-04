@@ -22,6 +22,12 @@ iframe#preview {
         --tw-font-weight: var(--font-weight-semibold);
         font-weight: var(--font-weight-semibold);
     }
+
+    .table-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 }
 
 /* Always show sidebar header, otherwise it only shows on mobile view */
