@@ -19,6 +19,7 @@
         "secondnetwork/blade-tabler-icons": "^3.21.0"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.6",
         "fakerphp/faker": "^1.9.1",
         "filament/upgrade": "^4.0",
         "laravel/pint": "^1.0",
