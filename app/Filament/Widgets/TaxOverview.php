@@ -73,6 +73,14 @@ class TaxOverview extends TableWidget implements HasActions
                     ->alignRight()
                     ->copyable()
                     ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+                TextColumn::make('totalNet')
+                    ->label(__('netTotal'))
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->color('gray')
+                    ->alignRight()
+                    ->copyable()
+                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
                 TextColumn::make('vatExpenses')
                     ->label(__('vatExpenses'))
                     ->money('eur')
@@ -115,6 +123,7 @@ class TaxOverview extends TableWidget implements HasActions
                 'unit' => $dt->year . ' ' . $dt->locale(app()->getLocale())->monthName,
                 'netTaxable' => $netTaxable,
                 'netUntaxable' => $netUntaxable,
+                'totalNet' => $netTaxable + $netUntaxable,
                 'vatExpenses' => $vatExpended,
                 'totalVat' => $vatEarned - $vatExpended,
             ];
@@ -139,6 +148,7 @@ class TaxOverview extends TableWidget implements HasActions
                 'unit' => "$dt->year Q$dt->quarter",
                 'netTaxable' => $netTaxable,
                 'netUntaxable' => $netUntaxable,
+                'totalNet' => $netTaxable + $netUntaxable,
                 'vatExpenses' => $vatExpended,
                 'totalVat' => $vatEarned - $vatExpended,
             ];
@@ -163,6 +173,7 @@ class TaxOverview extends TableWidget implements HasActions
                 'unit' => $dt->year,
                 'netTaxable' => $netTaxable,
                 'netUntaxable' => $netUntaxable,
+                'totalNet' => $netTaxable + $netUntaxable,
                 'vatExpenses' => $vatExpended,
                 'totalVat' => $vatEarned - $vatExpended,
             ];
