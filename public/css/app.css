@@ -6,6 +6,29 @@ iframe#preview {
     height: calc(100vh - 8.5rem);
 }
 
+/* Custom table header */
+.table-header {
+    padding-inline: calc(var(--spacing)*6);
+    padding-block: calc(var(--spacing)*4);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+        font-size: var(--text-base);
+        --tw-leading: calc(var(--spacing)*6);
+        line-height: calc(var(--spacing)*6);
+        --tw-font-weight: var(--font-weight-semibold);
+        font-weight: var(--font-weight-semibold);
+    }
+}
+
+/* Always show sidebar header, otherwise it only shows on mobile view */
+.fi-sidebar-header .fi-sidebar-header-logo-ctn {
+    display: block !important;
+}
+
 /* Visual indicator of max line length for position descriptions */
 textarea.position-limit {
   background-image: linear-gradient(90deg, transparent, transparent 580px, color-mix(in oklab, var(--color-white) 20%, transparent) 581px, transparent 581px);
