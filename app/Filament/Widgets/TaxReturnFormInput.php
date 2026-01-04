@@ -7,27 +7,16 @@ use App\Enums\TimeUnit;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Infolists\Components;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Concerns\InteractsWithInfolists;
-use Filament\Infolists\Contracts\HasInfolists;
-use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
-use Filament\Widgets\Widget;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 
-class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasActions
+class TaxReturnFormInput extends TableWidget
 {
-    use InteractsWithActions;
-    use InteractsWithInfolists;
-    use InteractsWithForms;
-
-    protected int | string | array $columnSpan = 8;
-    protected string $view = 'filament.widgets.tax-report-revenue-surplus-calculation';
+    protected int | string | array $columnSpan = 12;
     public ?int $filter = null;
 
     public function __construct()
@@ -36,17 +25,42 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
         $this->filter = now()->year - 1;
     }
 
-    public function getHeading(): string
+    public function table(Table $table): Table
     {
-        return __('taxReport');
+        return $table
+            ->header(view('filament.widgets.table-header', [
+                'heading' => __('taxReport'),
+                'options' => Invoice::getYearList(),
+                'actions' => null,
+            ]))
+            ->columns([
+                TextColumn::make('itr')
+                    ->label(__('itr'))
+                    ->fontFamily(FontFamily::Mono)
+                    ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
+                TextColumn::make('vr')
+                    ->label(__('vr'))
+                    ->fontFamily(FontFamily::Mono)
+                    ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
+                TextColumn::make('rsc')
+                    ->label(__('rsc'))
+                    ->fontFamily(FontFamily::Mono)
+                    ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
+                TextColumn::make('help')
+                    ->color('gray')
+                    ->label(__('helpText')),
+                TextColumn::make('value')
+                    ->label(__('value'))
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->alignRight()
+                    ->color(fn(array $record) => $record['color'] ?? false)
+                    ->copyable()
+                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+            ]);
     }
 
-    protected function getFilters(): ?array
-    {
-        return Invoice::getYearList();
-    }
-
-    protected function getData(): ?array
+    public function getTableRecords(): Collection
     {
         $dt = Carbon::create($this->filter, 1, 1);
         [$netEarned, $netUntaxableEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR); // TODO: Untaxable income
@@ -54,8 +68,10 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
         [$netServiceExpended, $vatServiceExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Service);
         $netExpended = $netGoodExpended + $netServiceExpended;
         $vatExpended = $vatGoodExpended + $vatServiceExpended;
-        return [
+
+        return collect([
             [
+                '__key' => 1,
                 'itr' => '1 (S)',
                 'vr' => null,
                 'rsc' => null,
@@ -64,6 +80,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'primary',
             ],
             [
+                '__key' => 2,
                 'itr' => null,
                 'vr' => '22',
                 'rsc' => '15',
@@ -72,6 +89,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'primary',
             ],
             [
+                '__key' => 3,
                 'itr' => null,
                 'vr' => '75',
                 'rsc' => null,
@@ -80,6 +98,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'primary',
             ],
             [
+                '__key' => 4,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '17',
@@ -88,6 +107,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'primary',
             ],
             [
+                '__key' => 5,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '27',
@@ -96,6 +116,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'danger',
             ],
             [
+                '__key' => 6,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '29',
@@ -104,6 +125,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'danger',
             ],
             [
+                '__key' => 7,
                 'itr' => null,
                 'vr' => '79',
                 'rsc' => '57',
@@ -112,6 +134,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'danger',
             ],
             [
+                '__key' => 8,
                 'itr' => null,
                 'vr' => '118',
                 'rsc' => null,
@@ -120,6 +143,7 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'color' => 'danger',
             ],
             [
+                '__key' => 9,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
@@ -127,58 +151,6 @@ class TaxReturnFormInput extends Widget implements HasForms, HasInfolists, HasAc
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
             ],
-        ];
-    }
-
-    /**
-     * @return array<Components\TextEntry>
-     */
-    private function renderData(): array
-    {
-        $entries = [];
-        $firstLine = true;
-        foreach ($this->getData() as $line) {
-            // Income tax return
-            $entries[] = TextEntry::make('itr')
-                ->label(__('itr'))
-                ->hiddenLabel(!$firstLine)
-                ->fontFamily(FontFamily::Mono)
-                ->state($line['itr'] ? __('lineN', ['n' => $line['itr']]) : '');
-            // VAT return
-            $entries[] = TextEntry::make('vr')
-                ->label(__('vr'))
-                ->hiddenLabel(!$firstLine)
-                ->fontFamily(FontFamily::Mono)
-                ->state($line['vr'] ? __('lineN', ['n' => $line['vr']]) : '');
-            // Revenue Surplus calculation
-            $entries[] = TextEntry::make('rsc')
-                ->label(__('rsc'))
-                ->hiddenLabel(!$firstLine)
-                ->fontFamily(FontFamily::Mono)
-                ->state($line['rsc'] ? __('lineN', ['n' => $line['rsc']]) : '');
-            // Values
-            $entries[] = TextEntry::make('value')
-                ->label(__('value'))
-                ->hiddenLabel(!$firstLine)
-                ->money('eur')
-                ->state($line['value'])
-                ->fontFamily(FontFamily::Mono)
-                ->color($line['color'] ?? false)
-                ->alignRight()
-                ->tooltip($line['help'])
-                ->copyable()
-                ->copyableState(fn (string $state): string => Number::format(floatval($state)));
-
-            $firstLine = false;
-        }
-        return $entries;
-    }
-
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->components($this->renderData())
-            ->columns(4)
-            ->gap(false);
+        ]);
     }
 }

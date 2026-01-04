@@ -10,9 +10,13 @@ use Filament\Widgets\ChartWidget;
 
 class HourlyRateChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 4;
     protected ?string $maxHeight = '150px';
     protected ?string $pollingInterval = null;
+
+    protected int | string | array $columnSpan = [
+        'sm' => 12,
+        'xl' => 4,
+    ];
 
     public function getHeading(): string
     {

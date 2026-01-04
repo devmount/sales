@@ -13,6 +13,11 @@ use Illuminate\Support\Number;
 
 class StatsOverview extends BaseWidget
 {
+    protected int | string | array $columnSpan = [
+        'sm' => 12,
+        'xl' => 12,
+    ];
+
     protected function getStats(): array
     {
         [$revenue, $hours] = $this->getData();
