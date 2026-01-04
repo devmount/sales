@@ -53,6 +53,20 @@ php artisan serve
 
 Now you can log in on <http://localhost:8000> with the initial admin user credentials (email: `admin@example.com`, password: `Joh.3,16`).
 
+Or if you have _Docker_ and _ddev_ installed, you can just run:
+
+```bash
+ddev start
+```
+
+You can now find the app at <https://sales.ddev.site/>.
+
+If you have issues with missing method or property definitions, the ide-helper definitions might need an upate:
+
+```bash
+php artisan ide-helper:generate 
+```
+
 ## Production
 
 To build the application for production, run:
