@@ -24,6 +24,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\ColorColumn;
@@ -62,6 +63,7 @@ class PositionResource extends Resource
                 TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->state(fn (Position $record): float => $record->duration)
+                    ->fontFamily(FontFamily::Mono)
                     ->weight(FontWeight::ExtraBold)
                     ->description(fn (Position $record): string => $record->time_range),
                 ToggleColumn::make('remote')
@@ -90,7 +92,7 @@ class PositionResource extends Resource
                     ->preload(),
                 SelectFilter::make('invoice')
                     ->label(trans_choice('invoice', 1))
-                    ->relationship('invoice', 'title', fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderByDesc('created_at'))
+                    ->relationship('invoice', 'title', fn (Builder $query) => $query->active()->orderByDesc('created_at'))
                     ->searchable()
                     ->preload(),
                 Filter::make('created_at')

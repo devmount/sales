@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\PricingUnit;
 use App\Models\Setting;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,6 +48,41 @@ class Project extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /**
+     * Scope a query to only include active projects.
+     */
+    #[Scope]
+    protected function active(Builder $query): void
+    {
+        $query->where('start_at', '<=', now())->where('due_at', '>=', now())->where('aborted', false);
+    }
+
+    /**
+     * Scope a query to only include upcoming projects.
+     */
+    #[Scope]
+    protected function upcoming(Builder $query): void
+    {
+        $query->where('start_at', '>', now())->where('aborted', false);
+    }
+
+    /**
+     * Scope a query to only include finished projects.
+     */
+    #[Scope]
+    protected function finished(Builder $query): void
+    {
+        $query->where('due_at', '<=', now())->where('aborted', false);
+    }
+
+    /**
+     * Scope a query to only include aborted projects.
+     */
+    #[Scope]
+    protected function aborted(Builder $query): void
+    {
+        $query->where('aborted', true);
+    }
 
     /**
      * All assigned estimates sorted by weight

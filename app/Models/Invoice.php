@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
 use App\Enums\TimeUnit;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,6 +41,33 @@ class Invoice extends Model
     public function positions(): HasMany
     {
         return $this->hasMany(Position::class);
+    }
+
+    /**
+     * Scope a query to only include active invoices.
+     */
+    #[Scope]
+    protected function active(Builder $query): void
+    {
+        $query->whereNull('invoiced_at')->whereNull('paid_at');
+    }
+
+    /**
+     * Scope a query to only include waiting invoices.
+     */
+    #[Scope]
+    protected function waiting(Builder $query): void
+    {
+        $query->whereNotNull('invoiced_at')->whereNull('paid_at');
+    }
+
+    /**
+     * Scope a query to only include finished invoices.
+     */
+    #[Scope]
+    protected function finished(Builder $query): void
+    {
+        $query->whereNotNull('invoiced_at')->whereNotNull('paid_at');
     }
 
     /**

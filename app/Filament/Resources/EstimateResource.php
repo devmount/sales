@@ -18,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -51,10 +52,12 @@ class EstimateResource extends Resource
                 TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->numeric()
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable(),
                 TextColumn::make('weight')
                     ->label(__('weight'))
                     ->numeric()
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label(__('createdAt'))

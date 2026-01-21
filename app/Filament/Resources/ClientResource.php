@@ -40,6 +40,21 @@ class ClientResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'tabler-users';
     protected static ?int $navigationSort = 10;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'gray';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return __('totalNumber');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components(self::formFields());
@@ -71,6 +86,7 @@ class ClientResource extends Resource
                     ->label(__('payment'))
                     ->abbr(__('averagePaymentDuration'), asTooltip: true)
                     ->numeric(1)
+                    ->fontFamily(FontFamily::Mono)
                     ->state(fn (Client $record): float => $record->avg_payment_delay)
                     ->description(trans_choice('day', 2)),
                 TextColumn::make('created_at')

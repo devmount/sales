@@ -67,12 +67,11 @@ class ExpenseResource extends Resource
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn (Expense $record): float => $record->vat)
                     ->color(fn (string $state): string => $state == 0 ? 'gray' : 'normal')
-                    // ->hidden(fn ($record): bool => in_array($record?->category, ExpenseCategory::taxCategories()))
                     ->sortable(),
                 TextColumn::make('quantity')
                     ->label(__('quantity'))
                     ->numeric()
-                    // ->hidden(fn ($record): bool => in_array($record?->category, ExpenseCategory::taxCategories()))
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable(),
                 TextColumn::make('category')
                     ->label(__('category'))
