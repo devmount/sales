@@ -7,6 +7,7 @@ use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use App\Filament\Pages\Auth\EditProfile;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -53,6 +54,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->unsavedChangesAlerts()
-            ->profile(isSimple: false);
+            ->profile(EditProfile::class, false);
     }
 }

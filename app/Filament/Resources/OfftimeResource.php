@@ -19,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -46,6 +47,7 @@ class OfftimeResource extends Resource
                 TextColumn::make('days')
                     ->label(trans_choice('day', 2))
                     ->state(fn (Offtime $record): string => $record->days_count ?? '')
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable(),
                 TextColumn::make('category')
                     ->label(__('category'))

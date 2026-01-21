@@ -41,13 +41,15 @@ class StatsOverview extends BaseWidget
                 ->description($revenueDiffPercent . '% ' . ($revenueIncrease ? __('increase') : __('decrease')))
                 ->descriptionIcon($revenueIncrease ? 'tabler-trending-up': 'tabler-trending-down')
                 ->chart($revenue)
-                ->color($revenueIncrease ? Color::Blue : Color::Red),
+                ->color($revenueIncrease ? Color::Blue : Color::Red)
+                ->extraAttributes(['class' => 'font-mono']),
             Stat::make('weeklyWorkingHours', Number::format($hoursStat))
                 ->label(__('weeklyWorkingHours'))
                 ->description($hoursDiffPercent . '% ' . ($hoursIncrease ? __('increase') : __('decrease')))
                 ->descriptionIcon($hoursIncrease ? 'tabler-trending-up': 'tabler-trending-down')
                 ->chart($hours)
-                ->color($hoursIncrease ? Color::Blue : Color::Red),
+                ->color($hoursIncrease ? Color::Blue : Color::Red)
+                ->extraAttributes(['class' => 'font-mono']),
             Stat::make('info', filament()->getBrandName() . ' v' . config('app.version'))
                 ->label("Filament $vFilament · Laravel $vLaravel")
                 ->description('PHP v' . phpversion()),

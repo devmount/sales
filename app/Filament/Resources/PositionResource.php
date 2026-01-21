@@ -24,6 +24,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\ColorColumn;
@@ -62,6 +63,7 @@ class PositionResource extends Resource
                 TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->state(fn (Position $record): float => $record->duration)
+                    ->fontFamily(FontFamily::Mono)
                     ->weight(FontWeight::ExtraBold)
                     ->description(fn (Position $record): string => $record->time_range),
                 ToggleColumn::make('remote')

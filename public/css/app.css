@@ -41,3 +41,7 @@ iframe#preview {
 textarea.position-limit {
   background-image: linear-gradient(90deg, transparent, transparent 580px, color-mix(in oklab, var(--color-white) 20%, transparent) 581px, transparent 581px);
 }
+
+.fi-wi-stats-overview-stat.font-mono .fi-wi-stats-overview-stat-value {
+    font-family: var(--mono-font-family), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}

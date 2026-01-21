@@ -71,6 +71,7 @@ class ClientResource extends Resource
                     ->label(__('payment'))
                     ->abbr(__('averagePaymentDuration'), asTooltip: true)
                     ->numeric(1)
+                    ->fontFamily(FontFamily::Mono)
                     ->state(fn (Client $record): float => $record->avg_payment_delay)
                     ->description(trans_choice('day', 2)),
                 TextColumn::make('created_at')
