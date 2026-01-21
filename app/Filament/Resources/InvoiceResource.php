@@ -47,6 +47,22 @@ class InvoiceResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'tabler-file-stack';
     protected static ?int $navigationSort = 30;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return Invoice::waiting()->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return Invoice::waiting()->count() > 0 ? 'warning' : 'gray';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        $waitingNet = Invoice::waiting()->get()->reduce(fn($p, $c) => $p + $c->net, 0);
+        return __('waitingForPayment', ['net' => Number::currency($waitingNet, 'eur') ]);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

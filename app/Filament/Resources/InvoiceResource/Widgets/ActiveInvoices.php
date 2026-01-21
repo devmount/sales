@@ -19,7 +19,7 @@ class ActiveInvoices extends TableWidget
     {
         return $table
             ->heading(__('invoicesInProgress'))
-            ->query(Invoice::whereNull('invoiced_at')->whereNull('paid_at')->whereNot('id', $this->record?->id))
+            ->query(Invoice::active()->whereNot('id', $this->record?->id))
             ->paginated(false)
             ->defaultSort('created_at', 'desc')
             ->columns([

@@ -92,7 +92,7 @@ class PositionResource extends Resource
                     ->preload(),
                 SelectFilter::make('invoice')
                     ->label(trans_choice('invoice', 1))
-                    ->relationship('invoice', 'title', fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderByDesc('created_at'))
+                    ->relationship('invoice', 'title', fn (Builder $query) => $query->active()->orderByDesc('created_at'))
                     ->searchable()
                     ->preload(),
                 Filter::make('created_at')

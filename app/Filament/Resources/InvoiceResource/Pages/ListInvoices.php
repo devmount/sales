@@ -28,29 +28,29 @@ class ListInvoices extends ListRecords
 
     public function getTabs(): array
     {
-        $active = Invoice::whereNull('invoiced_at')->whereNull('paid_at');
+        $active = Invoice::active();
         $activeNet = $active->get()->reduce(fn($p, $c) => $p + $c->net, 0);
         $activeCount = $active->count();
-        $waiting = Invoice::whereNotNull('invoiced_at')->whereNull('paid_at');
+        $waiting = Invoice::waiting();
         $waitingCount = $waiting->count();
         $waitingNet = $waiting->get()->reduce(fn($p, $c) => $p + $c->net, 0);
-        $finishedCount = Invoice::whereNotNull('invoiced_at')->whereNotNull('paid_at')->count();
+        $finishedCount = Invoice::finished()->count();
 
         return [
             'active' => Tab::make()
                 ->label(__('inProgress', ['net' => Number::currency($activeNet, 'eur') ]))
                 ->badge($activeCount)
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('invoiced_at')->whereNull('paid_at')->orderBy('updated_at', 'desc')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->active()->orderBy('updated_at', 'desc')),
             'waiting' => Tab::make()
                 ->label(__('waitingForPayment', ['net' => Number::currency($waitingNet, 'eur') ]))
                 ->badge($waitingCount)
                 ->badgeColor($waitingCount > 0 ? 'warning' : 'gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNull('paid_at')->orderBy('invoiced_at', 'desc')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->waiting()->orderBy('invoiced_at', 'desc')),
             'finished' => Tab::make()
                 ->label(__('finished'))
                 ->badge($finishedCount)
                 ->badgeColor('gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('invoiced_at')->whereNotNull('paid_at')->orderBy('paid_at', 'desc')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->finished()->orderBy('paid_at', 'desc')),
             'all' => Tab::make()
                 ->label(__('all')),
         ];

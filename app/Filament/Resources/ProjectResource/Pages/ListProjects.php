@@ -30,22 +30,22 @@ class ListProjects extends ListRecords
         return [
             'active' => Tab::make()
                 ->label(__('active'))
-                ->badge(Project::where('start_at', '<=', now())->where('due_at', '>=', now())->where('aborted', false)->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('start_at', '<=', now())->where('due_at', '>=', now())->where('aborted', false)),
+                ->badge(Project::active()->count())
+                ->modifyQueryUsing(fn (Builder $query) => $query->active()),
             'upcoming' => Tab::make()
                 ->label(__('upcoming'))
-                ->badge(Project::where('start_at', '>', now())->where('aborted', false)->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('start_at', '>', now())->where('aborted', false)),
+                ->badge(Project::upcoming()->count())
+                ->modifyQueryUsing(fn (Builder $query) => $query->upcoming()),
             'finished' => Tab::make()
                 ->label(__('finished'))
-                ->badge(Project::where('due_at', '<=', now())->where('aborted', false)->count())
+                ->badge(Project::finished()->count())
                 ->badgeColor('gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('due_at', '<=', now())->where('aborted', false)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->finished()),
             'aborted' => Tab::make()
                 ->label(__('aborted'))
-                ->badge(Project::where('aborted', true)->count())
+                ->badge(Project::aborted()->count())
                 ->badgeColor('gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('aborted', true)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->aborted()),
             'all' => Tab::make()
                 ->label(__('all')),
         ];

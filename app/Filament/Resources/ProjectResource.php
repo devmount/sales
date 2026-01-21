@@ -40,6 +40,16 @@ class ProjectResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'tabler-package';
     protected static ?int $navigationSort = 20;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::active()->count();
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return __('active');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components(self::formFields());

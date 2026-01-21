@@ -40,6 +40,21 @@ class ClientResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'tabler-users';
     protected static ?int $navigationSort = 10;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'gray';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return __('totalNumber');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components(self::formFields());
