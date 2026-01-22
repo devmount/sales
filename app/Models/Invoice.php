@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Number;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Invoice extends Model
 {
@@ -73,16 +74,18 @@ class Invoice extends Model
     /**
      * All assigned positions sorted depending on undated flag
      */
-    public function getSortedPositionsAttribute()
+    public function sortedPositions(): Attribute
     {
         // If undated, sort by positions creation date, if dated, sort by positions starting date
-        return $this->positions->sortBy($this->undated ? 'created_at' : 'started_at')->all();
+        return Attribute::make(
+            get: fn() => $this->positions->sortBy($this->undated ? 'created_at' : 'started_at')->all()
+        );
     }
 
     /**
      * All sorted positions split into chunks based on description lines count
      */
-    public function getPaginatedPositionsAttribute()
+    public function paginatedPositions(): Attribute
     {
         // Get positions by page, one page has space for 50 lines (I know. Let me have my magic number here.)
         $paginated = [];
@@ -98,41 +101,41 @@ class Invoice extends Model
                 $paginated[$i] = [$p];
             }
         }
-        return $paginated;
+        return Attribute::make(fn() => $paginated);
     }
 
     /**
      * Number of positions for this invoice formatted
      */
-    public function getPositionsFormattedAttribute()
+    public function positionsFormatted(): Attribute
     {
-        return count($this->positions) . ' ' . trans_choice('position', count($this->positions));
+        return Attribute::make(fn() => count($this->positions) . ' ' . trans_choice('position', count($this->positions)));
     }
 
     /**
      * Number of hours worked for this invoice
      */
-    public function getHoursAttribute()
+    public function hours(): Attribute
     {
         $hours = 0;
         foreach ($this->positions as $position) {
             $hours += $position->duration;
         }
-        return $hours;
+        return Attribute::make(fn() => $hours);
     }
 
     /**
      * Number of hours worked for this invoice formatted
      */
-    public function getHoursFormattedAttribute()
+    public function hoursFormatted(): Attribute
     {
-        return $this->hours . ' ' . trans_choice('hour', $this->hours);
+        return Attribute::make(fn() => $this->hours . ' ' . trans_choice('hour', $this->hours));
     }
 
     /**
      * Net amount of all assigned positions
      */
-    public function getRealNetAttribute()
+    public function realNet(): Attribute
     {
         $net = 0;
         if ($this->pricing_unit === PricingUnit::Project) {
@@ -143,78 +146,76 @@ class Invoice extends Model
                 PricingUnit::Day => 8,
             };
         }
-        return round($net, 2);
+        return Attribute::make(fn() => round($net, 2));
     }
 
     /**
      * Net amount of all assigned positions reduced by discount
      */
-    public function getNetAttribute()
+    public function net(): Attribute
     {
-        return $this->real_net - $this->discount;
+        return Attribute::make(fn() => $this->real_net - $this->discount);
     }
 
     /**
      * Net amount of all assigned positions formatted
      */
-    public function getNetFormattedAttribute()
+    public function netFormatted(): Attribute
     {
-        return Number::currency($this->net, 'eur');
+        return Attribute::make(fn() => Number::currency($this->net, 'eur'));
     }
 
     /**
      * Vat amount of current net amount
      */
-    public function getVatAttribute()
+    public function vat(): Attribute
     {
-        return $this->taxable ? round($this->net * $this->vat_rate, 2) : 0;
+        return Attribute::make(fn() => $this->taxable ? round($this->net * $this->vat_rate, 2) : 0);
     }
 
     /**
      * Gross amount of all assigned positions
      */
-    public function getGrossAttribute()
+    public function gross(): Attribute
     {
-        return $this->taxable
-            ? $this->net + $this->vat
-            : $this->net;
+        return Attribute::make(fn() => $this->taxable ? $this->net + $this->vat : $this->net);
     }
 
     /**
      * Final total amount of invoice
      */
-    public function getFinalAttribute()
+    public function final(): Attribute
     {
-        return $this->gross - $this->deduction;
+        return Attribute::make(fn() => $this->gross - $this->deduction);
     }
 
     /**
      * Calculate the current invoice number of format YYYYMMDD##ID
      */
-    public function getCurrentNumberAttribute()
+    public function currentNumber(): Attribute
     {
-        return now()->format('Ymd') . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+        return Attribute::make(fn() => now()->format('Ymd') . str_pad($this->id, 4, '0', STR_PAD_LEFT));
     }
 
     /**
      * Calculate the final invoice number of format YYYYMMDD##ID
      */
-    public function getFinalNumberAttribute(): string
+    public function finalNumber(): Attribute
     {
         $date = Carbon::parse($this->invoiced_at)?->format('Ymd') ?? '';
-        return $date . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+        return Attribute::make(fn() => $date . str_pad($this->id, 4, '0', STR_PAD_LEFT));
     }
 
     /**
      * Calculate the final invoice number of format YYYYMMDD##ID
      */
-    public function getStatusAttribute(): InvoiceStatus
+    public function status(): Attribute
     {
-        return match (true) {
+        return Attribute::make(fn() => match (true) {
             !$this->invoiced_at && !$this->paid_at => InvoiceStatus::RUNNING,
             $this->invoiced_at && !$this->paid_at => InvoiceStatus::SENT,
             $this->invoiced_at && $this->paid_at => InvoiceStatus::PAID,
-        };
+        });
     }
 
     /**
