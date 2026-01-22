@@ -214,7 +214,7 @@ class InvoiceResource extends Resource
                         ->action(function (array $data, Invoice $record) {
                             $record->paid_at = $data['paid_at'];
                             $record->save();
-                            Notification::make()->title(__('PaidDateSet'))->success()->send();
+                            Notification::make()->title(__('paidDateSet'))->success()->send();
                             return true;
                         }),
                     Action::make('remind')
