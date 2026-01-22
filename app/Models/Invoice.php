@@ -102,6 +102,14 @@ class Invoice extends Model
     }
 
     /**
+     * Number of positions for this invoice formatted
+     */
+    public function getPositionsFormattedAttribute()
+    {
+        return count($this->positions) . ' ' . trans_choice('position', count($this->positions));
+    }
+
+    /**
      * Number of hours worked for this invoice
      */
     public function getHoursAttribute()
