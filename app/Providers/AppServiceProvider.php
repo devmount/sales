@@ -6,9 +6,11 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Livewire\Notifications;
 use Filament\Support\Assets\Css;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\IconSize;
+use Filament\Support\Enums\VerticalAlignment;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
@@ -134,5 +136,8 @@ class AppServiceProvider extends ServiceProvider
             'pagination.next-button' => 'tabler-chevron-right', // Button to go to the next page
             // 'section.collapse-button' => 'tabler-', // Button to collapse a section
         ]);
+
+        // Notifications
+        Notifications::verticalAlignment(VerticalAlignment::End);
     }
 }

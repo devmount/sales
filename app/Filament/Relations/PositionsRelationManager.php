@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
@@ -38,6 +39,7 @@ class PositionsRelationManager extends RelationManager
                     ->label(trans_choice('hour', 2))
                     ->state(fn (Position $record): float => $record->duration)
                     ->weight(FontWeight::ExtraBold)
+                    ->fontFamily(FontFamily::Mono)
                     ->description(fn (Position $record): string => $record->time_range),
                 ToggleColumn::make('remote')
                     ->label(__('remote')),

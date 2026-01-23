@@ -12,7 +12,6 @@ use Filament\Widgets\TableWidget;
 
 class ActiveInvoices extends TableWidget
 {
-    // protected int | string | array $columnSpan = '2';
     public ?Invoice $record = null;
 
     public function table(Table $table): Table

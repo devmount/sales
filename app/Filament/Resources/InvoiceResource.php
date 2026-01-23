@@ -37,6 +37,7 @@ use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
@@ -69,32 +70,23 @@ class InvoiceResource extends Resource
             ->columns(10)
             ->components([
                 Section::make()
-                    ->columnSpan(['lg' => fn (?Invoice $obj) => !$obj?->project ? 10 : 8])
+                    ->columnSpan(['lg' => fn (?Invoice $record) => !$record?->project ? 10 : 8])
                     ->schema(self::formFields(12, false)),
-                Section::make()
-                    ->heading(__('currentState'))
-                    ->hidden(fn (?Invoice $obj) => !$obj?->project)
+                Grid::make()
+                    ->hidden(fn (?Invoice $record) => !$record?->project)
+                    ->columns(1)
                     ->columnSpan(['lg' => 2])
-                    ->schema([
-                        TextEntry::make('project')
+                    ->schema(fn (?Invoice $record) => [
+                        Stat::make('project', '...')
                             ->label(trans_choice('project', 1))
-                            ->state(fn (Invoice $obj) => new HtmlString(
-                                $obj->project?->hours
-                                . ' / ' . $obj->project?->scope_range
-                                . ($obj->project?->scope
-                                    ? '<br />' . __('numExhausted', ['n' => $obj->project?->progress_percent])
-                                    : ''
-                                )
-                            ))
-                            ->columnSpanFull(),
-                        TextEntry::make('invoice')
+                            ->value($record->project?->progress_percent ?? '-')
+                            ->description($record->project?->hours . ' / ' . $record->project?->scope_range),
+                        Stat::make('invoice', '...')
                             ->label(trans_choice('invoice', 1))
-                            ->state(fn (Invoice $obj) => new HtmlString(
-                                count($obj->positions) . ' ' . trans_choice('position', count($obj->positions))
-                                . '<br />' . $obj->hours_formatted
-                                . '<br />' . $obj->net_formatted . ' ' . __('net')
-                            ))
-                            ->columnSpanFull(),
+                            ->value($record->hours_formatted)
+                            ->description(new HtmlString(
+                                "$record->positions_formatted<br />$record->net_formatted " . __('net')
+                            )),
                     ]),
             ]);
     }
@@ -214,7 +206,7 @@ class InvoiceResource extends Resource
                         ->action(function (array $data, Invoice $record) {
                             $record->paid_at = $data['paid_at'];
                             $record->save();
-                            Notification::make()->title(__('PaidDateSet'))->success()->send();
+                            Notification::make()->title(__('paidDateSet'))->success()->send();
                             return true;
                         }),
                     Action::make('remind')

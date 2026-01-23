@@ -125,6 +125,7 @@
     "offtime": "Auszeit|Auszeiten",
     "page": "Seite",
     "paidAt": "Beglichen am",
+    "paidDateSet": "Das Zahlungsdatum wurde gespeichert",
     "pauseDuration": "Dauer der Pause",
     "payment": "Bezahlung",
     "paymentReminder": "Zahlungserinnerung",

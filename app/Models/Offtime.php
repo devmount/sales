@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Offtime extends Model
 {
@@ -25,19 +26,17 @@ class Offtime extends Model
     /**
      * Year the time off is assigned to
      */
-    public function getYearAttribute(): int
+    public function year(): Attribute
     {
-        return intval($this->start->format('Y'));
+        return Attribute::make(fn() => intval($this->start->format('Y')));
     }
 
     /**
      * Year the time off is assigned to
      */
-    public function getDaysCountAttribute(): int
+    public function daysCount(): Attribute
     {
-        return $this->end
-            ? $this->start->diffInDays($this->end) + 1
-            : 1;
+        return Attribute::make(fn() => $this->end ? $this->start->diffInDays($this->end) + 1 : 1);
     }
 
     /**
