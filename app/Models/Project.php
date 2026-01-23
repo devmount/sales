@@ -6,6 +6,7 @@ use App\Enums\PricingUnit;
 use App\Models\Setting;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -87,16 +88,16 @@ class Project extends Model
     /**
      * All assigned estimates sorted by weight
      */
-    public function getSortedEstimatesAttribute()
+    public function sortedEstimates(): Attribute
     {
-        return $this->estimates->sortBy('weight')->all();
+        return Attribute::make(fn() => $this->estimates->sortBy('weight')->all());
     }
 
 
     /**
      * All sorted estimates split into chunks based on description lines count
      */
-    public function getPaginatedEstimatesAttribute()
+    public function paginatedEstimates(): Attribute
     {
         // Get estimates by page, one page has space for 50 lines (I know. Let me have my magic number here.)
         $paginated = [];
@@ -112,77 +113,77 @@ class Project extends Model
                 $paginated[$i] = [$e];
             }
         }
-        return $paginated;
+        return Attribute::make(fn() => $paginated);
     }
 
     /**
      * Number of hours worked for this project
      */
-    public function getHoursAttribute()
+    public function hours(): Attribute
     {
         $hours = 0;
         foreach ($this->invoices as $invoice) {
             $hours += $invoice->hours;
         }
-        return $hours;
+        return Attribute::make(fn() => $hours);
     }
 
     /**
      * Labeled Number of hours
      */
-    public function getHoursWithLabelAttribute()
+    public function hoursWithLabel(): Attribute
     {
-        return $this->hours . ' ' . trans_choice('hour', $this->hours);
+        return Attribute::make(fn() => $this->hours . ' ' . trans_choice('hour', $this->hours));
     }
 
     /**
      * Show either scope or range from minimum to project limit in hours
      */
-    public function getScopeRangeAttribute()
+    public function scopeRange(): Attribute
     {
-        return $this->minimum != $this->scope
+        return Attribute::make(fn() => $this->minimum != $this->scope
             ? (int)$this->minimum . ' - ' . (int)$this->scope . ' ' . trans_choice('hour', 2)
-            : (int)$this->scope . ' ' . trans_choice('hour', (int)$this->scope);
+            : (int)$this->scope . ' ' . trans_choice('hour', (int)$this->scope));
     }
 
     /**
      * Show price per pricing unit
      */
-    public function getPricePerUnitAttribute()
+    public function pricePerUnit(): Attribute
     {
-        return $this->price . ' € / ' . match($this->pricing_unit) {
+        return Attribute::make(fn() => $this->price . ' € / ' . match($this->pricing_unit) {
             PricingUnit::Hour => trans_choice('hour', 1),
             PricingUnit::Day => trans_choice('day', 1),
             PricingUnit::Project => trans_choice('project', 1),
-        };
+        });
     }
 
     /**
      * Show current progress based on worked hours in relation to scope in percent
      */
-    public function getProgressPercentAttribute()
+    public function progressPercent(): Attribute
     {
-        return $this->scope > 0
+        return Attribute::make(fn() => $this->scope > 0
             ? round($this->hours/$this->scope*100, 1) . ' %'
-            : __('n/a');
+            : __('n/a'));
     }
 
     /**
      * Number of hours estimated for this project
      */
-    public function getEstimatedHoursAttribute()
+    public function estimatedHours(): Attribute
     {
         $hours = 0;
         foreach ($this->estimates as $estimate) {
             $hours += $estimate->amount;
         }
-        return $hours;
+        return Attribute::make(fn() => $hours);
     }
 
     /**
      * Net amount of all assigned estimates
      */
-    public function getEstimatedNetAttribute()
+    public function estimatedNet(): Attribute
     {
         $net = 0;
         if ($this->pricing_unit === PricingUnit::Project) {
@@ -193,22 +194,22 @@ class Project extends Model
                 PricingUnit::Day => 8,
             };
         }
-        return round($net, 2);
+        return Attribute::make(fn() => round($net, 2));
     }
 
     /**
      * Vat amount of estimated net amount
      */
-    public function getEstimatedVatAttribute()
+    public function estimatedVat(): Attribute
     {
-        return round($this->estimated_net * Setting::get('vatRate'), 2);
+        return Attribute::make(fn() => round($this->estimated_net * Setting::get('vatRate'), 2));
     }
 
     /**
      * Gross amount of all assigned estimates
      */
-    public function getEstimatedGrossAttribute()
+    public function estimatedGross(): Attribute
     {
-        return $this->estimated_net + $this->estimated_vat;
+        return Attribute::make(fn() => $this->estimated_net + $this->estimated_vat);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
@@ -29,9 +30,9 @@ class Setting extends Model
     /**
      * Translated setting label
      */
-    public function getLabelAttribute()
+    public function label(): Attribute
     {
-        return __($this->field);
+        return Attribute::make(fn() => __($this->field));
     }
 
     /**

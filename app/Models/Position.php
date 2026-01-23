@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Position extends Model
 {
@@ -23,16 +24,16 @@ class Position extends Model
     /**
      * Total duration of the position in hours
      */
-    public function getDurationAttribute()
+    public function duration(): Attribute
     {
-        return Carbon::parse($this->started_at)
-            ->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration;
+        return Attribute::make(fn() => Carbon::parse($this->started_at)
+            ->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration);
     }
 
     /**
      * Total net of the position
      */
-    public function getNetAttribute()
+    public function net(): Attribute
     {
         $net = 0;
         if ($this->invoice->pricing_unit === PricingUnit::Project) {
@@ -43,15 +44,15 @@ class Position extends Model
                 PricingUnit::Day => 8,
             };
         }
-        return round($net, 2);
+        return Attribute::make(fn() => round($net, 2));
     }
 
     /**
      * Human readable time range
      */
-    public function getTimeRangeAttribute()
+    public function timeRange(): Attribute
     {
-        return Carbon::parse($this->started_at)->isoFormat('lll')
-            . Carbon::parse($this->finished_at)->format(' - H.i');
+        return Attribute::make(fn() => Carbon::parse($this->started_at)->isoFormat('lll')
+            . Carbon::parse($this->finished_at)->format(' - H.i'));
     }
 }

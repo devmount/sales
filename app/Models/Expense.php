@@ -7,6 +7,7 @@ use App\Enums\TimeUnit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Expense extends Model
 {
@@ -24,34 +25,34 @@ class Expense extends Model
     /**
      * Serve year of expense
      */
-    public function getYearAttribute()
+    public function year(): Attribute
     {
-        return substr($this->expanded_at, 0, 4);
+        return Attribute::make(fn() => substr($this->expanded_at, 0, 4));
     }
 
     /**
      * Gross amount of this expense
      */
-    public function getGrossAttribute()
+    public function gross(): Attribute
     {
-        return round($this->price * $this->quantity, 2);
+        return Attribute::make(fn() => round($this->price * $this->quantity, 2));
     }
 
     /**
      * Net amount of this expense
      */
-    public function getNetAttribute()
+    public function net(): Attribute
     {
         $rate = $this->taxable ? $this->vat_rate : 0;
-        return round($this->gross / (1 + $rate), 2);
+        return Attribute::make(fn() => round($this->gross / (1 + $rate), 2));
     }
 
     /**
      * Vat amount of this expense
      */
-    public function getVatAttribute()
+    public function vat(): Attribute
     {
-        return $this->gross - $this->net;
+        return Attribute::make(fn() => $this->gross - $this->net);
     }
 
     public static function lastAdvanceVatExists(): bool
