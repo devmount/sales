@@ -32,7 +32,7 @@ class SumProductiveHoursChart extends ChartWidget
     protected function getData(): array
     {
         $positions = Position::oldest('started_at')->get();
-        $start = $positions[0]->started_at;
+        $start = $positions->first()?->started_at;
         $period = match($this->filter) {
             'y' => Carbon::parse($start)->startOfYear()->yearsUntil(now()->addYear()),
             'q' => Carbon::parse($start)->startOfQuarter()->quartersUntil(now()->addQuarter()),

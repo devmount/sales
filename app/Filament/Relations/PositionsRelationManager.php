@@ -48,7 +48,13 @@ class PositionsRelationManager extends RelationManager
                 CreateAction::make()
                     ->icon('tabler-plus')
                     ->afterFormFilled(function (Component $livewire) {
-                        $livewire->mountedActions[0]['data']['invoice_id'] = $this->ownerRecord->id;
+                        $mountedAction = $livewire->mountedActions[0] ?? null;
+
+                        if (!$mountedAction) {
+                            return;
+                        }
+
+                        $mountedAction['data']['invoice_id'] = $this->ownerRecord->id;
                     })
                     ->schema(PositionResource::formFields(useSection: false))
                     ->slideOver()

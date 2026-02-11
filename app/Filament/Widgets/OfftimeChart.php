@@ -32,7 +32,7 @@ class OfftimeChart extends ChartWidget
     protected function getData(): array
     {
         $invoices = Invoice::whereNotNull('paid_at')->whereNot('transitory')->oldest('paid_at')->get();
-        $period = Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear());
+        $period = Carbon::parse($invoices->first()?->paid_at)->startOfYear()->yearsUntil(now()->addYear());
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
         $period = $period->toArray();

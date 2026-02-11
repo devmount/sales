@@ -61,7 +61,13 @@ class ProjectsRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->afterFormFilled(function (Component $livewire) {
-                        $livewire->mountedActions[0]['data']['client_id'] = $this->ownerRecord->id;
+                        $mountedAction = $livewire->mountedActions[0] ?? null;
+
+                        if (!$mountedAction) {
+                            return;
+                        }
+                        
+                        $mountedAction['data']['client_id'] = $this->ownerRecord->id;
                     })
                     ->schema(ProjectResource::formFields(useSection: false))
                     ->slideOver()

@@ -41,7 +41,7 @@ class MonthlyIncomeChart extends ChartWidget
             ->where('category', ExpenseCategory::Tax)
             ->oldest('expended_at')
             ->get();
-        $period = Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear());
+        $period = Carbon::parse($invoices->first()?->paid_at)->startOfYear()->yearsUntil(now()->addYear());
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
         $period = $period->toArray();

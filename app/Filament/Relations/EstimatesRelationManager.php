@@ -50,7 +50,13 @@ class EstimatesRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->afterFormFilled(function (Component $livewire) {
-                        $livewire->mountedActions[0]['data']['project_id'] = $this->ownerRecord->id;
+                        $mountedAction = $livewire->mountedActions[0] ?? null;
+
+                        if (!$mountedAction) {
+                            return;
+                        }
+
+                        $mountedAction['data']['project_id'] = $this->ownerRecord->id;
                     })
                     ->schema(EstimateResource::formFields(useSection: false))
                     ->slideOver()
