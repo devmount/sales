@@ -31,7 +31,7 @@ class WeeklyHoursChart extends ChartWidget
     protected function getData(): array
     {
         $positions = Position::oldest('started_at')->get();
-        $period = Carbon::parse($positions[0]->started_at)->startOfYear()->yearsUntil(now()->addYear());
+        $period = Carbon::parse($positions->first()?->started_at)->startOfYear()->yearsUntil(now()->addYear());
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
         $period = $period->toArray();

@@ -229,8 +229,7 @@ class Invoice extends Model
         $firstDate = self::whereNotNull('paid_at')
             ->whereNot('transitory')
             ->oldest('paid_at')
-            ->first()
-            ->paid_at;
+            ->first()?->paid_at;
         $period = Carbon::parse($firstDate)->startOfYear()->yearsUntil(now());
         $years = array_reverse(
             iterator_to_array(

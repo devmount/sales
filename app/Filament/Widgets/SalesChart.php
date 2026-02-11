@@ -46,9 +46,9 @@ class SalesChart extends ChartWidget
             ->oldest('expended_at')
             ->get();
         $period = match($this->filter) {
-            'y' => Carbon::parse($invoices[0]->paid_at)->startOfYear()->yearsUntil(now()->addYear()),
-            'q' => Carbon::parse($invoices[0]->paid_at)->startOfQuarter()->quartersUntil(now()->addQuarter()),
-            'm' => Carbon::parse($invoices[0]->paid_at)->startOfMonth()->monthsUntil(now()->addMonth()),
+            'y' => Carbon::parse($invoices->first()?->paid_at)->startOfYear()->yearsUntil(now()->addYear()),
+            'q' => Carbon::parse($invoices->first()?->paid_at)->startOfQuarter()->quartersUntil(now()->addQuarter()),
+            'm' => Carbon::parse($invoices->first()?->paid_at)->startOfMonth()->monthsUntil(now()->addMonth()),
         };
         $labels = iterator_to_array($period->map(fn(Carbon $date) => match($this->filter) {
             'y' => $date->format('Y'),

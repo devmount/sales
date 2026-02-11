@@ -62,7 +62,13 @@ class InvoicesRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->afterFormFilled(function (Component $livewire) {
-                        $livewire->mountedActions[0]['data']['project_id'] = $this->ownerRecord->id;
+                        $mountedAction = $livewire->mountedActions[0] ?? null;
+
+                        if (!$mountedAction) {
+                            return;
+                        }
+
+                        $mountedAction['data']['project_id'] = $this->ownerRecord->id;
                     })
                     ->schema(InvoiceResource::formFields(6, false))
                     ->slideOver()
