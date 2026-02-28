@@ -4,6 +4,7 @@ namespace App\Filament\Relations;
 
 use App\Filament\Resources\PositionResource;
 use App\Models\Position;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -32,7 +33,6 @@ class PositionsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('description')
                     ->label(__('description'))
-                    ->copyable()
                     ->formatStateUsing(fn (string $state): string => nl2br($state))
                     ->html(),
                 TextColumn::make('amount')
@@ -61,6 +61,16 @@ class PositionsRelationManager extends RelationManager
                     ->modalWidth(Width::TwoExtraLarge),
             ])
             ->recordActions([
+                Action::make('copy')
+                    ->icon('tabler-clipboard')
+                    ->label('')
+                    ->actionJs(function (Position $record) {
+                        $text = str_replace("\n", "\\n", $record->description);
+                        return <<<JS
+                            window.navigator.clipboard.writeText('$text');
+                            \$tooltip('Copied to clipboard', { timeout: 1500 });
+                        JS;
+                    }),
                 EditAction::make()
                     ->icon('tabler-edit')
                     ->label('')

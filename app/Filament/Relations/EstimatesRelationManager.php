@@ -3,6 +3,8 @@
 namespace App\Filament\Relations;
 
 use App\Filament\Resources\EstimateResource;
+use App\Models\Estimate;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -33,7 +35,6 @@ class EstimatesRelationManager extends RelationManager
                     ->label(__('title')),
                 TextColumn::make('description')
                     ->label(__('description'))
-                    ->copyable()
                     ->formatStateUsing(fn (string $state): string => nl2br($state))
                     ->html(),
                 TextColumn::make('amount')
@@ -63,6 +64,16 @@ class EstimatesRelationManager extends RelationManager
                     ->modalWidth(Width::Large),
             ])
             ->recordActions([
+                Action::make('copy')
+                    ->icon('tabler-clipboard')
+                    ->label('')
+                    ->actionJs(function (Estimate $record) {
+                        $text = str_replace("\n", "\\n", $record->description);
+                        return <<<JS
+                            window.navigator.clipboard.writeText('$text');
+                            \$tooltip('Copied to clipboard', { timeout: 1500 });
+                        JS;
+                    }),
                 EditAction::make()
                     ->icon('tabler-edit')
                     ->label('')
