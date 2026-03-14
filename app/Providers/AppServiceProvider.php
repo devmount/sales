@@ -14,6 +14,7 @@ use Filament\Support\Enums\VerticalAlignment;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
+use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -52,10 +53,10 @@ class AppServiceProvider extends ServiceProvider
             $obj->native(false);
         });
         DatePicker::configureUsing(function (DatePicker $obj): void {
-            $obj->native(false)->locale(config('locale'));
+            $obj->native(false)->locale(config('app.locale'));
         });
         DateTimePicker::configureUsing(function (DateTimePicker $obj): void {
-            $obj->native(false)->locale(config('locale'));
+            $obj->native(false)->locale(config('app.locale'));
         });
 
         // Filter
@@ -139,5 +140,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Notifications
         Notifications::verticalAlignment(VerticalAlignment::End);
+
+        // Modals
+        ModalComponent::closedByClickingAway(false);
     }
 }
