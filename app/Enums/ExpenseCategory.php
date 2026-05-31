@@ -43,6 +43,8 @@ enum ExpenseCategory: string implements HasLabel, HasColor
         return [
             self::Good,
             self::Service,
+            self::Rent,
+            self::Utility,
         ];
     }
 
