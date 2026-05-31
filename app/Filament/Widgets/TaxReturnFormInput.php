@@ -63,10 +63,14 @@ class TaxReturnFormInput extends TableWidget
     public function getTableRecords(): Collection
     {
         $dt = Carbon::create($this->filter, 1, 1);
-        [$netEarned, $netUntaxableEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR); // TODO: Untaxable income
+
+        [$netEarned, $netUntaxableEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
         [$netGoodExpended, $vatGoodExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Good);
         [$netServiceExpended, $vatServiceExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Service);
-        $netExpended = $netGoodExpended + $netServiceExpended;
+        [$rentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Rent);
+        [$utilityCostsExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Utility);
+
+        $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended;
         $vatExpended = $vatGoodExpended + $vatServiceExpended;
 
         return collect([
@@ -75,7 +79,7 @@ class TaxReturnFormInput extends TableWidget
                 'itr' => '1 (S)',
                 'vr' => null,
                 'rsc' => null,
-                'value' => round($netEarned - $netExpended),
+                'value' => round($netEarned + $netUntaxableEarned - $netExpended),
                 'help' => __('formLabels')['itr1'],
                 'color' => 'primary',
             ],
@@ -92,7 +96,7 @@ class TaxReturnFormInput extends TableWidget
                 '__key' => 3,
                 'itr' => null,
                 'vr' => '75',
-                'rsc' => null,
+                'rsc' => '16',
                 'value' => $netUntaxableEarned,
                 'help' => __('formLabels')['vr75'],
                 'color' => 'primary',
@@ -136,6 +140,24 @@ class TaxReturnFormInput extends TableWidget
             [
                 '__key' => 8,
                 'itr' => null,
+                'vr' => null,
+                'rsc' => '65',
+                'value' => $rentExpended,
+                'help' => __('formLabels')['rsc65a'],
+                'color' => 'danger',
+            ],
+            [
+                '__key' => 9,
+                'itr' => null,
+                'vr' => null,
+                'rsc' => '65',
+                'value' => $utilityCostsExpended,
+                'help' => __('formLabels')['rsc65b'],
+                'color' => 'danger',
+            ],
+            [
+                '__key' => 10,
+                'itr' => null,
                 'vr' => '118',
                 'rsc' => null,
                 'value' => $vatEarned - $vatExpended,
@@ -143,11 +165,11 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 9,
+                '__key' => 11,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
-                'value' => $netEarned + $vatEarned - $netExpended - $vatExpended,
+                'value' => $netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended,
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
             ],
