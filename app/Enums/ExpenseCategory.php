@@ -11,6 +11,8 @@ enum ExpenseCategory: string implements HasLabel, HasColor
     case Good = 'good';
     case Service = 'service';
     case Tax = 'tax';
+    case Rent = 'rent';
+    case Utility = 'utility';
 
     public function getLabel(): ?string
     {
@@ -19,6 +21,8 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Good => __('good'),
             self::Service => __('service'),
             self::Tax => __('incomeTax'),
+            self::Rent => __('rent'),
+            self::Utility => __('utilityCosts'),
         };
     }
 
@@ -29,6 +33,8 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Good => 'blue',
             self::Service => 'purple',
             self::Tax => 'rose',
+            self::Rent => 'amber',
+            self::Utility => 'amber',
         };
     }
 
@@ -37,6 +43,8 @@ enum ExpenseCategory: string implements HasLabel, HasColor
         return [
             self::Good,
             self::Service,
+            self::Rent,
+            self::Utility,
         ];
     }
 
@@ -55,6 +63,8 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Good->value => __('good'),
             self::Service->value => __('service'),
             self::Tax->value => __('incomeTax'),
+            self::Rent->value => __('rent'),
+            self::Utility->value => __('utilityCosts'),
         ];
     }
 }
