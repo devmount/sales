@@ -14,10 +14,10 @@ use fpdf\PdfDocument;
 class PdfTemplate extends PdfDocument
 {
     // Locale
-    private $lang;
+    private ?string $lang;
 
     // Document type
-    private $type;
+    private DocumentType $type;
 
     // Attachments
     protected array $files = [];
