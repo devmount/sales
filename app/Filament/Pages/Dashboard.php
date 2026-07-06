@@ -3,8 +3,10 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
-use App\Filament\Resources\PositionResource\Widgets as ResourceWidgets;
+use App\Filament\Resources\PositionResource\Widgets\RecentPositionsChart;
+use App\Filament\Resources\ProjectResource\Widgets\CurrentProjects;
 use App\Filament\Widgets as AppWidgets;
+use App\Livewire\HeadingWidget;
 
 class Dashboard extends BaseDashboard
 {
@@ -19,11 +21,15 @@ class Dashboard extends BaseDashboard
     {
         return [
             AppWidgets\StatsOverview::class,
-            ResourceWidgets\RecentPositionsChart::class,
+            RecentPositionsChart::class,
+            CurrentProjects::class,
+            HeadingWidget::make(['heading' => __('sales'),]),
             AppWidgets\SalesChart::class,
-            AppWidgets\ClientProfitDistributionChart::class,
-            AppWidgets\HourlyRateChart::class,
             AppWidgets\MonthlyIncomeChart::class,
+            AppWidgets\HourlyRateChart::class,
+            HeadingWidget::make(['heading' => trans_choice('client', 2),]),
+            AppWidgets\ClientProfitDistributionChart::class,
+            HeadingWidget::make(['heading' => trans_choice('hour', 2),]),
             AppWidgets\SumProductiveHoursChart::class,
             AppWidgets\WeeklyHoursChart::class,
             AppWidgets\OfftimeChart::class,

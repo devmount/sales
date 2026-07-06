@@ -13,7 +13,7 @@ use Filament\Widgets\ChartWidget;
 class MonthlyIncomeChart extends ChartWidget
 {
     public ?string $filter = 'net';
-    protected ?string $maxHeight = '150px';
+    protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [
@@ -106,6 +106,7 @@ class MonthlyIncomeChart extends ChartWidget
     {
         return RawJs::make(<<<JS
         {
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: false

@@ -45,3 +45,28 @@ textarea.position-limit {
 .fi-wi-stats-overview-stat.font-mono .fi-wi-stats-overview-stat-value {
     font-family: var(--mono-font-family), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
+
+/* Prevent widget headings and descriptions from wrapping */
+.fi-section  {
+    .fi-section-header-heading,
+    .fi-section-header-description {
+        overflow-wrap: initial;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}
+
+/* Custom project process indicators */
+.project-progress {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+
+    div {
+        border-radius: .5rem;
+        padding: .125rem .5rem;
+        border: 1px solid;
+        text-align: center;
+    }
+}

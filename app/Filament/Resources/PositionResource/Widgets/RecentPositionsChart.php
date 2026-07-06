@@ -26,7 +26,7 @@ class RecentPositionsChart extends ChartWidget
 
     public function getDescription(): string
     {
-        return __('sumWorkingHoursPerDay');
+        return __('mostRecentWorkingHoursPerDay');
     }
 
     protected function getData(): array

@@ -106,7 +106,7 @@ class Project extends Model
             // Take the description lines and the position title (2 lines) into account
             $lineCount = count(explode("\n", trim($e->description))) + 2;
             $linesProcessed += $lineCount;
-            $i = floor($linesProcessed/50);
+            $i = intval(floor($linesProcessed/50));
             if (key_exists($i,$paginated)) {
                 $paginated[$i][] = $e;
             } else {

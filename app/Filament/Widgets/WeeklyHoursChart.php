@@ -15,7 +15,7 @@ class WeeklyHoursChart extends ChartWidget
 
     protected int | string | array $columnSpan = [
         'sm' => 12,
-        'xl' => 6,
+        'xl' => 4,
     ];
 
     public function getHeading(): string

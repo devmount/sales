@@ -18,7 +18,7 @@ class SalesChart extends ChartWidget
 
     protected int | string | array $columnSpan = [
         'sm' => 12,
-        'xl' => 6,
+        'xl' => 5,
     ];
 
     public function getHeading(): string
@@ -125,6 +125,7 @@ class SalesChart extends ChartWidget
     {
         return RawJs::make(<<<JS
         {
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: false
