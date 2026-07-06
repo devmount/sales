@@ -114,8 +114,7 @@ class PositionResource extends Resource
                                 fn (Builder $query, $date): Builder => $query->whereDate('finished_at', '<=', $date),
                             );
                     }),
-                TernaryFilter::make('remote')
-                    ->nullable(),
+                TernaryFilter::make('remote'),
             ])
             ->filtersFormColumns(3)
             ->recordActions(
