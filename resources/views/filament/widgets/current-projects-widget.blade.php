@@ -2,9 +2,13 @@
     <x-filament::section class="fi-section" :description="$description" :heading="$heading">
         <div class="project-progress">
             @foreach ($projects as $p)
-                <div @style(['border-color: ' . $p->client->color])>
+                <progress
+                    value="{{ $p->progress }}"
+                    max="100"
+                    @style(['border-color: ' . $p->client->color])
+                >
                     {{ $p->progress_percent }}
-                </div>
+                </progress>
             @endforeach
         </div>
     </x-filament::section>

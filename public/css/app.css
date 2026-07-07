@@ -63,10 +63,23 @@ textarea.position-limit {
     grid-template-columns: 1fr 1fr;
     gap: .5rem;
 
-    div {
+    progress {
+        box-sizing: border-box;
         border-radius: .5rem;
         padding: .125rem .5rem;
         border: 1px solid;
-        text-align: center;
+        background: linear-gradient(#191c23, #2d3341);
+
+        &::-webkit-progress-bar {
+            background: transparent;
+        }
+        &::-moz-progress-bar,
+        &::-webkit-progress-value {
+            border-radius: .5rem;
+            box-shadow: inset 0 .05em .05em #ffffff55;
+            background:
+                linear-gradient(#e2664caa, transparent),
+                repeating-linear-gradient(135deg, #a22215 0 .25rem, #be2a20 0 .5rem)
+        }
     }
 }
