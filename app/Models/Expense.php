@@ -26,7 +26,7 @@ class Expense extends Model
     protected function casts(): array
     {
         return [
-            'expended_at' => 'datetime',
+            'expended_at' => 'date',
             'price'       => 'float',
             'taxable'     => 'bool',
             'vat_rate'    => 'float',

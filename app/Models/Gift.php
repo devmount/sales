@@ -20,7 +20,7 @@ class Gift extends Model
     protected function casts(): array
     {
         return [
-            'received_at' => 'datetime',
+            'received_at' => 'date',
             'amount'      => 'float',
             'subject'     => 'string',
             'name'        => 'string',

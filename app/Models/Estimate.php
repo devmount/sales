@@ -15,7 +15,6 @@ class Estimate extends Model
         'description',
         'amount',
         'weight',
-        'vat_id',
     ];
 
     protected function casts(): array
