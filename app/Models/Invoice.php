@@ -20,14 +20,40 @@ class Invoice extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'pricing_unit' => PricingUnit::class,
+    protected $fillable = [
+        'title',
+        'description',
+        'price',
+        'pricing_unit',
+        'discount',
+        'taxable',
+        'transitory',
+        'undated',
+        'vat_rate',
+        'invoiced_at',
+        'paid_at',
+        'deduction',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'title'        => 'string',
+            'description'  => 'string',
+            'price'        => 'float',
+            'pricing_unit' => PricingUnit::class,
+            'discount'     => 'float',
+            'taxable'      => 'bool',
+            'transitory'   => 'bool',
+            'undated'      => 'bool',
+            'vat_rate'     => 'float',
+            'invoiced_at'  => 'date',
+            'paid_at'      => 'date',
+            'deduction'    => 'float',
+            'created_at'   => 'datetime',
+            'updated_at'   => 'datetime',
+        ];
+    }
 
     /**
      * Get the project this invoice is assigned to.

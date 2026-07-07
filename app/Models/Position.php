@@ -13,6 +13,27 @@ class Position extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'started_at',
+        'finished_at',
+        'pause_duration',
+        'description',
+        'remote',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'started_at'     => 'datetime',
+            'finished_at'    => 'datetime',
+            'pause_duration' => 'float',
+            'description'    => 'string',
+            'remote'         => 'bool',
+            'created_at'     => 'datetime',
+            'updated_at'     => 'datetime',
+        ];
+    }
+
     /**
      * Get the invoice this position was made for.
      */

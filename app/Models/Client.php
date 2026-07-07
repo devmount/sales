@@ -13,6 +13,41 @@ class Client extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'short',
+        'color',
+        'address',
+        'street',
+        'zip',
+        'city',
+        'country',
+        'email',
+        'phone',
+        'language',
+        'vat_id',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'name'       => 'string',
+            'short'      => 'string',
+            'color'      => 'string',
+            'address'    => 'string',
+            'street'     => 'string',
+            'zip'        => 'string',
+            'city'       => 'string',
+            'country'    => 'string',
+            'email'      => 'string',
+            'phone'      => 'string',
+            'language'   => 'string',
+            'vat_id'     => 'string',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
+
     /**
      * The projects this client ordered.
      */

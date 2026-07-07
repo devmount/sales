@@ -13,14 +13,30 @@ class Expense extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'category' => ExpenseCategory::class,
+    protected $fillable = [
+        'expended_at',
+        'price',
+        'taxable',
+        'vat_rate',
+        'quantity',
+        'category',
+        'description',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'expended_at' => 'datetime',
+            'price'       => 'float',
+            'taxable'     => 'bool',
+            'vat_rate'    => 'float',
+            'quantity'    => 'int',
+            'category'    => ExpenseCategory::class,
+            'description' => 'string',
+            'created_at'  => 'datetime',
+            'updated_at'  => 'datetime',
+        ];
+    }
 
     /**
      * Serve year of expense

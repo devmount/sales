@@ -19,9 +19,18 @@ class Setting extends Model
         'weight',
     ];
 
-    protected $casts = [
-        'attributes' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'field'      => 'string',
+            'value'      => 'string',
+            'type'       => 'string',
+            'attributes' => 'array',
+            'weight'     => 'int',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public static function get(string $field) {
         return self::find($field)?->value;

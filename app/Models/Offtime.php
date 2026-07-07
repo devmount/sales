@@ -14,12 +14,20 @@ class Offtime extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'start',
+        'end',
+        'category',
+        'description',
+    ];
+
     protected function casts(): array
     {
         return [
             'start' => 'date',
             'end' => 'date',
             'category' => OfftimeCategory::class,
+            'description' => 'string',
         ];
     }
 

@@ -16,14 +16,34 @@ class Project extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'pricing_unit' => PricingUnit::class,
+    protected $fillable = [
+        'title',
+        'description',
+        'start_at',
+        'due_at',
+        'minimum',
+        'scope',
+        'price',
+        'pricing_unit',
+        'aborted',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'title' => 'string',
+            'description' => 'string',
+            'start_at' => 'date',
+            'due_at' => 'date',
+            'minimum' => 'float',
+            'scope' => 'float',
+            'price' => 'float',
+            'pricing_unit' => PricingUnit::class,
+            'aborted' => 'bool',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the client that ordered the project.
