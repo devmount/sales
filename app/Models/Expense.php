@@ -25,34 +25,34 @@ class Expense extends Model
     /**
      * Serve year of expense
      */
-    public function year(): Attribute
+    protected function year(): Attribute
     {
-        return Attribute::make(fn() => substr($this->expanded_at, 0, 4));
+        return Attribute::make(fn(): int => intval(substr($this->expanded_at, 0, 4)));
     }
 
     /**
      * Gross amount of this expense
      */
-    public function gross(): Attribute
+    protected function gross(): Attribute
     {
-        return Attribute::make(fn() => round($this->price * $this->quantity, 2));
+        return Attribute::make(fn(): float => round($this->price * $this->quantity, 2));
     }
 
     /**
      * Net amount of this expense
      */
-    public function net(): Attribute
+    protected function net(): Attribute
     {
         $rate = $this->taxable ? $this->vat_rate : 0;
-        return Attribute::make(fn() => round($this->gross / (1 + $rate), 2));
+        return Attribute::make(fn(): float => round($this->gross / (1 + $rate), 2));
     }
 
     /**
      * Vat amount of this expense
      */
-    public function vat(): Attribute
+    protected function vat(): Attribute
     {
-        return Attribute::make(fn() => $this->gross - $this->net);
+        return Attribute::make(fn(): float => $this->gross - $this->net);
     }
 
     public static function lastAdvanceVatExists(): bool

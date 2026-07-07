@@ -32,18 +32,18 @@ class Client extends Model
     /**
      * All address information of this client as one string
      */
-    public function fullAddress(): Attribute
+    protected function fullAddress(): Attribute
     {
         $data = $this->address ? "{$this->address}\n" : '';
-        return Attribute::make(fn() => "$data{$this->street}\n{$this->zip} {$this->city}");
+        return Attribute::make(fn(): string => "$data{$this->street}\n{$this->zip} {$this->city}");
     }
 
     /**
      * Number of hours worked for this client
      */
-    public function hours(): Attribute
+    protected function hours(): Attribute
     {
-        $hours = 0;
+        $hours = 0.0;
         foreach ($this->projects as $project) {
             foreach ($project->invoices as $invoice) {
                 foreach ($invoice->positions as $position) {
@@ -51,27 +51,27 @@ class Client extends Model
                 }
             }
         }
-        return Attribute::make(fn() => $hours);
+        return Attribute::make(fn(): float => $hours);
     }
 
     /**
      * Net amount earned by this client
      */
-    public function net(): Attribute
+    protected function net(): Attribute
     {
-        $net = 0;
+        $net = 0.0;
         foreach ($this->projects as $project) {
             foreach ($project->invoices as $invoice) {
                 $net += $invoice->net;
             }
         }
-        return Attribute::make(fn() => $net);
+        return Attribute::make(fn(): float => $net);
     }
 
     /**
      * Number of days this client takse to pay bills on average
      */
-    public function avgPaymentDelay(): Attribute
+    protected function avgPaymentDelay(): Attribute
     {
         $days = [];
         foreach ($this->projects as $project) {
@@ -81,6 +81,6 @@ class Client extends Model
                 }
             }
         }
-        return Attribute::make(fn() => count($days) ? array_sum($days)/count($days) : 0);
+        return Attribute::make(fn(): float => count($days) ? array_sum($days)/count($days) : 0.0);
     }
 }

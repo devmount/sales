@@ -30,9 +30,9 @@ class Setting extends Model
     /**
      * Translated setting label
      */
-    public function label(): Attribute
+    protected function label(): Attribute
     {
-        return Attribute::make(fn() => __($this->field));
+        return Attribute::make(fn(): string => __($this->field));
     }
 
     /**
