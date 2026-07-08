@@ -41,10 +41,10 @@ jobs:
         uses: ddev/github-action-setup-ddev@v1
 
       - name: Composer install
-        run:
-        - cp .env.testing.example .env.testing
-        - ddev composer install
-        - ddev artisan key:generate --env=testing
+        run: |
+          cp .env.testing.example .env.testing
+          ddev composer install
+          ddev artisan key:generate --env=testing
 
       - name: Run test suite
         run: ddev artisan test
