@@ -1,0 +1,73 @@
+name: Validate
+
+concurrency:
+  group: validate
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!main'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      validate-app: ${{ steps.check.outputs.validate-app }}
+    steps:
+    - uses: actions/checkout@v6
+
+    - uses: dorny/paths-filter@v4
+      id: check
+      with:
+        filters: |
+          validate-app:
+            - '**/*.php'
+            - '.github/workflows/validate.yml'
+
+  validate-app:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.validate-app == 'true'
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install frontend dependencies
+        run: |
+          npm ci
+          npm run build
+
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: pcov
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install backend dependencies
+        run: |
+          composer install --prefer-dist
+          npm run build
+
+      - name: Test with Pest
+        run: php artisan test --coverage
