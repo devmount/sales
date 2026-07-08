@@ -45,26 +45,26 @@ php artisan db:anonymize
 
 ## Development
 
-To start a local development server, run:
-
-```bash
-php artisan serve
-```
-
-Now you can log in on <http://localhost:8000> with the initial admin user credentials (email: `admin@example.com`, password: `Joh.3,16`).
-
-Or if you have _Docker_ and _ddev_ installed, you can just run:
+To start a local development server, make sure to have _Docker_ and _ddev_ installed. Navigate to the project root directory and just run:
 
 ```bash
 ddev start
 ```
 
-You can now find the app at <https://sales.ddev.site/>.
+You can now find the app at <https://sales.ddev.site/> with the initial admin user credentials (email: `admin@example.com`, password: `Joh.3,16`).
 
 If you have issues with missing method or property definitions, the ide-helper definitions might need an upate:
 
 ```bash
-php artisan ide-helper:generate 
+ddev artisan ide-helper:generate 
+```
+
+## Testing
+
+To run the test suite, execute:
+
+```bash
+ddev artisan test
 ```
 
 ## Production
