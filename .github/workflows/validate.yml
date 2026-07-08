@@ -47,4 +47,4 @@ jobs:
           ddev artisan key:generate --env=testing
 
       - name: Run test suite
-        run: ddev artisan test
+        run: ddev artisan test --coverage --min=0

@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/tests/coverage
 .env
 .env.backup
 .env.testing

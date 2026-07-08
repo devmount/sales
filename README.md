@@ -61,10 +61,16 @@ ddev artisan ide-helper:generate
 
 ## Testing
 
-To run the test suite, execute:
+For a simple test suite run, execute:
 
 ```bash
 ddev artisan test
+```
+
+If you want to check coverage, run:
+
+```bash
+ddev artisan test --coverage --min=0
 ```
 
 ## Production
