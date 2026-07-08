@@ -47,4 +47,4 @@ jobs:
           ddev artisan key:generate --env=testing
 
       - name: Run test suite
-        run: ddev exec php -d pcov.enabled=1 -d opcache.jit=0 artisan test --coverage --min=0 --colors=never
+        run: ddev exec php -d pcov.enabled=1 -d opcache.jit_buffer_size=0 artisan test --coverage --min=0 --colors=never
