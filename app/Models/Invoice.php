@@ -240,7 +240,7 @@ class Invoice extends Model
      */
     protected function finalNumber(): Attribute
     {
-        $date = Carbon::parse($this->invoiced_at)?->format('Ymd') ?? '';
+        $date = $this->invoiced_at ? Carbon::parse($this->invoiced_at)->format('Ymd') : '';
         return Attribute::make(fn(): string => $date . str_pad($this->id, 4, '0', STR_PAD_LEFT));
     }
 
@@ -266,7 +266,7 @@ class Invoice extends Model
     public static function getYearList(): array
     {
         $firstDate = self::whereNotNull('paid_at')
-            ->whereNot('transitory')
+            ->where('transitory', 0)
             ->oldest('paid_at')
             ->first()?->paid_at;
         $period = Carbon::parse($firstDate)->startOfYear()->yearsUntil(now());

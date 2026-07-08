@@ -33,7 +33,7 @@ class PositionFactory extends Factory
             'invoice_id' => Invoice::factory(),
             'started_at' => $startedAt,
             'finished_at' => $finishedAt,
-            'pause_duration' => fake()->optional(0.2)->randomElement([1.0, 2.0]),
+            'pause_duration' => fake()->optional(0.2, 0.0)->randomElement([1.0, 2.0]),
             'description' => fake()->sentence(),
             'remote' => fake()->boolean(90), // 90% chance of being remote
         ];

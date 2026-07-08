@@ -31,7 +31,7 @@ class ClientFactory extends Factory
             'name' => $name,
             'short' => str($name)->take(2)->upper()->toString(),
             'color' => fake()->hexColor(),
-            'address' => fake()->secondaryAddress(),
+            'address' => fake()->optional()->bothify('Apt. ##'),
             'street' => fake()->streetAddress(),
             'zip' => fake()->postcode(),
             'city' => fake()->city(),

@@ -35,7 +35,7 @@ class ClientProfitDistributionChart extends ChartWidget
         $from = Carbon::create($year, 1, 31, 12, 0, 0)->startOfYear();
         $to = Carbon::create($year, 1, 31, 12, 0, 0)->endOfYear();
         $invoices = Invoice::whereBetween('paid_at', [$from, $to])
-            ->whereNot('transitory')
+            ->where('transitory', 0)
             ->get();
         $profit = [];
         foreach ($invoices as $obj) {

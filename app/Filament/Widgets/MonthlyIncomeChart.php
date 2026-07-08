@@ -34,7 +34,7 @@ class MonthlyIncomeChart extends ChartWidget
     protected function getData(): array
     {
         $invoices = Invoice::whereNotNull('paid_at')
-            ->whereNot('transitory')
+            ->where('transitory', 0)
             ->oldest('paid_at')
             ->get();
         $taxes = Expense::whereNotNull('expended_at')

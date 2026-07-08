@@ -34,7 +34,7 @@ class SalesChart extends ChartWidget
     protected function getData(): array
     {
         $invoices = Invoice::whereNotNull('paid_at')
-            ->whereNot('transitory')
+            ->where('transitory', 0)
             ->oldest('paid_at')
             ->get();
         $expenses = Expense::whereNotNull('expended_at')

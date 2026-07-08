@@ -29,7 +29,7 @@ class GiftFactory extends Factory
             'amount' => fake()->randomFloat(2, 10, 500),
             'subject' => fake()->optional()->sentence(),
             'name' => fake()->optional()->name(),
-            'email' => fake()->optional()->unique()->safeEmail(),
+            'email' => fake()->optional()->unique()?->safeEmail(),
         ];
     }
 }

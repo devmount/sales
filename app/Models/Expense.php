@@ -68,7 +68,7 @@ class Expense extends Model
      */
     protected function vat(): Attribute
     {
-        return Attribute::make(fn(): float => $this->gross - $this->net);
+        return Attribute::make(fn(): float => round($this->gross - $this->net, 2));
     }
 
     public static function lastAdvanceVatExists(): bool

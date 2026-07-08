@@ -27,7 +27,7 @@ class InvoiceFactory extends Factory
     public function definition(): array
     {
         $taxable = fake()->boolean(90); // 90% chance of being taxable
-        $invoicedAt = fake()->optional(0.6)->dateTimeBetween('-6 months', 'now')->format('Y-m-d');
+        $invoicedAt = fake()->optional(0.6)->dateTimeBetween('-6 months', 'now')?->format('Y-m-d');
         $paidAt = $invoicedAt && fake()->boolean(70) ? fake()->dateTimeBetween($invoicedAt, '+14 days')->format('Y-m-d') : null;
 
         return [
