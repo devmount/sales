@@ -25,12 +25,12 @@ class OfftimeFactory extends Factory
      */
     public function definition(): array
     {
-        $start = fake()->dateTimeBetween('-1 year', '+1 year')->format('Y-m-d');
-        $end = fake()->optional(0.4)->dateTimeBetween($start, '+5 days')?->format('Y-m-d');
+        $start = fake()->dateTimeBetween('-1 year', '+1 year');
+        $end = fake()->dateTimeBetween($start, (clone $start)->modify('+5 days'));
 
         return [
-            'start' => $start,
-            'end' => $end,
+            'start' => $start->format('Y-m-d'),
+            'end' => $end->format('Y-m-d'),
             'category' => fake()->randomElement(array_column(OfftimeCategory::cases(), 'value')),
             'description' => fake()->optional()->sentence(),
         ];

@@ -75,15 +75,41 @@ it('sorts positions by creation order when the invoice is undated', function () 
     expect(collect($invoice->sorted_positions)->pluck('id')->all())->toBe([$first->id, $second->id]);
 });
 
-it('paginates positions into a single page when they fit within 50 lines', function () {
+it('paginates positions into a single page when they fit under 50 lines', function () {
     $invoice = Invoice::factory()->create();
-    $first = Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-01 09:00:00', 'description' => 'Line 1']);
-    $second = Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-02 09:00:00', 'description' => 'Line 1']);
+    $positions = collect([
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-01 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-02 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-03 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-04 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-05 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7"]),
+    ]);
 
     $paginated = $invoice->paginated_positions;
 
-    expect($paginated)->toHaveCount(1)
-        ->and(collect($paginated[0])->pluck('id')->all())->toBe([$first->id, $second->id]);
+    expect($paginated)
+        ->toHaveCount(1)
+        ->and(collect($paginated[0])->pluck('id')->all())->toBe($positions->map(fn($p) => $p->id)->all());
+});
+
+it('paginates positions into multiple pages when they have exactly 50 lines', function () {
+    $invoice = Invoice::factory()->create();
+    $positions = collect([
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-01 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-02 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-03 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-04 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+        Position::factory()->create(['invoice_id' => $invoice->id, 'started_at' => '2026-06-05 09:00:00', 'description' => "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8"]),
+    ]);
+
+    $paginated = $invoice->paginated_positions;
+
+    $lastElement = $positions->pop();
+
+    expect($paginated)
+        ->toHaveCount(2)
+        ->and(collect($paginated[0])->pluck('id')->all())->toBe($positions->map(fn($p) => $p->id)->all())
+        ->and(collect($paginated[1])->pluck('id')->all())->toBe([$lastElement->id]);
 });
 
 it('formats the number of positions', function () {
@@ -111,9 +137,15 @@ it('sums worked hours from its positions', function () {
         'finished_at' => '2026-03-01 14:00:00',
         'pause_duration' => 0,
     ]);
+    Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-02 09:00:00',
+        'finished_at' => '2026-03-02 09:30:00',
+        'pause_duration' => 0,
+    ]);
 
-    expect($invoice->hours)->toBe(5.0)
-        ->and($invoice->hours_formatted)->toBe('5 ' . trans_choice('hour', 5));
+    expect($invoice->hours)->toBe(5.5)
+        ->and($invoice->hours_formatted)->toBe('5.5 ' . trans_choice('hour', 5.5));
 });
 
 it('calculates real net based on worked hours for hourly pricing', function () {
@@ -121,11 +153,11 @@ it('calculates real net based on worked hours for hourly pricing', function () {
     Position::factory()->create([
         'invoice_id' => $invoice->id,
         'started_at' => '2026-03-01 09:00:00',
-        'finished_at' => '2026-03-01 14:00:00',
+        'finished_at' => '2026-03-01 14:30:00',
         'pause_duration' => 0,
     ]);
 
-    expect($invoice->real_net)->toBe(500.0);
+    expect($invoice->real_net)->toBe(550.0);
 });
 
 it('uses the flat price as real net for project-based pricing', function () {
