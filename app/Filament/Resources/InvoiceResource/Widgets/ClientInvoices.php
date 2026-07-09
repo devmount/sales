@@ -10,7 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 
-class ActiveInvoices extends TableWidget
+class ClientInvoices extends TableWidget
 {
     public ?Invoice $record = null;
 
@@ -19,15 +19,21 @@ class ActiveInvoices extends TableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading(__('invoicesInProgress'))
-            ->query(Invoice::active()->whereNot('id', $this->record?->id))
-            ->paginated(false)
+            ->heading(__('otherInvoices'))
+            ->query(
+                Invoice::whereHas('project', fn ($query) => $query->where('client_id', $this->record?->project->client_id))
+                    ->whereNot('id', $this->record?->id)
+            )
+            ->paginated([8])
             ->defaultSort('created_at', 'desc')
             ->columns([
                 ColorColumn::make('project.client.color')
                     ->label(''),
                 TextColumn::make('title')
                     ->label(__('title')),
+                TextColumn::make('invoiced_at')
+                    ->label(__('invoiceDate'))
+                    ->date('j. F Y'),
             ])
             ->recordActions([
                 Action::make('edit')
