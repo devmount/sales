@@ -15,7 +15,25 @@ A service sales manager especially for freelancers. Built in German, available i
 
 ![Demo of Sales Dashboard](docs/sales_v2.9.0_dashboard.png)
 
-## Setup
+## Getting Started
+
+There are two ways to get Sales up and running.
+
+### 1. Install using DDEV with Docker
+
+```bash
+git clone https://github.com/devmount/sales # get files
+cd sales                       # switch to app directory
+cp .env.example .env           # init environment configuration
+ddev start                     # Create docker containers and start them
+ddev artisan migrate            # create database structure
+ddev artisan key:generate       # build a secure key for the app
+ddev artisan db:seed            # create initial admin user
+```
+
+You can now login at <https://sales.ddev.site/>.
+
+### 2. Install directly
 
 Prerequisites:
 
@@ -75,7 +93,7 @@ ddev artisan test --coverage --min=0
 
 ## Production
 
-To build the application for production, run:
+To build the application for production without DDEV, run:
 
 ```bash
 composer install --optimize-autoloader --no-dev
