@@ -31,7 +31,7 @@ class Dashboard extends BaseDashboard
             AppWidgets\ClientProfitDistributionChart::class,
             AppWidgets\ClientProfitChart::class,
             AppWidgets\ClientHoursChart::class,
-            HeadingWidget::make(['heading' => trans_choice('hour', 2),]),
+            HeadingWidget::make(['heading' => __('workingHours'),]),
             AppWidgets\SumProductiveHoursChart::class,
             AppWidgets\WeeklyHoursChart::class,
             AppWidgets\OfftimeChart::class,

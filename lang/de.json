@@ -36,7 +36,7 @@
     "dateAndDescription": "Datum und Beschreibung",
     "dateRange": "Zeitraum",
     "day": "Tag|Tage",
-    "daysWithoutWorkDuty": "Tage ohne Arbeitspflicht",
+    "daysWithoutWorkDuty": "Anzahl Tage ohne Arbeitspflicht",
     "decrease": "Rückgang",
     "deduction": "Abzug",
     "definesEstimateSorting": "Definiert die Reihenfolge der Schätzungen",
@@ -193,7 +193,7 @@
     "to": "An",
     "total": "Gesamt",
     "totalAmount": "Gesamtbetrag",
-    "totalDaysOff": "Gesamttage",
+    "totalDaysOff": "Auszeittage gesamt",
     "totalNumber": "Gesamtanzahl",
     "totalQuote": "Gesamtangebot",
     "totalVat": "Gesamt USt.",
@@ -223,6 +223,8 @@
     "weeksWithWorkingDays": "Wochen mit Arbeitstagen",
     "weight": "Gewicht",
     "withKindRegards": "Mit freundlichen Grüßen",
+    "workingDays": "Produktive Arbeitstage",
+    "workingHours": "Arbeitszeit",
     "year": "Jahr",
     "zip": "PLZ"
 }

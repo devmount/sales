@@ -183,7 +183,7 @@ omit_containers: [ddev-ssh-agent]
 # This is not used by most people, most people use the *router* instead
 # of the localhost port.
 
-# host_db_port: "59002"
+host_db_port: "59002"
 # The host port binding for the ddev-dbserver can be explicitly specified. It is dynamic
 # unless explicitly specified.
 
