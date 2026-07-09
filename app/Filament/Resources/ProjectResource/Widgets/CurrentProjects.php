@@ -19,8 +19,8 @@ class CurrentProjects extends Widget
     protected function getViewData(): array
     {
         return [
-            'heading' => 'Current Projects',
-            'description' => 'Progress of active projects',
+            'heading' => __('currentProjectState'),
+            'description' => __('clickForLatestInvoice'),
             'projects' => Project::active()
                 ->withMax('invoices', 'created_at')
                 ->orderByDesc('invoices_max_created_at')
