@@ -179,8 +179,8 @@ class InvoiceResource extends Resource
                         ->icon('tabler-mail-forward')
                         ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::RUNNING)
                         ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
-                            . '?subject=' . rawurlencode(trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->current_number
-                            . '&body=' . rawurlencode(__('email.template.invoicing.body.url', ['title' => $record->project?->title], $record->project?->client?->language))),
+                            . '?subject=' . rawurlencode(trans_choice('invoice', 1, [], $record->project?->client?->language->value)) . ' ' . $record->current_number
+                            . '&body=' . rawurlencode(__('email.template.invoicing.body.url', ['title' => $record->project?->title], $record->project?->client?->language->value))),
                     Action::make('issue')
                         ->label(__('invoiceIssued'))
                         ->icon('tabler-calendar-up')
@@ -214,8 +214,8 @@ class InvoiceResource extends Resource
                         ->icon('tabler-mail-exclamation')
                         ->hidden(fn(Invoice $record) => $record->status != InvoiceStatus::SENT)
                         ->url(fn (Invoice $record): string => 'mailto:' . $record->project?->client?->email
-                            . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language)) . ' ' . $record->final_number
-                            . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->final_number], $record->project?->client?->language))),
+                            . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language->value)) . ' ' . $record->final_number
+                            . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->final_number], $record->project?->client?->language->value))),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical')

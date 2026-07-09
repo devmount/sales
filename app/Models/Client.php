@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LanguageCode;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,7 +42,7 @@ class Client extends Model
             'country'    => 'string',
             'email'      => 'string',
             'phone'      => 'string',
-            'language'   => 'string',
+            'language'   => LanguageCode::class,
             'vat_id'     => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
