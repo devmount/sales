@@ -10,6 +10,25 @@ class Estimate extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'title',
+        'description',
+        'amount',
+        'weight',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'title'       => 'string',
+            'description' => 'string',
+            'amount'      => 'float',
+            'weight'      => 'int',
+            'created_at'  => 'datetime',
+            'updated_at'  => 'datetime',
+        ];
+    }
+
     /**
      * Get the client that ordered the project.
      */

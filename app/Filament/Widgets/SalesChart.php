@@ -18,7 +18,7 @@ class SalesChart extends ChartWidget
 
     protected int | string | array $columnSpan = [
         'sm' => 12,
-        'xl' => 6,
+        'xl' => 5,
     ];
 
     public function getHeading(): string
@@ -34,7 +34,7 @@ class SalesChart extends ChartWidget
     protected function getData(): array
     {
         $invoices = Invoice::whereNotNull('paid_at')
-            ->whereNot('transitory')
+            ->where('transitory', 0)
             ->oldest('paid_at')
             ->get();
         $expenses = Expense::whereNotNull('expended_at')
@@ -125,6 +125,7 @@ class SalesChart extends ChartWidget
     {
         return RawJs::make(<<<JS
         {
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: false

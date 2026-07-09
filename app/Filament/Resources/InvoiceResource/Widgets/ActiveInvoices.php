@@ -14,6 +14,8 @@ class ActiveInvoices extends TableWidget
 {
     public ?Invoice $record = null;
 
+    protected int | string | array $columnSpan = 6;
+
     public function table(Table $table): Table
     {
         return $table

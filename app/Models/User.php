@@ -16,8 +16,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     /**
      * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -27,8 +25,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     /**
      * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -37,13 +33,18 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     /**
      * The attributes that should be cast.
-     *
-     * @var array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'name'              => 'string',
+            'email'             => 'string',
+            'email_verified_at' => 'datetime',
+            'password'          => 'hashed',
+            'created_at'        => 'datetime',
+            'updated_at'        => 'datetime',
+        ];
+    }
 
     public function canAccessPanel(Panel $panel): bool
     {

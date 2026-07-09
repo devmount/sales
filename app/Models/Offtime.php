@@ -14,29 +14,37 @@ class Offtime extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'start',
+        'end',
+        'category',
+        'description',
+    ];
+
     protected function casts(): array
     {
         return [
             'start' => 'date',
             'end' => 'date',
             'category' => OfftimeCategory::class,
+            'description' => 'string',
         ];
     }
 
     /**
      * Year the time off is assigned to
      */
-    public function year(): Attribute
+    protected function year(): Attribute
     {
-        return Attribute::make(fn() => intval($this->start->format('Y')));
+        return Attribute::make(fn(): int => intval($this->start->format('Y')));
     }
 
     /**
-     * Year the time off is assigned to
+     * Number of days this off time consists of
      */
-    public function daysCount(): Attribute
+    protected function daysCount(): Attribute
     {
-        return Attribute::make(fn() => $this->end ? $this->start->diffInDays($this->end) + 1 : 1);
+        return Attribute::make(fn(): int => $this->end ? intval($this->start->diffInDays($this->end)) + 1 : 1);
     }
 
     /**

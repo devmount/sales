@@ -14,7 +14,7 @@ class RecentPositionsChart extends ChartWidget
     protected ?string $maxHeight = '180px';
     public ?string $filter = '60';
 
-    protected int | string | array $columnSpan = [
+    public int | string | array $columnSpan = [
         'sm' => 12,
         'xl' => 6,
     ];
@@ -26,7 +26,7 @@ class RecentPositionsChart extends ChartWidget
 
     public function getDescription(): string
     {
-        return __('sumWorkingHoursPerDay');
+        return __('mostRecentWorkingHoursPerDay');
     }
 
     protected function getData(): array

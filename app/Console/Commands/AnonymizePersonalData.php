@@ -60,6 +60,7 @@ class AnonymizePersonalData extends Command
             $name = fake()->company();
             $obj->name = $name;
             $obj->short = str($name)->substr(0, 2)->upper();
+            $obj->color = fake()->hexColor();
             $obj->street = fake()->streetAddress();
             $obj->zip = fake()->postcode();
             $obj->city = fake()->city();
@@ -89,6 +90,9 @@ class AnonymizePersonalData extends Command
         }
         foreach ($positions as $obj) {
             $obj->description = implode("\n", fake()->sentences(2));
+            $obj->started_at = $obj->started_at->hour(fake()->randomElement([9, 10]));
+            $obj->finished_at = $obj->finished_at->hour(fake()->randomElement([11, 12]));
+            $obj->pause_duration = 0.0;
             $obj->save();
             $bar->advance();
         }

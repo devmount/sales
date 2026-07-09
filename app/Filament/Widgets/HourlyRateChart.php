@@ -10,12 +10,12 @@ use Filament\Widgets\ChartWidget;
 
 class HourlyRateChart extends ChartWidget
 {
-    protected ?string $maxHeight = '150px';
+    protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [
         'sm' => 12,
-        'xl' => 4,
+        'xl' => 3,
     ];
 
     public function getHeading(): string
@@ -31,7 +31,7 @@ class HourlyRateChart extends ChartWidget
     protected function getData(): array
     {
         $invoices = Invoice::whereNotNull('paid_at')
-            ->whereNot('transitory')
+            ->where('transitory', 0)
             ->oldest('paid_at')
             ->get();
         $period = Carbon::parse($invoices->first()?->paid_at)->startOfYear()->yearsUntil(now()->addYear());
@@ -76,6 +76,8 @@ class HourlyRateChart extends ChartWidget
     {
         return RawJs::make(<<<JS
         {
+            maintainAspectRatio: false,
+            aspectRatio: 1.25,
             plugins: {
                 legend: {
                     display: false
@@ -100,7 +102,8 @@ class HourlyRateChart extends ChartWidget
             scales: {
                 y: {
                     ticks: {
-                        callback: (value) => value + ' €',
+                        stepSize: 10,
+                        callback: (value) => value + ' €/h',
                     },
                 },
             },

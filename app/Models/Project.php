@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PricingUnit;
 use App\Models\Setting;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -11,19 +12,40 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\HtmlString;
 
 class Project extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'pricing_unit' => PricingUnit::class,
+    protected $fillable = [
+        'title',
+        'description',
+        'start_at',
+        'due_at',
+        'minimum',
+        'scope',
+        'price',
+        'pricing_unit',
+        'aborted',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'title' => 'string',
+            'description' => 'string',
+            'start_at' => 'date',
+            'due_at' => 'date',
+            'minimum' => 'float',
+            'scope' => 'float',
+            'price' => 'float',
+            'pricing_unit' => PricingUnit::class,
+            'aborted' => 'bool',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the client that ordered the project.
@@ -88,16 +110,16 @@ class Project extends Model
     /**
      * All assigned estimates sorted by weight
      */
-    public function sortedEstimates(): Attribute
+    protected function sortedEstimates(): Attribute
     {
-        return Attribute::make(fn() => $this->estimates->sortBy('weight')->all());
+        return Attribute::make(fn(): array => $this->estimates->sortBy('weight')->all());
     }
 
 
     /**
      * All sorted estimates split into chunks based on description lines count
      */
-    public function paginatedEstimates(): Attribute
+    protected function paginatedEstimates(): Attribute
     {
         // Get estimates by page, one page has space for 50 lines (I know. Let me have my magic number here.)
         $paginated = [];
@@ -106,52 +128,66 @@ class Project extends Model
             // Take the description lines and the position title (2 lines) into account
             $lineCount = count(explode("\n", trim($e->description))) + 2;
             $linesProcessed += $lineCount;
-            $i = floor($linesProcessed/50);
+            $i = intval(floor($linesProcessed/50));
             if (key_exists($i,$paginated)) {
                 $paginated[$i][] = $e;
             } else {
                 $paginated[$i] = [$e];
             }
         }
-        return Attribute::make(fn() => $paginated);
+        return Attribute::make(fn(): array => $paginated);
+    }
+
+    /**
+     * Number of hours per unit
+     */
+    protected function pricingHours(): Attribute
+    {
+        return Attribute::make(fn(): int => match ($this->pricing_unit) {
+            PricingUnit::Hour => 1,
+            PricingUnit::Day => 8,
+            default => 1,
+        });
     }
 
     /**
      * Number of hours worked for this project
      */
-    public function hours(): Attribute
+    protected function hours(): Attribute
     {
-        $hours = 0;
+        $hours = 0.0;
         foreach ($this->invoices as $invoice) {
             $hours += $invoice->hours;
         }
-        return Attribute::make(fn() => $hours);
+        return Attribute::make(fn(): float => $hours);
     }
 
     /**
      * Labeled Number of hours
      */
-    public function hoursWithLabel(): Attribute
+    protected function hoursWithLabel(): Attribute
     {
-        return Attribute::make(fn() => $this->hours . ' ' . trans_choice('hour', $this->hours));
+        return Attribute::make(fn(): string => $this->hours . ' ' . trans_choice('hour', $this->hours));
     }
 
     /**
-     * Show either scope or range from minimum to project limit in hours
+     * Show either scope or range from minimum to project limit in hours, formatted
      */
-    public function scopeRange(): Attribute
+    protected function scopeRange(): Attribute
     {
-        return Attribute::make(fn() => $this->minimum != $this->scope
-            ? (int)$this->minimum . ' - ' . (int)$this->scope . ' ' . trans_choice('hour', 2)
-            : (int)$this->scope . ' ' . trans_choice('hour', (int)$this->scope));
+        return Attribute::make(
+            fn(): string => $this->minimum != $this->scope
+                ? (int)$this->minimum . ' - ' . (int)$this->scope . ' ' . trans_choice('hour', 2)
+                : (int)$this->scope . ' ' . trans_choice('hour', (int)$this->scope)
+        );
     }
 
     /**
-     * Show price per pricing unit
+     * Show price per pricing unit, formatted
      */
-    public function pricePerUnit(): Attribute
+    protected function pricePerUnit(): Attribute
     {
-        return Attribute::make(fn() => $this->price . ' € / ' . match($this->pricing_unit) {
+        return Attribute::make(fn(): string => $this->price . ' € / ' . match($this->pricing_unit) {
             PricingUnit::Hour => trans_choice('hour', 1),
             PricingUnit::Day => trans_choice('day', 1),
             PricingUnit::Project => trans_choice('project', 1),
@@ -159,57 +195,76 @@ class Project extends Model
     }
 
     /**
-     * Show current progress based on worked hours in relation to scope in percent
+     * Calculate current progress based on worked hours in relation to scope in percent
      */
-    public function progressPercent(): Attribute
+    protected function progress(): Attribute
     {
-        return Attribute::make(fn() => $this->scope > 0
-            ? round($this->hours/$this->scope*100, 1) . ' %'
-            : __('n/a'));
+        return Attribute::make(
+            fn(): float => $this->scope > 0
+                ? round($this->hours/$this->scope*100, 1)
+                : 0.0
+        );
+    }
+
+    /**
+     * Format current progress based on worked hours in relation to scope in percent
+     */
+    protected function progressPercent(): Attribute
+    {
+        return Attribute::make(
+            fn(): string => $this->scope > 0
+                ? strval($this->progress) . ' %'
+                : __('n/a')
+        );
     }
 
     /**
      * Number of hours estimated for this project
      */
-    public function estimatedHours(): Attribute
+    protected function estimatedHours(): Attribute
     {
-        $hours = 0;
+        $hours = 0.0;
         foreach ($this->estimates as $estimate) {
             $hours += $estimate->amount;
         }
-        return Attribute::make(fn() => $hours);
+        return Attribute::make(fn(): float => $hours);
     }
 
     /**
      * Net amount of all assigned estimates
      */
-    public function estimatedNet(): Attribute
+    protected function estimatedNet(): Attribute
     {
-        $net = 0;
+        $net = 0.0;
         if ($this->pricing_unit === PricingUnit::Project) {
             $net = $this->price;
         } else {
-            $net += $this->estimated_hours * $this->price / match ($this->pricing_unit) {
-                PricingUnit::Hour => 1,
-                PricingUnit::Day => 8,
-            };
+            $net += $this->estimated_hours * $this->price / $this->pricing_hours;
         }
-        return Attribute::make(fn() => round($net, 2));
+        return Attribute::make(fn(): float => round($net, 2));
     }
 
     /**
      * Vat amount of estimated net amount
      */
-    public function estimatedVat(): Attribute
+    protected function estimatedVat(): Attribute
     {
-        return Attribute::make(fn() => round($this->estimated_net * Setting::get('vatRate'), 2));
+        return Attribute::make(fn(): float => round($this->estimated_net * Setting::get('vatRate'), 2));
     }
 
     /**
      * Gross amount of all assigned estimates
      */
-    public function estimatedGross(): Attribute
+    protected function estimatedGross(): Attribute
     {
-        return Attribute::make(fn() => $this->estimated_net + $this->estimated_vat);
+        return Attribute::make(fn(): float => $this->estimated_net + $this->estimated_vat);
+    }
+
+    /**
+     * Tooltip content for project lists
+     */
+    protected function tooltip(): Attribute
+    {
+        return Attribute::make(fn(): Htmlable => new HtmlString("{$this->title}<br>({$this->client->name})"));
     }
 }

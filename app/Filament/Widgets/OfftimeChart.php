@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
 use App\Models\Offtime;
+use App\Models\Position;
 use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
@@ -16,7 +17,7 @@ class OfftimeChart extends ChartWidget
 
     protected int | string | array $columnSpan = [
         'sm' => 12,
-        'xl' => 6,
+        'xl' => 4,
     ];
 
     public function getHeading(): string
@@ -31,7 +32,7 @@ class OfftimeChart extends ChartWidget
 
     protected function getData(): array
     {
-        $invoices = Invoice::whereNotNull('paid_at')->whereNot('transitory')->oldest('paid_at')->get();
+        $invoices = Invoice::whereNotNull('paid_at')->where('transitory', 0)->oldest('paid_at')->get();
         $period = Carbon::parse($invoices->first()?->paid_at)->startOfYear()->yearsUntil(now()->addYear());
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
@@ -41,6 +42,7 @@ class OfftimeChart extends ChartWidget
         $plannedData = array_fill(0, count($period)-1, 0);
         $unplannedData = array_fill(0, count($period)-1, 0);
         $totalData = array_fill(0, count($period)-1, 0);
+        $workedData = array_fill(0, count($period)-1, 0);
 
         foreach ($period as $i => $date) {
             if ($i == count($period)-1) break;
@@ -49,6 +51,11 @@ class OfftimeChart extends ChartWidget
             $plannedData[$i] = $p;
             $unplannedData[$i] = $u;
             $totalData[$i] = $t;
+            $workedData[$i] = Position::whereBetween('started_at', [$date, $period[$i+1]])
+                ->get(['started_at'])
+                ->map(fn ($obj) => $obj->started_at->format('Y-m-d'))
+                ->unique()
+                ->count();
         }
 
         return [
@@ -80,6 +87,13 @@ class OfftimeChart extends ChartWidget
                     'fill' => 'start',
                     'backgroundColor' => '#64748b22',
                     'borderColor' => '#64748b',
+                ],
+                [
+                    'label' => __('workingDays'),
+                    'data' => $workedData,
+                    'fill' => 'start',
+                    'backgroundColor' => '#64748b22',
+                    'borderColor' => '#39444b',
                 ],
             ],
             'labels' => $labels

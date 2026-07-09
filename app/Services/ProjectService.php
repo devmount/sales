@@ -26,7 +26,7 @@ class ProjectService
     public static function generateQuotePdf(Project $project): string {
         $conf = Setting::pluck('value', 'field');
         $client = $project?->client;
-        $lang = $client?->language ?? 'de';
+        $lang = $client?->language->value ?? 'de';
         $billedPerProject = $project->pricing_unit === PricingUnit::Project;
         $now = Carbon::now();
 

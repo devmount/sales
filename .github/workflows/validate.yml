@@ -1,0 +1,50 @@
+name: Validate
+
+concurrency:
+  group: validate
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!main'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  # Only run this again if a PHP file changed or this workflow file
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      validate-app: ${{ steps.check.outputs.validate-app }}
+    steps:
+    - uses: actions/checkout@v6
+
+    - uses: dorny/paths-filter@v4
+      id: check
+      with:
+        filters: |
+          validate-app:
+            - '**/*.php'
+            - '.github/workflows/validate.yml'
+
+  validate-app:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.validate-app == 'true'
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup DDEV
+        uses: ddev/github-action-setup-ddev@v1
+
+      - name: Composer install
+        run: |
+          cp .env.testing.example .env.testing
+          ddev composer install
+          ddev artisan key:generate --env=testing
+
+      - name: Run test suite
+        run: ddev artisan test --coverage --min=0

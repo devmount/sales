@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\InvoiceResource\Widgets\ActiveInvoices;
+use App\Filament\Resources\InvoiceResource\Widgets\ClientInvoices;
 use App\Filament\Resources\PositionResource\Widgets\RecentPositionsChart;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
@@ -39,11 +40,17 @@ class EditInvoice extends EditRecord
         ];
     }
 
+    public function getFooterWidgetsColumns(): int|array
+    {
+        return 12;
+    }
+
     protected function getFooterWidgets(): array
     {
         return [
-            RecentPositionsChart::class,
+            RecentPositionsChart::make(['columnSpan' => 12]),
             ActiveInvoices::class,
+            ClientInvoices::class,
         ];
     }
 

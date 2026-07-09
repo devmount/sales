@@ -45,3 +45,71 @@ textarea.position-limit {
 .fi-wi-stats-overview-stat.font-mono .fi-wi-stats-overview-stat-value {
     font-family: var(--mono-font-family), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
+
+/* Prevent widget headings and descriptions from wrapping */
+.fi-section  {
+    .fi-section-header-heading,
+    .fi-section-header-description {
+        overflow-wrap: initial;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}
+
+/* Custom project process indicators */
+.project-progress {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem 1rem;
+    height: 180px;
+
+    a {
+        position: relative;
+
+        progress {
+            --accent: white; /* Fallback. Will be overwritten by client color. */
+            --end-border-radius: .25rem; /* Fallback. Will be overwritten by client progress value. */
+
+            box-sizing: border-box;
+            border-radius: .5rem;
+            padding: .0625rem;
+            border: 1px solid;
+            border-color: color-mix(in oklab, var(--gray-950) 10%, transparent);
+            background: var(--gray-50);
+            height: 1.5rem;
+            width: 100%;
+
+            &::-webkit-progress-bar {
+                background: transparent;
+            }
+            &::-moz-progress-bar,
+            &::-webkit-progress-value {
+                border-radius: .4rem var(--end-border-radius) var(--end-border-radius) .4rem;
+                background: repeating-linear-gradient(
+                    135deg,
+                    color-mix(in srgb, black 5%, var(--accent)) 0 .5rem,
+                    color-mix(in srgb, white 5%, var(--accent)) 0 1rem
+                )
+            }
+            &:where(.dark, .dark *) {
+                background-color: color-mix(in oklab, var(--color-white) 5%, transparent);
+                border-color: color-mix(in oklab, var(--color-white) 20%, transparent);
+            }
+        }
+
+        &::after {
+            content: attr(data-percent);
+            position: absolute;
+            right: .5rem;
+            top: .25rem;
+            text-shadow: 0 0 .125rem white;
+            color: var(--gray-500);
+            font-size: .75rem;
+        }
+        &:where(.dark, .dark *)::after {
+            color: var(--gray-400);
+            text-shadow: 0 0 .125rem black;
+        }
+    }
+}

@@ -13,6 +13,27 @@ class Position extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'started_at',
+        'finished_at',
+        'pause_duration',
+        'description',
+        'remote',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'started_at'     => 'datetime',
+            'finished_at'    => 'datetime',
+            'pause_duration' => 'float',
+            'description'    => 'string',
+            'remote'         => 'bool',
+            'created_at'     => 'datetime',
+            'updated_at'     => 'datetime',
+        ];
+    }
+
     /**
      * Get the invoice this position was made for.
      */
@@ -24,35 +45,40 @@ class Position extends Model
     /**
      * Total duration of the position in hours
      */
-    public function duration(): Attribute
+    protected function duration(): Attribute
     {
-        return Attribute::make(fn() => Carbon::parse($this->started_at)
-            ->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration);
+        return Attribute::make(
+            fn(): float => Carbon::parse($this->started_at)
+                ->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration
+        );
     }
 
     /**
      * Total net of the position
      */
-    public function net(): Attribute
+    protected function net(): Attribute
     {
+        if (!$this->invoice) {
+            return Attribute::make(fn(): float => 0.0);
+        }
+
         $net = 0;
         if ($this->invoice->pricing_unit === PricingUnit::Project) {
             $net = $this->invoice->hours/$this->invoice->net * $this->duration;
         } else {
-            $net += $this->duration * $this->invoice->price / match ($this->invoice->pricing_unit) {
-                PricingUnit::Hour => 1,
-                PricingUnit::Day => 8,
-            };
+            $net += $this->duration * $this->invoice->price / $this->invoice->pricing_hours;
         }
-        return Attribute::make(fn() => round($net, 2));
+        return Attribute::make(fn(): float => round($net, 2));
     }
 
     /**
      * Human readable time range
      */
-    public function timeRange(): Attribute
+    protected function timeRange(): Attribute
     {
-        return Attribute::make(fn() => Carbon::parse($this->started_at)->isoFormat('lll')
-            . Carbon::parse($this->finished_at)->format(' - H.i'));
+        return Attribute::make(
+            fn(): string => Carbon::parse($this->started_at)->isoFormat('lll')
+                . Carbon::parse($this->finished_at)->format(' - H.i')
+        );
     }
 }

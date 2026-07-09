@@ -5,8 +5,10 @@
 /public/storage
 /storage/*.key
 /vendor
+/tests/coverage
 .env
 .env.backup
+.env.testing
 .env.production
 .phpunit.result.cache
 Homestead.json
@@ -17,3 +19,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+_ide_helper*

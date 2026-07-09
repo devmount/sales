@@ -26,7 +26,7 @@ class InvoiceService
     public static function generatePdf(Invoice $invoice): string {
         $conf = Setting::pluck('value', 'field');
         $client = $invoice?->project?->client;
-        $lang = $client?->language ?? 'de';
+        $lang = $client?->language->value ?? 'de';
         $billedPerProject = $invoice->pricing_unit === PricingUnit::Project;
 
         $data = collect([
@@ -318,7 +318,7 @@ class InvoiceService
     public static function generateEn16931Xml(Invoice $invoice): string {
         $settings = Setting::pluck('value', 'field');
         $client = $invoice?->project?->client;
-        $lang = $client?->language ?? 'de';
+        $lang = $client?->language->value ?? 'de';
         $label = trans_choice("invoice", 1, [], $lang);
         $filename = strtolower("{$invoice->current_number}_{$label}_{$settings['company']}.xml");
 

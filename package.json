@@ -1,4 +1,5 @@
 {
+    "name": "Sales",
     "private": true,
     "type": "module",
     "scripts": {

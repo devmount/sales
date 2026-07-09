@@ -8,12 +8,12 @@ A service sales manager especially for freelancers. Built in German, available i
 - Keep track of clients
 - Create projects for clients and provide estimations
 - Create invoices and fill them with descriptive positions
-- PDF export quotes or invoices from projects
+- Export quotes or invoices from projects as PDF
 - Keep track of expenses and taxes
-- Keep track of gifts/donations (e.g. if you're an OS maintainer)
+- Keep track of gifts and donations (e.g. if you're an OS maintainer)
 - Anonymize data in staging/dev environments
 
-![sales_demo](https://github.com/devmount/sales/assets/5441654/037e8b6b-e673-430f-91c2-39146cc54d1b)
+![Demo of Sales Dashboard](docs/sales_v2.9.0_dashboard.png)
 
 ## Setup
 
@@ -40,31 +40,37 @@ npm i
 To anonymize all personal data, run the following command:
 
 ```bash
-php artisan db:anonymize
+ddev artisan db:anonymize
 ```
 
 ## Development
 
-To start a local development server, run:
-
-```bash
-php artisan serve
-```
-
-Now you can log in on <http://localhost:8000> with the initial admin user credentials (email: `admin@example.com`, password: `Joh.3,16`).
-
-Or if you have _Docker_ and _ddev_ installed, you can just run:
+To start a local development server, make sure to have _Docker_ and _ddev_ installed. Navigate to the project root directory and just run:
 
 ```bash
 ddev start
 ```
 
-You can now find the app at <https://sales.ddev.site/>.
+You can now find the app at <https://sales.ddev.site/> with the initial admin user credentials (email: `admin@example.com`, password: `Joh.3,16`).
 
 If you have issues with missing method or property definitions, the ide-helper definitions might need an upate:
 
 ```bash
-php artisan ide-helper:generate 
+ddev artisan ide-helper:generate 
+```
+
+## Testing
+
+For a simple test suite run, execute:
+
+```bash
+ddev artisan test
+```
+
+If you want to check coverage, run:
+
+```bash
+ddev artisan test --coverage --min=0
 ```
 
 ## Production
