@@ -17,6 +17,7 @@
     "clickForLatestInvoice": "Click to jump to open invoice",
     "client": "Client|Clients",
     "client.name.hint": "Person or company title",
+    "clientsHours": "Hours per client",
     "clientsProfit": "Profit per client",
     "clientsProfitDistribution": "Distribution of profit per client",
     "color": "Color",

@@ -17,6 +17,7 @@
     "clickForLatestInvoice": "Klicken um zur aktuellen Rechnung zu springen",
     "client": "Kunde|Kunden",
     "client.name.hint": "Person oder Firmentitel",
+    "clientsHours": "Stunden pro Kunde",
     "clientsProfit": "Gewinn pro Kunde",
     "clientsProfitDistribution": "Gewinnverteilung pro Kunde",
     "color": "Farbe",
