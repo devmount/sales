@@ -103,7 +103,7 @@ class HourlyRateChart extends ChartWidget
                 y: {
                     ticks: {
                         stepSize: 10,
-                        callback: (value) => value + ' €',
+                        callback: (value) => value + ' €/h',
                     },
                 },
             },
