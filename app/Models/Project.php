@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PricingUnit;
 use App\Models\Setting;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\HtmlString;
 
 class Project extends Model
 {
@@ -256,5 +258,13 @@ class Project extends Model
     protected function estimatedGross(): Attribute
     {
         return Attribute::make(fn(): float => $this->estimated_net + $this->estimated_vat);
+    }
+
+    /**
+     * Tooltip content for project lists
+     */
+    protected function tooltip(): Attribute
+    {
+        return Attribute::make(fn(): Htmlable => new HtmlString("{$this->title}<br>({$this->client->name})"));
     }
 }

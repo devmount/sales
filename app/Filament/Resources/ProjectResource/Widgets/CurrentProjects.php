@@ -21,7 +21,10 @@ class CurrentProjects extends Widget
         return [
             'heading' => 'Current Projects',
             'description' => 'Progress of active projects',
-            'projects' => Project::active()->get(),
+            'projects' => Project::active()
+                ->withMax('invoices', 'created_at')
+                ->orderByDesc('invoices_max_created_at')
+                ->get(),
         ];
     }
 }

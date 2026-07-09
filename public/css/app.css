@@ -61,25 +61,55 @@ textarea.position-limit {
 .project-progress {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: .5rem;
+    gap: .5rem 1rem;
+    height: 180px;
 
-    progress {
-        box-sizing: border-box;
-        border-radius: .5rem;
-        padding: .125rem .5rem;
-        border: 1px solid;
-        background: linear-gradient(#191c23, #2d3341);
+    a {
+        position: relative;
 
-        &::-webkit-progress-bar {
-            background: transparent;
-        }
-        &::-moz-progress-bar,
-        &::-webkit-progress-value {
+        progress {
+            --accent: white; /* Fallback. Will be overwritten by client color. */
+            --end-border-radius: .25rem; /* Fallback. Will be overwritten by client progress value. */
+
+            box-sizing: border-box;
             border-radius: .5rem;
-            box-shadow: inset 0 .05em .05em #ffffff55;
-            background:
-                linear-gradient(#e2664caa, transparent),
-                repeating-linear-gradient(135deg, #a22215 0 .25rem, #be2a20 0 .5rem)
+            padding: .0625rem;
+            border: 1px solid;
+            border-color: color-mix(in oklab, var(--gray-950) 10%, transparent);
+            background: var(--gray-50);
+            height: 1.5rem;
+            width: 100%;
+
+            &::-webkit-progress-bar {
+                background: transparent;
+            }
+            &::-moz-progress-bar,
+            &::-webkit-progress-value {
+                border-radius: .4rem var(--end-border-radius) var(--end-border-radius) .4rem;
+                background: repeating-linear-gradient(
+                    135deg,
+                    color-mix(in srgb, black 5%, var(--accent)) 0 .5rem,
+                    color-mix(in srgb, white 5%, var(--accent)) 0 1rem
+                )
+            }
+            &:where(.dark, .dark *) {
+                background-color: color-mix(in oklab, var(--color-white) 5%, transparent);
+                border-color: color-mix(in oklab, var(--color-white) 20%, transparent);
+            }
+        }
+
+        &::after {
+            content: attr(data-percent);
+            position: absolute;
+            right: .5rem;
+            top: .25rem;
+            text-shadow: 0 0 .125rem white;
+            color: var(--gray-500);
+            font-size: .75rem;
+        }
+        &:where(.dark, .dark *)::after {
+            color: var(--gray-400);
+            text-shadow: 0 0 .125rem black;
         }
     }
 }
