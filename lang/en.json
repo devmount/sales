@@ -77,7 +77,6 @@
         "vr75": "Other non-taxable transactions (place of performance not in the country)"
     },
     "gift": "Gift|Gifts",
-    "giftsSubjectDistribution": "Sum of gifts",
     "good": "Good",
     "gross": "Gross",
     "grossIncome": "Gross income",
@@ -185,6 +184,7 @@
     "subject": "Subject",
     "sum": "Sum",
     "sumAmountPerYear": "Grouped by subject per year",
+    "sumGifts": "Sum of gifts",
     "sumNetPerYear": "Sum net per year",
     "sumOfAllPositions": "Sum of all positions",
     "sumWorkingHoursPerDay": "Sum of paid working hours per day",
@@ -193,6 +193,7 @@
     "taxes": "Taxes",
     "taxOffice": "Tax office",
     "taxReport": "Tax return",
+    "temporalCourse": "Temporal course",
     "title": "Title",
     "to": "To",
     "total": "Total",

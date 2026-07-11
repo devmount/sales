@@ -37,6 +37,7 @@ class Dashboard extends BaseDashboard
             AppWidgets\OfftimeChart::class,
             HeadingWidget::make(['heading' => trans_choice('gift', 2)]),
             AppWidgets\GiftSubjectDistributionChart::class,
+            AppWidgets\SumGiftsChart::class,
         ];
     }
 }

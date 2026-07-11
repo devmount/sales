@@ -77,7 +77,6 @@
         "vr75": "Übrige nicht steuerbare Umsätze (Leistungsort nicht im Inland)"
     },
     "gift": "Schenkung|Schenkungen",
-    "giftsSubjectDistribution": "Summe Schenkungen",
     "good": "Ware",
     "gross": "Brutto",
     "grossIncome": "Brutto Einkommen",
@@ -185,6 +184,7 @@
     "subject": "Betreff",
     "sum": "Summe",
     "sumAmountPerYear": "Gruppiert nach Betreff pro Jahr",
+    "sumGifts": "Summe Schenkungen",
     "sumNetPerYear": "Summe netto pro Jahr",
     "sumOfAllPositions": "Summe aller Positionen",
     "sumWorkingHoursPerDay": "Summe bezahlter Arbeitsstunden pro Tag",
@@ -193,6 +193,7 @@
     "taxes": "Steuern",
     "taxOffice": "Finanzamt",
     "taxReport": "Steuererklärung",
+    "temporalCourse": "Zeitlicher Verlauf",
     "title": "Titel",
     "to": "An",
     "total": "Gesamt",

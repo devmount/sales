@@ -23,7 +23,7 @@ class GiftSubjectDistributionChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('giftsSubjectDistribution');
+        return __('sumGifts');
     }
 
     public function getDescription(): string
