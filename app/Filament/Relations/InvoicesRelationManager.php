@@ -4,10 +4,11 @@ namespace App\Filament\Relations;
 
 use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Models\Project;
 use Carbon\Carbon;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
@@ -18,7 +19,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Number;
-use Livewire\Component;
 
 class InvoicesRelationManager extends RelationManager
 {
@@ -58,19 +58,11 @@ class InvoicesRelationManager extends RelationManager
                     ->description(fn (Invoice $record): string => Number::currency($record->vat, 'eur') . ' ' . __('vat')),
             ])
             ->headerActions([
-                Action::make('create')
+                CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->afterFormFilled(function (Component $livewire) {
-                        $mountedAction = $livewire->mountedActions[0] ?? null;
-
-                        if (!$mountedAction) {
-                            return;
-                        }
-
-                        $mountedAction['data']['project_id'] = $this->ownerRecord->id;
-                    })
                     ->schema(InvoiceResource::formFields(6, false))
+                    ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
                     ->slideOver()
                     ->modalWidth(Width::ExtraLarge),
             ])
@@ -96,10 +88,11 @@ class InvoicesRelationManager extends RelationManager
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                Action::make('create')
+                CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->schema(InvoiceResource::formFields(6, false))
+                    ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
                     ->slideOver()
                     ->modalWidth(Width::ExtraLarge),
             ])

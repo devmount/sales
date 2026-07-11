@@ -5,8 +5,8 @@ namespace App\Filament\Relations;
 use App\Filament\Resources\ProjectResource;
 use App\Models\Project;
 use Carbon\Carbon;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -14,7 +14,6 @@ use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Livewire\Component;
 
 class ProjectsRelationManager extends RelationManager
 {
@@ -57,18 +56,9 @@ class ProjectsRelationManager extends RelationManager
             ])
             ->defaultSort('start_at', 'desc')
             ->headerActions([
-                Action::make('create')
+                CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->afterFormFilled(function (Component $livewire) {
-                        $mountedAction = $livewire->mountedActions[0] ?? null;
-
-                        if (!$mountedAction) {
-                            return;
-                        }
-                        
-                        $mountedAction['data']['client_id'] = $this->ownerRecord->id;
-                    })
                     ->schema(ProjectResource::formFields(useSection: false))
                     ->slideOver()
                     ->modalWidth(Width::Large),
