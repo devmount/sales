@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasEmptyStateChart;
 use App\Models\Client;
 use App\Models\Invoice;
 use Carbon\Carbon;
@@ -10,6 +11,8 @@ use Filament\Widgets\ChartWidget;
 
 class ClientProfitDistributionChart extends ChartWidget
 {
+    use HasEmptyStateChart;
+
     protected ?string $maxHeight = '180px';
     public ?string $filter = '';
     protected ?string $pollingInterval = null;
