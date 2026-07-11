@@ -3,18 +3,17 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Widgets\Concerns\HasEmptyStateChart;
-use App\Models\Client;
-use App\Models\Invoice;
+use App\Models\Gift;
 use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
-class ClientProfitDistributionChart extends ChartWidget
+class GiftSubjectDistributionChart extends ChartWidget
 {
     use HasEmptyStateChart;
 
     protected ?string $maxHeight = '180px';
-    public ?string $filter = '';
+    public ?string $filter = 'all';
     protected ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [
@@ -24,37 +23,39 @@ class ClientProfitDistributionChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('clientsProfitDistribution');
+        return __('sumGifts');
     }
 
     public function getDescription(): string
     {
-        return __('sumNetPerYear');
+        return __('sumAmountPerYear');
     }
 
     protected function getData(): array
     {
-        $year = $this->filter ? (int) $this->filter : now()->year;
-        $from = Carbon::create($year, 1, 31, 12, 0, 0)->startOfYear();
-        $to = Carbon::create($year, 1, 31, 12, 0, 0)->endOfYear();
-        $invoices = Invoice::whereBetween('paid_at', [$from, $to])
-            ->where('transitory', 0)
-            ->get();
-        $profit = [];
-        foreach ($invoices as $obj) {
-            $id = $obj->project->client->id;
-            $profit[$id] = array_key_exists($id, $profit)
-                ? $profit[$id] + $obj->net
-                : $obj->net;
+        if ($this->filter === 'all') {
+            $gifts = Gift::all();
+        } else {
+            $year = $this->filter ? (int) $this->filter : now()->year;
+            $from = Carbon::create($year, 1, 31, 12, 0, 0)->startOfYear();
+            $to = Carbon::create($year, 1, 31, 12, 0, 0)->endOfYear();
+            $gifts = Gift::whereBetween('received_at', [$from, $to])->get();
         }
-        $sum = array_sum($profit);
-        $labels = array_map(fn ($id, $p) => '(' . round($p/$sum*100, 1) . '%) ' . Client::find($id)->name, array_keys($profit), $profit);
-        $colors = array_map(fn ($id) => Client::find($id)->color, array_keys($profit));
+        $amounts = [];
+        foreach ($gifts as $obj) {
+            $subject = $obj->subject ?? __('n/a');
+            $amounts[$subject] = array_key_exists($subject, $amounts)
+                ? $amounts[$subject] + $obj->amount
+                : $obj->amount;
+        }
+        $sum = array_sum($amounts);
+        $labels = array_map(fn ($subject, $a) => '(' . round($a/$sum*100, 1) . '%) ' . $subject, array_keys($amounts), $amounts);
+        $colors = array_map(fn ($subject) => self::colorForSubject($subject), array_keys($amounts));
 
         return [
             'datasets' => [
                 [
-                    'data' => array_values($profit),
+                    'data' => array_values($amounts),
                     'borderColor' => $colors,
                     'backgroundColor' => $colors,
                     'hoverOffset' => 4
@@ -71,7 +72,17 @@ class ClientProfitDistributionChart extends ChartWidget
 
     protected function getFilters(): ?array
     {
-        return Invoice::getYearList();
+        return ['all' => __('all')] + Gift::getYearList();
+    }
+
+    /**
+     * Deterministically derive a color from a subject name, so that
+     * the same subject always gets the same slice color across renders.
+     */
+    private static function colorForSubject(string $subject): string
+    {
+        $hue = crc32($subject) % 360;
+        return "hsl({$hue}, 65%, 55%)";
     }
 
     protected function getOptions(): RawJs
