@@ -1,10 +1,22 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-it('returns a successful response', function () {
-    $user = User::factory()->create();
-    $response = $this->actingAs($user)->get('/');
+class HealthTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $response->assertStatus(200);
-});
+    #[Test]
+    public function it_returns_a_successful_response(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->actingAs($user)->get('/');
+
+        $response->assertStatus(200);
+    }
+}

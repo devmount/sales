@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Enums\LanguageCode;
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\ClientResource\Pages\EditClient;
@@ -9,107 +11,133 @@ use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-it('redirects guests away from the client list', function () {
-    $this->get(ClientResource::getUrl('index'))->assertRedirect();
-});
+class ClientResourceTest extends TestCase
+{
+    use RefreshDatabase;
 
-it('renders the client list page for authenticated users', function () {
-    $this->actingAs(User::factory()->create());
+    #[Test]
+    public function it_redirects_guests_away_from_the_client_list(): void
+    {
+        $this->get(ClientResource::getUrl('index'))->assertRedirect();
+    }
 
-    Livewire::test(ListClients::class)->assertSuccessful();
-});
+    #[Test]
+    public function it_renders_the_client_list_page_for_authenticated_users(): void
+    {
+        $this->actingAs(User::factory()->create());
 
-it('lists clients in the table', function () {
-    $this->actingAs(User::factory()->create());
-    $clients = Client::factory()->count(3)->create();
+        Livewire::test(ListClients::class)->assertSuccessful();
+    }
 
-    Livewire::test(ListClients::class)
-        ->loadTable()
-        ->assertCanSeeTableRecords($clients);
-});
+    #[Test]
+    public function it_lists_clients_in_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $clients = Client::factory()->count(3)->create();
 
-it('creates a client', function () {
-    $this->actingAs(User::factory()->create());
+        Livewire::test(ListClients::class)
+            ->loadTable()
+            ->assertCanSeeTableRecords($clients);
+    }
 
-    $data = [
-        'name' => 'Acme Inc.',
-        'short' => 'AC',
-        'color' => '#3b82f6',
-        'address' => 'Suite 5',
-        'street' => 'Main Street 1',
-        'zip' => '12345',
-        'city' => 'Berlin',
-        'country' => 'Germany',
-        'email' => 'contact@acme.test',
-        'phone' => '+49 30 123456',
-        'language' => LanguageCode::DE->value,
-        'vat_id' => 'DE123456789',
-    ];
+    #[Test]
+    public function it_creates_a_client(): void
+    {
+        $this->actingAs(User::factory()->create());
 
-    Livewire::test(ListClients::class)
-        ->callAction(CreateAction::class, data: $data)
-        ->assertHasNoFormErrors();
+        $data = [
+            'name' => 'Acme Inc.',
+            'short' => 'AC',
+            'color' => '#3b82f6',
+            'address' => 'Suite 5',
+            'street' => 'Main Street 1',
+            'zip' => '12345',
+            'city' => 'Berlin',
+            'country' => 'Germany',
+            'email' => 'contact@acme.test',
+            'phone' => '+49 30 123456',
+            'language' => LanguageCode::DE->value,
+            'vat_id' => 'DE123456789',
+        ];
 
-    $this->assertDatabaseHas('clients', [
-        'name' => 'Acme Inc.',
-        'email' => 'contact@acme.test',
-        'language' => LanguageCode::DE->value,
-    ]);
-});
+        Livewire::test(ListClients::class)
+            ->callAction(CreateAction::class, data: $data)
+            ->assertHasNoFormErrors();
 
-it('requires a name and language when creating a client', function () {
-    $this->actingAs(User::factory()->create());
+        $this->assertDatabaseHas('clients', [
+            'name' => 'Acme Inc.',
+            'email' => 'contact@acme.test',
+            'language' => LanguageCode::DE->value,
+        ]);
+    }
 
-    Livewire::test(ListClients::class)
-        ->callAction(CreateAction::class, data: [
-            'name' => '',
-            'language' => '',
-        ])
-        ->assertHasFormErrors(['name' => 'required', 'language' => 'required']);
+    #[Test]
+    public function it_requires_a_name_and_language_when_creating_a_client(): void
+    {
+        $this->actingAs(User::factory()->create());
 
-    $this->assertDatabaseCount('clients', 0);
-});
+        Livewire::test(ListClients::class)
+            ->callAction(CreateAction::class, data: [
+                'name' => '',
+                'language' => '',
+            ])
+            ->assertHasFormErrors(['name' => 'required', 'language' => 'required']);
 
-it('updates a client', function () {
-    $this->actingAs(User::factory()->create());
-    $client = Client::factory()->create(['name' => 'Old Name']);
+        $this->assertDatabaseCount('clients', 0);
+    }
 
-    Livewire::test(EditClient::class, ['record' => $client->getKey()])
-        ->fillForm(['name' => 'New Name'])
-        ->call('save')
-        ->assertHasNoFormErrors();
+    #[Test]
+    public function it_updates_a_client(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['name' => 'Old Name']);
 
-    expect($client->refresh()->name)->toBe('New Name');
-});
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm(['name' => 'New Name'])
+            ->call('save')
+            ->assertHasNoFormErrors();
 
-it('requires a name when updating a client', function () {
-    $this->actingAs(User::factory()->create());
-    $client = Client::factory()->create();
+        $this->assertSame('New Name', $client->refresh()->name);
+    }
 
-    Livewire::test(EditClient::class, ['record' => $client->getKey()])
-        ->fillForm(['name' => ''])
-        ->call('save')
-        ->assertHasFormErrors(['name' => 'required']);
-});
+    #[Test]
+    public function it_requires_a_name_when_updating_a_client(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
 
-it('deletes a client from the edit page', function () {
-    $this->actingAs(User::factory()->create());
-    $client = Client::factory()->create();
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm(['name' => ''])
+            ->call('save')
+            ->assertHasFormErrors(['name' => 'required']);
+    }
 
-    Livewire::test(EditClient::class, ['record' => $client->getKey()])
-        ->callAction(DeleteAction::class);
+    #[Test]
+    public function it_deletes_a_client_from_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
 
-    $this->assertModelMissing($client);
-});
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->callAction(DeleteAction::class);
 
-it('deletes a client from the table', function () {
-    $this->actingAs(User::factory()->create());
-    $client = Client::factory()->create();
+        $this->assertModelMissing($client);
+    }
 
-    Livewire::test(ListClients::class)
-        ->callAction(TestAction::make(DeleteAction::class)->table($client));
+    #[Test]
+    public function it_deletes_a_client_from_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
 
-    $this->assertModelMissing($client);
-});
+        Livewire::test(ListClients::class)
+            ->callAction(TestAction::make(DeleteAction::class)->table($client));
+
+        $this->assertModelMissing($client);
+    }
+}
