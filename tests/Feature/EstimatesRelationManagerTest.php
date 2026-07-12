@@ -49,6 +49,20 @@ class EstimatesRelationManagerTest extends TestCase
     }
 
     #[Test]
+    public function it_prefills_the_project_when_creating_an_estimate(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $project = Project::factory()->create();
+
+        Livewire::test(EstimatesRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => EditProject::class,
+        ])
+            ->mountAction(TestAction::make(CreateAction::class)->table(true))
+            ->assertActionDataSet(['project_id' => $project->getKey()]);
+    }
+
+    #[Test]
     public function it_creates_an_estimate_for_the_project(): void
     {
         $this->actingAs(User::factory()->create());
