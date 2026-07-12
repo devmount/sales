@@ -5,7 +5,7 @@ namespace App\Filament\Pages;
 use Filament\Pages\Dashboard as BaseDashboard;
 use App\Filament\Resources\PositionResource\Widgets\RecentPositionsChart;
 use App\Filament\Resources\ProjectResource\Widgets\CurrentProjects;
-use App\Filament\Widgets as AppWidgets;
+use App\Filament\Widgets;
 use App\Livewire\HeadingWidget;
 
 class Dashboard extends BaseDashboard
@@ -20,24 +20,24 @@ class Dashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
-            AppWidgets\StatsOverview::class,
+            Widgets\StatsOverview::class,
             RecentPositionsChart::class,
             CurrentProjects::class,
             HeadingWidget::make(['heading' => __('sales')]),
-            AppWidgets\SalesChart::class,
-            AppWidgets\MonthlyIncomeChart::class,
-            AppWidgets\HourlyRateChart::class,
+            Widgets\SalesChart::class,
+            Widgets\MonthlyIncomeChart::class,
+            Widgets\HourlyRateChart::class,
             HeadingWidget::make(['heading' => trans_choice('client', 2)]),
-            AppWidgets\ClientProfitDistributionChart::class,
-            AppWidgets\ClientProfitChart::class,
-            AppWidgets\ClientHoursChart::class,
+            Widgets\ClientProfitDistributionChart::class,
+            Widgets\ClientProfitChart::class,
+            Widgets\ClientHoursChart::class,
             HeadingWidget::make(['heading' => __('workingHours')]),
-            AppWidgets\SumProductiveHoursChart::class,
-            AppWidgets\WeeklyHoursChart::class,
-            AppWidgets\OfftimeChart::class,
+            Widgets\SumProductiveHoursChart::class,
+            Widgets\WeeklyHoursChart::class,
+            Widgets\OfftimeChart::class,
             HeadingWidget::make(['heading' => trans_choice('gift', 2)]),
-            AppWidgets\GiftSubjectDistributionChart::class,
-            AppWidgets\SumGiftsChart::class,
+            Widgets\GiftSubjectDistributionChart::class,
+            Widgets\SumGiftsChart::class,
         ];
     }
 }
