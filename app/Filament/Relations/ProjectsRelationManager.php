@@ -3,6 +3,7 @@
 namespace App\Filament\Relations;
 
 use App\Filament\Resources\ProjectResource;
+use App\Models\Client;
 use App\Models\Project;
 use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
@@ -60,6 +61,9 @@ class ProjectsRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->schema(ProjectResource::formFields(useSection: false))
+                    ->fillForm(fn (): array => $this->getOwnerRecord() instanceof Client
+                        ? ['client_id' => $this->getOwnerRecord()->getKey()]
+                        : [])
                     ->slideOver()
                     ->modalWidth(Width::Large),
             ])

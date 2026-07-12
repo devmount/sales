@@ -49,6 +49,20 @@ class ProjectsRelationManagerTest extends TestCase
     }
 
     #[Test]
+    public function it_prefills_the_client_when_creating_a_project_under_a_client(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(ProjectsRelationManager::class, [
+            'ownerRecord' => $client,
+            'pageClass' => EditClient::class,
+        ])
+            ->mountAction(TestAction::make(CreateAction::class)->table(true))
+            ->assertActionDataSet(['client_id' => $client->getKey()]);
+    }
+
+    #[Test]
     public function it_creates_a_project_for_the_client(): void
     {
         $this->actingAs(User::factory()->create());
