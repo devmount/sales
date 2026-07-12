@@ -15,7 +15,7 @@
         "laravel/framework": "^13",
         "laravel/sanctum": "^4.0.0",
         "laravel/tinker": "^3",
-        "laurentmuller/fpdf2": "^2",
+        "laurentmuller/fpdf2": "^4.3",
         "secondnetwork/blade-tabler-icons": "^3.21.0"
     },
     "require-dev": {

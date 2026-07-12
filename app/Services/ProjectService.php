@@ -105,62 +105,62 @@ class ProjectService
 
         // Address header
         $pdf->setFont('FiraSans-ExtraLight', fontSizeInPoint: 8)
-            ->setTextColor(...Color::GRAY->rgb())
+            ->setTextColor(Color::GRAY->pdfColor())
             ->text(10, 50, $data['address']);
         $pdf->setFontSizeInPoint(9)
             ->text(10, 62, $label['to']);
         $pdf->setFontSizeInPoint(15)
-            ->setTextColor(...Color::MAIN->rgb())
+            ->setTextColor(Color::MAIN->pdfColor())
             ->text(10, 69, $data['clientName']);
-        $pdf->setDrawColor(...Color::LINE->rgb())
+        $pdf->setDrawColor(Color::LINE->pdfColor())
             ->setLineWidth(0.4)
             ->setLineCap(PdfLineCap::BUTT)
             ->line(0, 73, 70, 73)
             ->line(138, 73, 210, 73);
         $pdf->setFontSizeInPoint(10)
-            ->setTextColor(...Color::GRAY->rgb())
+            ->setTextColor(Color::GRAY->pdfColor())
             ->text(10, 79, $data['clientStreet'])
             ->text(10, 84, $data['clientLocation'])
             ->setFont('FiraSans-Regular')
-            ->setTextColor(...Color::MAIN->rgb())
+            ->setTextColor(Color::MAIN->pdfColor())
             ->textRightX($data['date'], 68.8, 8);
 
         // Cover table
         $pdf->setLineWidth(0.8)
-            ->setFillColor(...Color::COL3->rgb())
+            ->setFillColor(Color::COL3->pdfColor())
             ->rect(10, 105, 90, 56, PdfRectangleStyle::FILL)
-            ->setDrawColor(...Color::COL2->rgb())
+            ->setDrawColor(Color::COL2->pdfColor())
             ->line(10, 133, 100, 133)
-            ->setFillColor(...Color::COL2->rgb())
+            ->setFillColor(Color::COL2->pdfColor())
             ->rect(100, 105, 31, 56, PdfRectangleStyle::FILL)
-            ->setDrawColor(...Color::COL1->rgb())
+            ->setDrawColor(Color::COL1->pdfColor())
             ->line(100, 133, 131, 133)
-            ->setFillColor(...Color::COL1->rgb())
+            ->setFillColor(Color::COL1->pdfColor())
             ->rect(131, 105, 30, 56, PdfRectangleStyle::FILL)
-            ->setDrawColor(...Color::COL4->rgb())
+            ->setDrawColor(Color::COL4->pdfColor())
             ->line(131, 133, 162, 133)
-            ->setFillColor(...Color::ACCENT->rgb())
+            ->setFillColor(Color::ACCENT->pdfColor())
             ->rect(162, 105, 40, 56, PdfRectangleStyle::FILL)
-            ->setDrawColor(...Color::LINE2->rgb())
+            ->setDrawColor(Color::LINE2->pdfColor())
             ->line(162, 133, 202, 133);
         $pdf->setFontSizeInPoint(13)
             ->setFont('FiraSans-ExtraLight')
-            ->setTextColor(...Color::DARK->rgb())
+            ->setTextColor(Color::DARK->pdfColor())
             ->text(15, 118, $label['description'])
             ->textCenterX($label['quantity'], 118, 115)
             ->textCenterX($label['price'], 118, 146)
             ->setFont('FiraSans-Regular')
-            ->setTextColor(...Color::LIGHT->rgb())
+            ->setTextColor(Color::LIGHT->pdfColor())
             ->textCenterX($label['sum'], 118, 182);
         $pdf->setFontSizeInPoint(8)
             ->setFont('FiraSans-ExtraLight')
-            ->setTextColor(...Color::DARK->rgb())
+            ->setTextColor(Color::DARK->pdfColor())
             ->text(15, 124, $label['statementOfWork'])
             ->textCenterX($label['quantitySubtitle'], 124, 115)
             ->textCenterX($label['priceSubtitle'], 124, 146)
-            ->setTextColor(...Color::LIGHT->rgb())
+            ->setTextColor(Color::LIGHT->pdfColor())
             ->textCenterX($label['totalQuote'], 124, 182);
-        $pdf->setTextColor(...Color::DARK->rgb())
+        $pdf->setTextColor(Color::DARK->pdfColor())
             ->setFont('FiraSans-Regular')
             ->setFontSizeInPoint(9)
             ->text(15, 141, $data['title'])
@@ -171,16 +171,16 @@ class ProjectService
             ->setFontSizeInPoint(16)
             ->textCenterX($data['hours'], 148, 115)
             ->textCenterX($data['price'], 148, 146)
-            ->setTextColor(...Color::LIGHT->rgb())
+            ->setTextColor(Color::LIGHT->pdfColor())
             ->textCenterX($data['net'], 148, 182);
 
         // Table total
-        $pdf->setFillColor(...Color::COL3->rgb())
+        $pdf->setFillColor(Color::COL3->pdfColor())
             ->rect(0, 165, 210, 50, PdfRectangleStyle::FILL)
-            ->setDrawColor(...Color::COL1->rgb())
+            ->setDrawColor(Color::COL1->pdfColor())
             ->setLineWidth(0.3);
         $pdf->line(124, 196, 194, 196)
-            ->setTextColor(...Color::DARK->rgb())
+            ->setTextColor(Color::DARK->pdfColor())
             ->setFont('FiraSans-ExtraLight')
             ->setFontSizeInPoint(13)
             ->textRightX($label['amountNet'], 181, 50)
@@ -238,38 +238,38 @@ class ProjectService
             $pdf->addPage();
 
             $pdf->setLineWidth(0.8)
-                ->setFillColor(...Color::COL3->rgb())
+                ->setFillColor(Color::COL3->pdfColor())
                 ->rect(10, 50, 113, $totalHeight, PdfRectangleStyle::FILL)
-                ->setDrawColor(...Color::COL2->rgb())
+                ->setDrawColor(Color::COL2->pdfColor())
                 ->line(10, 78, 123, 78);
-            $pdf->setFillColor(... $billedPerProject ? Color::COL3->rgb() : Color::COL2->rgb())
+            $pdf->setFillColor($billedPerProject ? Color::COL3->pdfColor() : Color::COL2->pdfColor())
                 ->rect(123, 50, 26, $totalHeight, PdfRectangleStyle::FILL)
-                ->setDrawColor(... $billedPerProject ? Color::COL2->rgb() : Color::COL1->rgb())
+                ->setDrawColor($billedPerProject ? Color::COL2->pdfColor() : Color::COL1->pdfColor())
                 ->line(123, 78, 149, 78)
-                ->setFillColor(... $billedPerProject ? Color::COL3->rgb() : Color::COL1->rgb())
+                ->setFillColor($billedPerProject ? Color::COL3->pdfColor() : Color::COL1->pdfColor())
                 ->rect(149, 50, 26, $totalHeight, PdfRectangleStyle::FILL)
-                ->setDrawColor(... $billedPerProject ? Color::COL2->rgb() : Color::COL4->rgb())
+                ->setDrawColor($billedPerProject ? Color::COL2->pdfColor() : Color::COL4->pdfColor())
                 ->line(149, 78, 176, 78)
-                ->setFillColor(... $billedPerProject ? Color::COL3->rgb() : Color::ACCENT->rgb())
+                ->setFillColor($billedPerProject ? Color::COL3->pdfColor() : Color::ACCENT->pdfColor())
                 ->rect(176, 50, 26, $totalHeight, PdfRectangleStyle::FILL)
-                ->setDrawColor(... $billedPerProject ? Color::COL2->rgb() : Color::LINE2->rgb())
+                ->setDrawColor($billedPerProject ? Color::COL2->pdfColor() : Color::LINE2->pdfColor())
                 ->line(176, 78, 202, 78);
             $pdf->setFontSizeInPoint(13)
                 ->setFont('FiraSans-ExtraLight')
-                ->setTextColor(...Color::DARK->rgb())
+                ->setTextColor(Color::DARK->pdfColor())
                 ->text(15, 63, $label['position'])
                 ->textCenterX($label['quantityEstimates'], 63, 136)
                 ->textCenterX($label['priceEstimates'], 63, 162)
                 ->setFont('FiraSans-Regular')
-                ->setTextColor(...Color::LIGHT->rgb())
+                ->setTextColor(Color::LIGHT->pdfColor())
                 ->textCenterX($label['totalEstimates'], 63, 189);
             $pdf->setFontSizeInPoint(8)
                 ->setFont('FiraSans-ExtraLight')
-                ->setTextColor(...Color::DARK->rgb())
+                ->setTextColor(Color::DARK->pdfColor())
                 ->text(15, 69, $label['description'])
                 ->textCenterX($label['inHoursEstimates'], 69, 136)
                 ->textCenterX($label['perHourEstimates'], 69, 162)
-                ->setTextColor(...Color::LIGHT->rgb())
+                ->setTextColor(Color::LIGHT->pdfColor())
                 ->textCenterX($label['priceEstimates'], 69, 189);
 
             // draw positions
@@ -288,7 +288,7 @@ class ProjectService
                 // Convert to supported char encoding
                 $estData = $estData->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
 
-                $pdf->setTextColor(...Color::DARK->rgb())
+                $pdf->setTextColor(Color::DARK->pdfColor())
                     ->setFont('FiraSans-Regular')
                     ->setFontSizeInPoint(9)
                     ->text(15, (84 + $rowHeight * $linesProcessed), $estData['title'])
@@ -299,7 +299,7 @@ class ProjectService
                     ->setFontSizeInPoint(11)
                     ->textCenterX($estData['hours'], (87 + $rowHeight * $linesProcessed), 136)
                     ->textCenterX($estData['price'], (87 + $rowHeight * $linesProcessed), 162)
-                    ->setTextColor(...Color::LIGHT->rgb())
+                    ->setTextColor(Color::LIGHT->pdfColor())
                     ->textRightX($estData['total'], (87 + $rowHeight * $linesProcessed), 13);
 
                 $linesProcessed += $lineCount;
