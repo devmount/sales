@@ -63,6 +63,9 @@ class InvoicesRelationManager extends RelationManager
                     ->label(__('create'))
                     ->schema(InvoiceResource::formFields(6, false))
                     ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
+                    ->fillForm(fn (): array => $this->getOwnerRecord() instanceof Project
+                        ? ['project_id' => $this->getOwnerRecord()->getKey()]
+                        : [])
                     ->slideOver()
                     ->modalWidth(Width::ExtraLarge),
             ])
@@ -93,6 +96,9 @@ class InvoicesRelationManager extends RelationManager
                     ->label(__('create'))
                     ->schema(InvoiceResource::formFields(6, false))
                     ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
+                    ->fillForm(fn (): array => $this->getOwnerRecord() instanceof Project
+                        ? ['project_id' => $this->getOwnerRecord()->getKey()]
+                        : [])
                     ->slideOver()
                     ->modalWidth(Width::ExtraLarge),
             ])

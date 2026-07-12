@@ -107,6 +107,20 @@ class InvoicesRelationManagerTest extends TestCase
     }
 
     #[Test]
+    public function it_prefills_the_project_when_creating_an_invoice_under_a_project(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $project = Project::factory()->create();
+
+        Livewire::test(InvoicesRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => EditProject::class,
+        ])
+            ->mountAction(TestAction::make(CreateAction::class)->table(true))
+            ->assertActionDataSet(['project_id' => $project->getKey()]);
+    }
+
+    #[Test]
     public function it_creates_an_invoice_for_the_project(): void
     {
         $this->actingAs(User::factory()->create());
