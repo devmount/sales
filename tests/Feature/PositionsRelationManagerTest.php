@@ -49,6 +49,23 @@ class PositionsRelationManagerTest extends TestCase
     }
 
     #[Test]
+    public function it_prefills_the_invoice_when_creating_a_position(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->mountAction(TestAction::make(CreateAction::class)->table(true))
+            ->assertActionDataSet([
+                'invoice_id' => $invoice->getKey(),
+                'pause_duration' => 0,
+            ]);
+    }
+
+    #[Test]
     public function it_creates_a_position_for_the_invoice(): void
     {
         $this->actingAs(User::factory()->create());
