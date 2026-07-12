@@ -13,6 +13,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
@@ -63,9 +64,12 @@ class InvoicesRelationManager extends RelationManager
                     ->label(__('create'))
                     ->schema(InvoiceResource::formFields(6, false))
                     ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
-                    ->fillForm(fn (): array => $this->getOwnerRecord() instanceof Project
-                        ? ['project_id' => $this->getOwnerRecord()->getKey()]
-                        : [])
+                    ->mountUsing(function (Schema $schema) {
+                        $schema->fill();
+                        if ($this->getOwnerRecord() instanceof Project) {
+                            $schema->fillPartially(['project_id' => $this->getOwnerRecord()->getKey()], ['project_id']);
+                        }
+                    })
                     ->slideOver()
                     ->modalWidth(Width::ExtraLarge),
             ])
@@ -96,9 +100,12 @@ class InvoicesRelationManager extends RelationManager
                     ->label(__('create'))
                     ->schema(InvoiceResource::formFields(6, false))
                     ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
-                    ->fillForm(fn (): array => $this->getOwnerRecord() instanceof Project
-                        ? ['project_id' => $this->getOwnerRecord()->getKey()]
-                        : [])
+                    ->mountUsing(function (Schema $schema) {
+                        $schema->fill();
+                        if ($this->getOwnerRecord() instanceof Project) {
+                            $schema->fillPartially(['project_id' => $this->getOwnerRecord()->getKey()], ['project_id']);
+                        }
+                    })
                     ->slideOver()
                     ->modalWidth(Width::ExtraLarge),
             ])

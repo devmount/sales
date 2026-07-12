@@ -117,7 +117,11 @@ class InvoicesRelationManagerTest extends TestCase
             'pageClass' => EditProject::class,
         ])
             ->mountAction(TestAction::make(CreateAction::class)->table(true))
-            ->assertActionDataSet(['project_id' => $project->getKey()]);
+            ->assertActionDataSet([
+                'project_id' => $project->getKey(),
+                'taxable' => true,
+                'vat_rate' => 0.19,
+            ]);
     }
 
     #[Test]

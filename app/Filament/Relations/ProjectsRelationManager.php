@@ -11,6 +11,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -61,9 +62,12 @@ class ProjectsRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->schema(ProjectResource::formFields(useSection: false))
-                    ->fillForm(fn (): array => $this->getOwnerRecord() instanceof Client
-                        ? ['client_id' => $this->getOwnerRecord()->getKey()]
-                        : [])
+                    ->mountUsing(function (Schema $schema) {
+                        $schema->fill();
+                        if ($this->getOwnerRecord() instanceof Client) {
+                            $schema->fillPartially(['client_id' => $this->getOwnerRecord()->getKey()], ['client_id']);
+                        }
+                    })
                     ->slideOver()
                     ->modalWidth(Width::Large),
             ])
