@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use fpdf\Color\PdfRgbColor;
+
 enum DocumentColor: int
 {
     case MAIN   = 0;
@@ -52,5 +54,14 @@ enum DocumentColor: int
     public function rgb(): array
     {
         return sscanf($this->hex(), "#%02x%02x%02x");
+    }
+
+    /**
+     * PdfRgbColor representation, for fpdf2's color-setter APIs
+     * (setFillColor/setDrawColor/setTextColor).
+     */
+    public function pdfColor(): PdfRgbColor
+    {
+        return PdfRgbColor::instance(...$this->rgb());
     }
 }

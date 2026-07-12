@@ -6,23 +6,22 @@ use App\Enums\DocumentColor as Color;
 use App\Enums\DocumentType;
 use App\Models\Setting;
 use Carbon\Carbon;
-use Exception;
 use fpdf\Enums\PdfRectangleStyle;
 use fpdf\Enums\PdfTextAlignment;
+use fpdf\Internal\PdfAttachment;
 use fpdf\PdfDocument;
+use fpdf\PdfException;
+use fpdf\Traits\PdfAttachmentTrait;
 
 class PdfTemplate extends PdfDocument
 {
+    use PdfAttachmentTrait;
+
     // Locale
     private ?string $lang;
 
     // Document type
     private DocumentType $type;
-
-    // Attachments
-    protected array $files = [];
-    protected int $nFiles;
-    protected bool $openAttachmentPane = false;
 
     public function __construct(?string $lang = null, DocumentType $type = DocumentType::INVOICE)
     {
@@ -43,7 +42,7 @@ class PdfTemplate extends PdfDocument
     public function header(): void
     {
         // Title bar
-        $this->setFillColor(...Color::MAIN->rgb())
+        $this->setFillColor(Color::MAIN->pdfColor())
             ->rect(0, 9, 210, 30, PdfRectangleStyle::FILL);
         // Logo
         $this->image(Setting::get('logo'), 12, 13, 22, 22, 'JPEG');
@@ -59,7 +58,7 @@ class PdfTemplate extends PdfDocument
             }
         );
         $this->setFont('FiraSans-ExtraLight', fontSizeInPoint: 26)
-            ->setTextColor(...Color::LIGHT->rgb())
+            ->setTextColor(Color::LIGHT->pdfColor())
             ->textCenterX($title, 27);
         // Contact entries
         $this->setFontSizeInPoint(9)
@@ -76,7 +75,7 @@ class PdfTemplate extends PdfDocument
     public function footer(): void
     {
         // Bottom line
-        $this->setDrawColor(...Color::LINE->rgb())
+        $this->setDrawColor(Color::LINE->pdfColor())
             ->setLineWidth(0.4)
             ->line(10, 277, 202, 277);
         // Signature
@@ -84,7 +83,7 @@ class PdfTemplate extends PdfDocument
         // Page number
         $this->setY(-26)
             ->setFontSizeInPoint(9)
-            ->setTextColor(...Color::GRAY->rgb())
+            ->setTextColor(Color::GRAY->pdfColor())
             ->cell(text: \sprintf('%d/{nb}', $this->getPage()), align: PdfTextAlignment::CENTER);
 
         // Prepare settings, data and labels
@@ -118,17 +117,17 @@ class PdfTemplate extends PdfDocument
             ->multiCell(40, 4, "{$conf['vatId']}\n{$conf['taxOffice']}");
 
         // Document guides
-        $this->setDrawColor(...Color::LINE->rgb())
+        $this->setDrawColor(Color::LINE->pdfColor())
             ->line(0, 105, 3, 105)
             ->line(0, 148, 5, 148);
         if ($this->getPage() <= 1) {
             switch ($this->type) {
                 case DocumentType::QUOTE:
-                    $this->setDrawColor(...Color::COL1->rgb());
+                    $this->setDrawColor(Color::COL1->pdfColor());
                     break;
                 case DocumentType::INVOICE:
                 default:
-                    $this->setDrawColor(...Color::LINE4->rgb());
+                    $this->setDrawColor(Color::LINE4->pdfColor());
                     break;
             }
         }
@@ -146,7 +145,7 @@ class PdfTemplate extends PdfDocument
     public function textCenterX(string $text, float $y, ?float $anchor = null): static
     {
         $x = $anchor === null
-            ? ($this->width - $this->getStringWidth($text)) / 2.0
+            ? ($this->getPageWidth() - $this->getStringWidth($text)) / 2.0
             : $anchor - $this->getStringWidth($text) / 2.0;
         return $this->text($x, $y, $text);
     }
@@ -161,114 +160,104 @@ class PdfTemplate extends PdfDocument
      */
     public function textRightX(string $text, float $y, float $offset = 0.0): static
     {
-        $x = ($this->width - $this->getStringWidth($text)) - $offset;
+        $x = ($this->getPageWidth() - $this->getStringWidth($text)) - $offset;
         return $this->text($x, $y, $text);
     }
 
-    public function attach(string $file, string $name = '', string $desc = '')
+    /**
+     * PHP resolves private-method calls made from *within* a trait's own code (e.g.
+     * PdfAttachmentTrait::putResources() calling $this->putAttachments()) against the
+     * trait's own private method, even if this class declares a same-named override —
+     * private methods aren't virtually dispatched. So putCatalog()/putResources() are
+     * re-declared here too (verbatim copies of the trait's versions, which have no bug
+     * of their own) purely so their internal putAttachments() calls happen from this
+     * class's own scope and correctly reach the corrected version below.
+     */
+    protected function putCatalog(): void
     {
-        if ($name == '') {
-            $p = strrpos($file, '/');
-            if ($p === false) {
-                $p = strrpos($file, '\\');
-            }
-            if ($p !== false) {
-                $name = substr($file, $p + 1);
-            }
-            else {
-                $name = $file;
-            }
+        parent::putCatalog();
+        if ([] === $this->attachments) {
+            return;
         }
-        $this->files[] = ['file' => $file, 'name' => $name, 'desc' => $desc];
-        return $this;
-    }
-
-    public function openAttachmentPane()
-    {
-        $this->openAttachmentPane = true;
-        return $this;
-    }
-
-    protected function putFiles()
-    {
-        foreach ($this->files as $i => &$info) {
-            $file = $info['file'];
-            $name = $info['name'];
-            $desc = $info['desc'];
-
-            $fc = file_get_contents($file);
-            if ($fc === false) {
-                $this->error('Cannot open file: ' . $file);
-            }
-            $size = strlen($fc);
-            $date = @date('YmdHisO', filemtime($file));
-            $md = 'D:' . substr($date, 0, -2) . "'" . substr($date, -2) . "'";;
-
-            $this->putNewObj();
-            $info['n'] = $this->objectNumber;
-            $this->put('<<');
-            $this->put('/Type /Filespec');
-            $this->put('/F (' . $this->escape($name) . ')');
-            $this->put('/UF ' . $this->textstring($name));
-            $this->put('/EF <</F ' . ($this->objectNumber + 1) . ' 0 R>>');
-            if ($desc) {
-                $this->put('/Desc ' . $this->textstring($desc));
-            }
-            $this->put('/AFRelationship /Unspecified');
-            $this->put('>>');
-            $this->put('endobj');
-
-            $this->putNewObj();
-            $this->put('<<');
-            $this->put('/Type /EmbeddedFile');
-            $this->put('/Subtype /application#2Foctet-stream');
-            $this->put('/Length ' . $size);
-            $this->put('/Params <</Size ' . $size . ' /ModDate ' . $this->textstring($md) . '>>');
-            $this->put('>>');
-            $this->putstream($fc);
-            $this->put('endobj');
-        }
-        unset($info);
-
-        $this->putNewObj();
-        $this->nFiles = $this->objectNumber;
-        $a = array();
-        foreach ($this->files as $i => $info) {
-            $a[] = $this->textstring(sprintf('%03d', $i)) . ' ' . $info['n'] . ' 0 R';
-        }
-        $this->put('<<');
-        $this->put('/Names [' . implode(' ', $a) . ']');
-        $this->put('>>');
-        $this->put('endobj');
+        $this->writer->putf('/Names <</EmbeddedFiles %d 0 R>>', $this->attachmentNumber);
+        $array = \array_map(
+            static fn (PdfAttachment $attachment): string => $attachment->formatNumber(),
+            $this->attachments
+        );
+        $this->writer->putf('/AF [%s]', \implode(' ', $array));
     }
 
     protected function putResources(): void
     {
         parent::putResources();
-        if (!empty($this->files)) {
-            $this->putFiles();
+        if ([] !== $this->attachments) {
+            $this->putAttachments();
         }
     }
 
-    protected function putCatalog(): void
+    /**
+     * Corrected copy of PdfAttachmentTrait::putAttachments() (fpdf2 v4.3.10, also present
+     * on the library's main branch as of this writing).
+     *
+     * Upstream bug: the final /Names array is built by wrapping each "<index> <object> 0 R"
+     * pair as a single text-string literal, e.g. "(000 23 0 R)", instead of the name/value
+     * pair a PDF name tree requires: a string "(000)" followed by a *separate* indirect
+     * reference "23 0 R". This produces a malformed /Names array that PDF readers (verified
+     * with poppler's pdfdetach) reject with "Invalid FileSpec". This override only changes
+     * how that final array is assembled; every other line is unchanged from the trait.
+     *
+     * @throws PdfException if unable to get the file content of an attachment
+     */
+    private function putAttachments(): void
     {
-        parent::putCatalog();
-        if (!empty($this->files)) {
-            $this->put('/Names <</EmbeddedFiles ' . $this->nFiles . ' 0 R>>');
-            $a = array();
-            foreach ($this->files as $info) {
-                $a[] = $info['n'] . ' 0 R';
-            }
-            $this->put('/AF [' . implode(' ', $a) . ']');
-            if ($this->openAttachmentPane) {
-                $this->put('/PageMode /UseAttachments');
-            }
-        }
-    }
+        foreach ($this->attachments as $attachment) {
+            $file = $attachment->file;
+            $name = $attachment->name;
 
-    protected function error(string $msg)
-    {
-        // Fatal error
-        throw new Exception('FPDF2 error: ' . $msg);
+            $contents = \file_get_contents($file);
+            if (false === $contents) {
+                throw PdfException::format('Unable to get content of the file: %s.', $file);
+            }
+            $size = \strlen($contents);
+            $time = \filemtime($file);
+            $date = $this->encoder->formatDate(\is_int($time) ? $time : null);
+
+            $this->writer->putNewObj();
+            $attachment->number = $this->writer->getObjectNumber();
+            $this->writer->put('<<');
+            $this->writer->put('/Type /Filespec');
+            $this->writer->putf('/F (%s)', $this->encoder->escape($name));
+            $this->writer->putf('/UF %s', $this->encoder->textString($name));
+            $this->writer->putf('/EF <</F %d 0 R>>', $this->writer->getObjectNumber() + 1);
+            if ($attachment->isDescription()) {
+                $this->writer->putf('/Desc %s', $this->encoder->textString($attachment->description));
+            }
+            $this->writer->put('/AFRelationship /Unspecified');
+            $this->writer->put('>>');
+            $this->writer->putEndObj();
+
+            $this->writer->putNewObj();
+            $this->writer->put('<<');
+            $this->writer->put('/Type /EmbeddedFile');
+            $this->writer->put('/Subtype /application#2Foctet-stream');
+            $this->writer->putf('/Length %d', $size);
+            $this->writer->putf('/Params <</Size %d /ModDate %s>>', $size, $this->encoder->textString($date));
+            $this->writer->put('>>');
+            $this->writer->putStream($contents);
+            $this->writer->putEndObj();
+        }
+
+        $this->writer->putNewObj();
+        $this->attachmentNumber = $this->writer->getObjectNumber();
+        $names = [];
+        /** @var PdfAttachment $attachment */
+        foreach (\array_values($this->attachments) as $index => $attachment) {
+            $names[] = $this->encoder->textString(\sprintf('%03d', $index));
+            $names[] = $attachment->formatNumber();
+        }
+        $this->writer->put('<<');
+        $this->writer->putf('/Names [%s]', \implode(' ', $names));
+        $this->writer->put('>>');
+        $this->writer->putEndObj();
     }
 }
