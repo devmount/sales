@@ -37,7 +37,7 @@ class ClientFactory extends Factory
             'city' => fake()->city(),
             'country' => fake()->country(),
             'email' => fake()->unique()->companyEmail(),
-            'phone' => fake()->phoneNumber(),
+            'phone' => '+49' . fake()->numerify('###########'),
             'language' => fake()->randomElement(array_column(LanguageCode::cases(), 'value')),
             'vat_id' => fake()->bothify('DE#########'),
         ];

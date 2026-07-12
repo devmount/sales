@@ -12,13 +12,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
-use Livewire\Component;
 
 class PositionsRelationManager extends RelationManager
 {
@@ -47,12 +47,11 @@ class PositionsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->icon('tabler-plus')
-                    ->afterFormFilled(function (Component $livewire) {
-                        $mountedAction = $livewire->mountedActions[0] ?? null;
-                        if (!$mountedAction) return;
-                        $livewire->mountedActions[0]['data']['invoice_id'] = $this->ownerRecord->id;
-                    })
                     ->schema(PositionResource::formFields(useSection: false))
+                    ->mountUsing(function (Schema $schema) {
+                        $schema->fill();
+                        $schema->fillPartially(['invoice_id' => $this->getOwnerRecord()->getKey()], ['invoice_id']);
+                    })
                     ->slideOver()
                     ->modalWidth(Width::TwoExtraLarge),
             ])

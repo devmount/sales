@@ -72,7 +72,6 @@ class ProjectService
             'quantityEstimates' => $billedPerProject ? '' : __('quantity', locale: $lang),
             'quantitySubtitle' => $billedPerProject ? __('flatRate', locale: $lang) : __('inHours', locale: $lang),
             'quote' => __('quote', locale: $lang),
-            'quote' => __('quote', locale: $lang),
             'referenceUse' => __('referenceUse', locale: $lang),
             'referenceUseText' => __('referenceUseText', locale: $lang),
             'regards' => __('withKindRegards', locale: $lang),

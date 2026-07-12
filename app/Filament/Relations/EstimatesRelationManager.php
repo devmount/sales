@@ -12,13 +12,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Livewire\Component;
 
 class EstimatesRelationManager extends RelationManager
 {
@@ -50,12 +50,11 @@ class EstimatesRelationManager extends RelationManager
                 CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->afterFormFilled(function (Component $livewire) {
-                        $mountedAction = $livewire->mountedActions[0] ?? null;
-                        if (!$mountedAction) return;
-                        $livewire->mountedActions[0]['data']['project_id'] = $this->ownerRecord->id;
-                    })
                     ->schema(EstimateResource::formFields(useSection: false))
+                    ->mountUsing(function (Schema $schema) {
+                        $schema->fill();
+                        $schema->fillPartially(['project_id' => $this->getOwnerRecord()->getKey()], ['project_id']);
+                    })
                     ->slideOver()
                     ->modalWidth(Width::Large),
             ])
