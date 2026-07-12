@@ -6,12 +6,14 @@ use App\Enums\LanguageCode;
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\ClientResource\Pages\EditClient;
 use App\Filament\Resources\ClientResource\Pages\ListClients;
+use App\Mail\ContactClient;
 use App\Models\Client;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -139,5 +141,65 @@ class ClientResourceTest extends TestCase
             ->callAction(TestAction::make(DeleteAction::class)->table($client));
 
         $this->assertModelMissing($client);
+    }
+
+    #[Test]
+    public function it_disables_the_contact_action_for_clients_without_an_email(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['email' => null]);
+
+        Livewire::test(ListClients::class)
+            ->loadTable()
+            ->assertActionDisabled(TestAction::make('kontaktieren')->table($client));
+    }
+
+    #[Test]
+    public function it_enables_the_contact_action_for_clients_with_an_email(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['email' => 'client@example.test']);
+
+        Livewire::test(ListClients::class)
+            ->loadTable()
+            ->assertActionEnabled(TestAction::make('kontaktieren')->table($client));
+    }
+
+    #[Test]
+    public function it_sends_a_contact_email_to_the_client(): void
+    {
+        Mail::fake();
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['email' => 'client@example.test']);
+
+        Livewire::test(ListClients::class)
+            ->callAction(TestAction::make('kontaktieren')->table($client), data: [
+                'subject' => 'Hello there',
+                'content' => 'This is a test message.',
+            ])
+            ->assertHasNoFormErrors();
+
+        Mail::assertSent(ContactClient::class, function (ContactClient $mail) use ($client) {
+            return $mail->hasTo($client->email)
+                && $mail->hasSubject('Hello there')
+                && str_contains($mail->body, 'This is a test message.');
+        });
+    }
+
+    #[Test]
+    public function it_requires_a_subject_and_content_to_contact_a_client(): void
+    {
+        Mail::fake();
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['email' => 'client@example.test']);
+
+        Livewire::test(ListClients::class)
+            ->callAction(TestAction::make('kontaktieren')->table($client), data: [
+                'subject' => '',
+                'content' => '',
+            ])
+            ->assertHasFormErrors(['subject' => 'required', 'content']);
+
+        Mail::assertNothingSent();
     }
 }
