@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9bc6f6072553db272e286cc3d0716169",
+    "content-hash": "ea08bb8f7d600c03c7abfbc8767e6491",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2730,16 +2730,16 @@
         },
         {
             "name": "laurentmuller/fpdf2",
-            "version": "4.3.10",
+            "version": "4.3.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laurentmuller/fpdf2.git",
-                "reference": "b3f0ef76d5ffe16c135d877f41ec9a78d0339c27"
+                "reference": "6c8192e2aebcf54ea79bb06ce70d452171865bce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laurentmuller/fpdf2/zipball/b3f0ef76d5ffe16c135d877f41ec9a78d0339c27",
-                "reference": "b3f0ef76d5ffe16c135d877f41ec9a78d0339c27",
+                "url": "https://api.github.com/repos/laurentmuller/fpdf2/zipball/6c8192e2aebcf54ea79bb06ce70d452171865bce",
+                "reference": "6c8192e2aebcf54ea79bb06ce70d452171865bce",
                 "shasum": ""
             },
             "require": {
@@ -2791,7 +2791,7 @@
                 "issues": "https://github.com/laurentmuller/fpdf2/issues",
                 "source": "https://github.com/laurentmuller/fpdf2"
             },
-            "time": "2026-07-08T06:23:35+00:00"
+            "time": "2026-07-13T13:53:25+00:00"
         },
         {
             "name": "league/commonmark",

@@ -8,9 +8,7 @@ use App\Models\Setting;
 use Carbon\Carbon;
 use fpdf\Enums\PdfRectangleStyle;
 use fpdf\Enums\PdfTextAlignment;
-use fpdf\Internal\PdfAttachment;
 use fpdf\PdfDocument;
-use fpdf\PdfException;
 use fpdf\Traits\PdfAttachmentTrait;
 
 class PdfTemplate extends PdfDocument
@@ -162,102 +160,5 @@ class PdfTemplate extends PdfDocument
     {
         $x = ($this->getPageWidth() - $this->getStringWidth($text)) - $offset;
         return $this->text($x, $y, $text);
-    }
-
-    /**
-     * PHP resolves private-method calls made from *within* a trait's own code (e.g.
-     * PdfAttachmentTrait::putResources() calling $this->putAttachments()) against the
-     * trait's own private method, even if this class declares a same-named override —
-     * private methods aren't virtually dispatched. So putCatalog()/putResources() are
-     * re-declared here too (verbatim copies of the trait's versions, which have no bug
-     * of their own) purely so their internal putAttachments() calls happen from this
-     * class's own scope and correctly reach the corrected version below.
-     */
-    protected function putCatalog(): void
-    {
-        parent::putCatalog();
-        if ([] === $this->attachments) {
-            return;
-        }
-        $this->writer->putf('/Names <</EmbeddedFiles %d 0 R>>', $this->attachmentNumber);
-        $array = \array_map(
-            static fn(PdfAttachment $attachment): string => $attachment->formatNumber(),
-            $this->attachments,
-        );
-        $this->writer->putf('/AF [%s]', \implode(' ', $array));
-    }
-
-    protected function putResources(): void
-    {
-        parent::putResources();
-        if ([] !== $this->attachments) {
-            $this->putAttachments();
-        }
-    }
-
-    /**
-     * Corrected copy of PdfAttachmentTrait::putAttachments() (fpdf2 v4.3.10, also present
-     * on the library's main branch as of this writing).
-     *
-     * Upstream bug: the final /Names array is built by wrapping each "<index> <object> 0 R"
-     * pair as a single text-string literal, e.g. "(000 23 0 R)", instead of the name/value
-     * pair a PDF name tree requires: a string "(000)" followed by a *separate* indirect
-     * reference "23 0 R". This produces a malformed /Names array that PDF readers (verified
-     * with poppler's pdfdetach) reject with "Invalid FileSpec". This override only changes
-     * how that final array is assembled; every other line is unchanged from the trait.
-     *
-     * @throws PdfException if unable to get the file content of an attachment
-     */
-    private function putAttachments(): void
-    {
-        foreach ($this->attachments as $attachment) {
-            $file = $attachment->file;
-            $name = $attachment->name;
-
-            $contents = \file_get_contents($file);
-            if (false === $contents) {
-                throw PdfException::format('Unable to get content of the file: %s.', $file);
-            }
-            $size = \strlen($contents);
-            $time = \filemtime($file);
-            $date = $this->encoder->formatDate(\is_int($time) ? $time : null);
-
-            $this->writer->putNewObj();
-            $attachment->number = $this->writer->getObjectNumber();
-            $this->writer->put('<<');
-            $this->writer->put('/Type /Filespec');
-            $this->writer->putf('/F (%s)', $this->encoder->escape($name));
-            $this->writer->putf('/UF %s', $this->encoder->textString($name));
-            $this->writer->putf('/EF <</F %d 0 R>>', $this->writer->getObjectNumber() + 1);
-            if ($attachment->isDescription()) {
-                $this->writer->putf('/Desc %s', $this->encoder->textString($attachment->description));
-            }
-            $this->writer->put('/AFRelationship /Unspecified');
-            $this->writer->put('>>');
-            $this->writer->putEndObj();
-
-            $this->writer->putNewObj();
-            $this->writer->put('<<');
-            $this->writer->put('/Type /EmbeddedFile');
-            $this->writer->put('/Subtype /application#2Foctet-stream');
-            $this->writer->putf('/Length %d', $size);
-            $this->writer->putf('/Params <</Size %d /ModDate %s>>', $size, $this->encoder->textString($date));
-            $this->writer->put('>>');
-            $this->writer->putStream($contents);
-            $this->writer->putEndObj();
-        }
-
-        $this->writer->putNewObj();
-        $this->attachmentNumber = $this->writer->getObjectNumber();
-        $names = [];
-        /** @var PdfAttachment $attachment */
-        foreach (\array_values($this->attachments) as $index => $attachment) {
-            $names[] = $this->encoder->textString(\sprintf('%03d', $index));
-            $names[] = $attachment->formatNumber();
-        }
-        $this->writer->put('<<');
-        $this->writer->putf('/Names [%s]', \implode(' ', $names));
-        $this->writer->put('>>');
-        $this->writer->putEndObj();
     }
 }
