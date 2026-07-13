@@ -18,17 +18,17 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-	/*
-	|--------------------------------------------------------------------------
-	| Application Version
-	|--------------------------------------------------------------------------
-	|
-	| This value is the version of your application. This value is used when
-	| the framework needs to place the application's version in a notification
-	| or any other location as required by the application or its packages.
-	*/
+    /*
+    |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | This value is the version of your application. This value is used when
+    | the framework needs to place the application's version in a notification
+    | or any other location as required by the application or its packages.
+    */
 
-	'version' => '2.9.0',
+    'version' => '2.9.0',
 
     /*
     |--------------------------------------------------------------------------

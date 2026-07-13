@@ -12,7 +12,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -31,21 +33,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     */
-    protected function casts(): array
-    {
-        return [
-            'name'              => 'string',
-            'email'             => 'string',
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'created_at'        => 'datetime',
-            'updated_at'        => 'datetime',
-        ];
-    }
-
     public function canAccessPanel(Panel $panel): bool
     {
         // TODO: limit to defined domains
@@ -62,5 +49,20 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
                 <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
             </svg>
         HTML;
+    }
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'name'              => 'string',
+            'email'             => 'string',
+            'email_verified_at' => 'datetime',
+            'password'          => 'hashed',
+            'created_at'        => 'datetime',
+            'updated_at'        => 'datetime',
+        ];
     }
 }

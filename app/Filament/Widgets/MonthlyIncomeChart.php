@@ -16,7 +16,7 @@ class MonthlyIncomeChart extends ChartWidget
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -45,12 +45,14 @@ class MonthlyIncomeChart extends ChartWidget
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
         $period = $period->toArray();
-        $invoiceData = array_fill(0, count($period)-1, 0);
+        $invoiceData = array_fill(0, count($period) - 1, 0);
         foreach ($period as $i => $date) {
-            if ($i == count($period)-1) break;
+            if ($i == count($period) - 1) {
+                break;
+            }
             foreach ($invoices as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->paid_at)) {
-                    $invoiceData[$i] += match($this->filter) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->paid_at)) {
+                    $invoiceData[$i] += match ($this->filter) {
                         'net' => $obj->net,
                         'gross' => $obj->gross,
                     };
@@ -59,23 +61,23 @@ class MonthlyIncomeChart extends ChartWidget
             if ($this->filter === 'net') {
                 foreach ($taxes as $obj) {
                     // Shift yearly income taxes post pays to the year before
-                    if ($i > 0 && !Str($obj->description)->contains('EStVA') && CarbonPeriod::create($date, $period[$i+1])->contains(Carbon::parse($obj->expended_at))) {
-                        $invoiceData[$i-1] = round($invoiceData[$i-1] - $obj->net/($i == count($period)-2 ? now()->month : 12), 2);
+                    if ($i > 0 && !Str($obj->description)->contains('EStVA') && CarbonPeriod::create($date, $period[$i + 1])->contains(Carbon::parse($obj->expended_at))) {
+                        $invoiceData[$i - 1] = round($invoiceData[$i - 1] - $obj->net / ($i == count($period) - 2 ? now()->month : 12), 2);
                         continue;
                     }
                     // Handle income tax advance pays
-                    if (CarbonPeriod::create($date, $period[$i+1])->contains(Carbon::parse($obj->expended_at))) {
+                    if (CarbonPeriod::create($date, $period[$i + 1])->contains(Carbon::parse($obj->expended_at))) {
                         $invoiceData[$i] -= $obj->net;
                     }
                 }
             }
-            $invoiceData[$i] = round($invoiceData[$i]/($i == count($period)-2 ? now()->month : 12), 2);
+            $invoiceData[$i] = round($invoiceData[$i] / ($i == count($period) - 2 ? now()->month : 12), 2);
         }
 
         return [
             'datasets' => [
                 [
-                    'label' => match($this->filter) {
+                    'label' => match ($this->filter) {
                         'net' => __('netIncome'),
                         'gross' => __('grossIncome'),
                     },
@@ -85,7 +87,7 @@ class MonthlyIncomeChart extends ChartWidget
                     'borderColor' => '#3b82f6',
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

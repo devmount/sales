@@ -23,6 +23,53 @@ class Expense extends Model
         'description',
     ];
 
+    public static function lastAdvanceVatExists(): bool
+    {
+        $format = 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM');
+        return self::where('description', $format)->first() !== null;
+    }
+
+    public static function saveLastAdvanceVat(): bool
+    {
+        [,, $vatIn] = Invoice::ofTime(now()->subMonth(), TimeUnit::MONTH);
+        [, $vatOut] = self::ofTime(now()->subMonth(), TimeUnit::MONTH);
+        $obj = new self([
+            'expended_at' => now(),
+            'category' => ExpenseCategory::Vat,
+            'price' => $vatIn - $vatOut,
+            'quantity' => 1,
+            'taxable' => false,
+            'vat_rate' => 0,
+            'description' => 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'),
+        ]);
+        return $obj->save();
+    }
+
+    /**
+     * Sum of net and vat amounts of given time range
+     */
+    public static function ofTime(Carbon $d, TimeUnit $u, ?ExpenseCategory $category = null): array
+    {
+        $start = match ($u) {
+            TimeUnit::MONTH => $d->startOfMonth()->toDateString(),
+            TimeUnit::QUARTER => $d->startOfQuarter()->toDateString(),
+            TimeUnit::YEAR => $d->startOfYear()->toDateString(),
+        };
+        $end = match ($u) {
+            TimeUnit::MONTH => $d->endOfMonth()->toDateString(),
+            TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
+            TimeUnit::YEAR => $d->endOfYear()->toDateString(),
+        };
+        $categories = $category ? [$category] : ExpenseCategory::deliverableCategories();
+        $records = self::where('expended_at', '>=', $start)
+            ->where('expended_at', '<=', $end)
+            ->whereIn('category', $categories)
+            ->get();
+        $net = array_sum($records->map(fn(self $r) => $r->net)->toArray());
+        $vat = array_sum($records->map(fn(self $r) => $r->vat)->toArray());
+        return [$net, $vat];
+    }
+
     protected function casts(): array
     {
         return [
@@ -69,52 +116,5 @@ class Expense extends Model
     protected function vat(): Attribute
     {
         return Attribute::make(fn(): float => round($this->gross - $this->net, 2));
-    }
-
-    public static function lastAdvanceVatExists(): bool
-    {
-        $format = 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM');
-        return self::where('description', $format)->first() !== null;
-    }
-
-    public static function saveLastAdvanceVat(): bool
-    {
-        [,, $vatIn] = Invoice::ofTime(now()->subMonth(), TimeUnit::MONTH);
-        [, $vatOut] = self::ofTime(now()->subMonth(), TimeUnit::MONTH);
-        $obj = new self([
-            'expended_at' => now(),
-            'category' => ExpenseCategory::Vat,
-            'price' => $vatIn - $vatOut,
-            'quantity' => 1,
-            'taxable' => false,
-            'vat_rate' => 0,
-            'description' => 'UStVA ' . now()->year . '-' . now()->subMonth()->isoFormat('MM'),
-        ]);
-        return $obj->save();
-    }
-
-    /**
-     * Sum of net and vat amounts of given time range
-     */
-    public static function ofTime(Carbon $d, TimeUnit $u, ?ExpenseCategory $category = null): array
-    {
-        $start = match ($u) {
-            TimeUnit::MONTH => $d->startOfMonth()->toDateString(),
-            TimeUnit::QUARTER => $d->startOfQuarter()->toDateString(),
-            TimeUnit::YEAR => $d->startOfYear()->toDateString(),
-        };
-        $end = match ($u) {
-            TimeUnit::MONTH => $d->endOfMonth()->toDateString(),
-            TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
-            TimeUnit::YEAR => $d->endOfYear()->toDateString(),
-        };
-        $categories = $category ? [$category] : ExpenseCategory::deliverableCategories();
-        $records = self::where('expended_at', '>=', $start)
-            ->where('expended_at', '<=', $end)
-            ->whereIn('category', $categories)
-            ->get();
-        $net = array_sum($records->map(fn (self $r) => $r->net)->toArray());
-        $vat = array_sum($records->map(fn (self $r) => $r->vat)->toArray());
-        return [$net, $vat];
     }
 }

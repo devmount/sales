@@ -52,7 +52,7 @@ class InvoiceFactory extends Factory
      */
     public function active(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'invoiced_at' => null,
             'paid_at' => null,
         ]);
@@ -63,7 +63,7 @@ class InvoiceFactory extends Factory
      */
     public function waiting(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'invoiced_at' => fake()->dateTimeBetween('-6 months', 'now')->format('Y-m-d'),
             'paid_at' => null,
         ]);
@@ -75,7 +75,7 @@ class InvoiceFactory extends Factory
     public function finished(): static
     {
         $invoicedAt = fake()->dateTimeBetween('-6 months', 'now')->format('Y-m-d');
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'invoiced_at' => $invoicedAt,
             'paid_at' => fake()->dateTimeBetween($invoicedAt, '+7 days')->format('Y-m-d'),
         ]);
@@ -86,7 +86,7 @@ class InvoiceFactory extends Factory
      */
     public function taxable(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'taxable' => true,
             'vat_rate' => fake()->randomElement([0.07, 0.19]),
         ]);
@@ -97,7 +97,7 @@ class InvoiceFactory extends Factory
      */
     public function notTaxable(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'taxable' => false,
             'vat_rate' => null,
         ]);
@@ -108,7 +108,7 @@ class InvoiceFactory extends Factory
      */
     public function hourly(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'price' => fake()->randomFloat(2, 50, 150),
             'pricing_unit' => PricingUnit::Hour->value,
         ]);
@@ -119,7 +119,7 @@ class InvoiceFactory extends Factory
      */
     public function daily(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'price' => fake()->randomFloat(2, 450, 1250),
             'pricing_unit' => PricingUnit::Day->value,
         ]);
@@ -130,7 +130,7 @@ class InvoiceFactory extends Factory
      */
     public function project(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'price' => fake()->randomFloat(2, 500, 15000),
             'pricing_unit' => PricingUnit::Project->value,
         ]);

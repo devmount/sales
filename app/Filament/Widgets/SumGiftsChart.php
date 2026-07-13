@@ -12,12 +12,12 @@ use Filament\Widgets\ChartWidget;
 class SumGiftsChart extends ChartWidget
 {
     use HasEmptyStateChart;
+    public ?string $filter = 'y';
 
     protected ?string $maxHeight = '180px';
-    public ?string $filter = 'y';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -36,23 +36,25 @@ class SumGiftsChart extends ChartWidget
     {
         $gifts = Gift::oldest('received_at')->get();
         $start = $gifts->first()?->received_at;
-        $period = match($this->filter) {
+        $period = match ($this->filter) {
             'y' => Carbon::parse($start)->startOfYear()->yearsUntil(now()->addYear()),
             'q' => Carbon::parse($start)->startOfQuarter()->quartersUntil(now()->addQuarter()),
             'm' => Carbon::parse($start)->startOfMonth()->monthsUntil(now()->addMonth()),
         };
-        $labels = iterator_to_array($period->map(fn(Carbon $date) => match($this->filter) {
+        $labels = iterator_to_array($period->map(fn(Carbon $date) => match ($this->filter) {
             'y' => $date->format('Y'),
             'q' => $date->isoFormat('YYYY [Q]Q'),
             'm' => $date->isoFormat('YYYY MMM'),
         }));
         array_pop($labels);
         $period = $period->toArray();
-        $amounts = array_fill(0, count($period)-1, 0);
+        $amounts = array_fill(0, count($period) - 1, 0);
         foreach ($period as $i => $date) {
-            if ($i == count($period)-1) break;
+            if ($i == count($period) - 1) {
+                break;
+            }
             foreach ($gifts as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->received_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->received_at)) {
                     $amounts[$i] += $obj->amount;
                 }
             }
@@ -67,7 +69,7 @@ class SumGiftsChart extends ChartWidget
                     'barPercentage' => 0.75,
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

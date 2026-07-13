@@ -10,7 +10,7 @@ class HeadingWidget extends Widget
 
     protected string $view = 'livewire.heading-widget';
 
-    protected int | string | array $columnSpan = 12;
+    protected int|string|array $columnSpan = 12;
 
     protected function getViewData(): array
     {

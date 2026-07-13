@@ -11,12 +11,12 @@ use Filament\Widgets\ChartWidget;
 class GiftSubjectDistributionChart extends ChartWidget
 {
     use HasEmptyStateChart;
+    public ?string $filter = 'all';
 
     protected ?string $maxHeight = '180px';
-    public ?string $filter = 'all';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -49,8 +49,8 @@ class GiftSubjectDistributionChart extends ChartWidget
                 : $obj->amount;
         }
         $sum = array_sum($amounts);
-        $labels = array_map(fn ($subject, $a) => '(' . round($a/$sum*100, 1) . '%) ' . $subject, array_keys($amounts), $amounts);
-        $colors = array_map(fn ($subject) => self::colorForSubject($subject), array_keys($amounts));
+        $labels = array_map(fn($subject, $a) => '(' . round($a / $sum * 100, 1) . '%) ' . $subject, array_keys($amounts), $amounts);
+        $colors = array_map(fn($subject) => self::colorForSubject($subject), array_keys($amounts));
 
         return [
             'datasets' => [
@@ -58,10 +58,10 @@ class GiftSubjectDistributionChart extends ChartWidget
                     'data' => array_values($amounts),
                     'borderColor' => $colors,
                     'backgroundColor' => $colors,
-                    'hoverOffset' => 4
+                    'hoverOffset' => 4,
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 
@@ -73,16 +73,6 @@ class GiftSubjectDistributionChart extends ChartWidget
     protected function getFilters(): ?array
     {
         return ['all' => __('all')] + Gift::getYearList();
-    }
-
-    /**
-     * Deterministically derive a color from a subject name, so that
-     * the same subject always gets the same slice color across renders.
-     */
-    private static function colorForSubject(string $subject): string
-    {
-        $hue = crc32($subject) % 360;
-        return "hsl({$hue}, 65%, 55%)";
     }
 
     protected function getOptions(): RawJs
@@ -117,5 +107,15 @@ class GiftSubjectDistributionChart extends ChartWidget
             },
         }
         JS);
+    }
+
+    /**
+     * Deterministically derive a color from a subject name, so that
+     * the same subject always gets the same slice color across renders.
+     */
+    private static function colorForSubject(string $subject): string
+    {
+        $hue = crc32($subject) % 360;
+        return "hsl({$hue}, 65%, 55%)";
     }
 }

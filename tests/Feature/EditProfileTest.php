@@ -15,15 +15,6 @@ class EditProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // The "save" action is rate-limited by component+method+IP via the file
-        // cache driver, which isn't reset between tests like the database is.
-        Cache::flush();
-    }
-
     #[Test]
     public function it_redirects_guests_away_from_the_profile_page(): void
     {
@@ -146,5 +137,14 @@ class EditProfileTest extends TestCase
             ])
             ->call('save')
             ->assertHasFormErrors(['password']);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // The "save" action is rate-limited by component+method+IP via the file
+        // cache driver, which isn't reset between tests like the database is.
+        Cache::flush();
     }
 }

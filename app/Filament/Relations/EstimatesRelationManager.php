@@ -35,7 +35,7 @@ class EstimatesRelationManager extends RelationManager
                     ->label(__('title')),
                 TextColumn::make('description')
                     ->label(__('description'))
-                    ->formatStateUsing(fn (string $state): string => nl2br($state))
+                    ->formatStateUsing(fn(string $state): string => nl2br($state))
                     ->html(),
                 TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))

@@ -44,7 +44,7 @@ class PositionFactory extends Factory
      */
     public function remote(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'remote' => true,
         ]);
     }
@@ -54,7 +54,7 @@ class PositionFactory extends Factory
      */
     public function onSite(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'remote' => false,
         ]);
     }

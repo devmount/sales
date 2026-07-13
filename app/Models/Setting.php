@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    protected $primaryKey = 'field';
-
     public $incrementing = false;
+    protected $primaryKey = 'field';
 
     protected $fillable = [
         'field',
@@ -18,6 +17,23 @@ class Setting extends Model
         'attributes',
         'weight',
     ];
+
+    public static function get(string $field)
+    {
+        return self::find($field)?->value;
+    }
+
+    /**
+     * Address field
+     */
+    public static function address()
+    {
+        $name = self::get('name');
+        $street = self::get('street');
+        $zip = self::get('zip');
+        $city = self::get('city');
+        return "$name, $street, $zip $city";
+    }
 
     protected function casts(): array
     {
@@ -32,27 +48,11 @@ class Setting extends Model
         ];
     }
 
-    public static function get(string $field) {
-        return self::find($field)?->value;
-    }
-
     /**
      * Translated setting label
      */
     protected function label(): Attribute
     {
         return Attribute::make(fn(): string => __($this->field));
-    }
-
-    /**
-     * Address field
-     */
-    public static function address()
-    {
-        $name = self::get('name');
-        $street = self::get('street');
-        $zip = self::get('zip');
-        $city = self::get('city');
-        return "$name, $street, $zip $city";
     }
 }

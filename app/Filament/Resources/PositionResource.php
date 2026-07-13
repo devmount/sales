@@ -39,7 +39,7 @@ use Illuminate\Database\Eloquent\Builder;
 class PositionResource extends Resource
 {
     protected static ?string $model = Position::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-list-details';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-list-details';
     protected static ?int $navigationSort = 35;
 
     public static function form(Schema $schema): Schema
@@ -53,19 +53,19 @@ class PositionResource extends Resource
             ->columns([
                 ColorColumn::make('invoice.project.client.color')
                     ->label('')
-                    ->tooltip(fn (Position $record): ?string => $record->invoice?->project?->client?->name),
+                    ->tooltip(fn(Position $record): ?string => $record->invoice?->project?->client?->name),
                 TextColumn::make('description')
                     ->label(__('description'))
                     ->searchable()
-                    ->tooltip(fn (Position $record): ?string => $record->invoice?->title)
-                    ->formatStateUsing(fn (string $state): string => nl2br($state))
+                    ->tooltip(fn(Position $record): ?string => $record->invoice?->title)
+                    ->formatStateUsing(fn(string $state): string => nl2br($state))
                     ->html(),
                 TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
-                    ->state(fn (Position $record): float => $record->duration)
+                    ->state(fn(Position $record): float => $record->duration)
                     ->fontFamily(FontFamily::Mono)
                     ->weight(FontWeight::ExtraBold)
-                    ->description(fn (Position $record): string => $record->time_range),
+                    ->description(fn(Position $record): string => $record->time_range),
                 ToggleColumn::make('remote')
                     ->label(__('remote')),
                 TextColumn::make('created_at')
@@ -92,7 +92,7 @@ class PositionResource extends Resource
                     ->preload(),
                 SelectFilter::make('invoice')
                     ->label(trans_choice('invoice', 1))
-                    ->relationship('invoice', 'title', fn (Builder $query) => $query->active()->orderByDesc('created_at'))
+                    ->relationship('invoice', 'title', fn(Builder $query) => $query->active()->orderByDesc('created_at'))
                     ->searchable()
                     ->preload(),
                 Filter::make('created_at')
@@ -107,11 +107,11 @@ class PositionResource extends Resource
                         return $query
                             ->when(
                                 $data['earliest'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('started_at', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('started_at', '>=', $date),
                             )
                             ->when(
                                 $data['latest'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('finished_at', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('finished_at', '<=', $date),
                             );
                     }),
                 TernaryFilter::make('remote'),
@@ -131,7 +131,7 @@ class PositionResource extends Resource
                         ->modalWidth(Width::TwoExtraLarge),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             )
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -206,7 +206,7 @@ class PositionResource extends Resource
                     if ($started >= $finished || !$started->isSameDay($finished)) {
                         $set(
                             'finished_at',
-                            $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString()
+                            $started->addMinutes($previous->diffInMinutes($finished))->toDateTimeString(),
                         );
                     }
                 })

@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\PricingUnit;
-use App\Models\Setting;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,23 +29,6 @@ class Project extends Model
         'aborted',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'title' => 'string',
-            'description' => 'string',
-            'start_at' => 'date',
-            'due_at' => 'date',
-            'minimum' => 'float',
-            'scope' => 'float',
-            'price' => 'float',
-            'pricing_unit' => PricingUnit::class,
-            'aborted' => 'bool',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
-
     /**
      * Get the client that ordered the project.
      */
@@ -69,6 +51,23 @@ class Project extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'title' => 'string',
+            'description' => 'string',
+            'start_at' => 'date',
+            'due_at' => 'date',
+            'minimum' => 'float',
+            'scope' => 'float',
+            'price' => 'float',
+            'pricing_unit' => PricingUnit::class,
+            'aborted' => 'bool',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 
     /**
@@ -128,8 +127,8 @@ class Project extends Model
             // Take the description lines and the position title (2 lines) into account
             $lineCount = count(explode("\n", trim($e->description))) + 2;
             $linesProcessed += $lineCount;
-            $i = intval(floor($linesProcessed/50));
-            if (key_exists($i,$paginated)) {
+            $i = intval(floor($linesProcessed / 50));
+            if (key_exists($i, $paginated)) {
                 $paginated[$i][] = $e;
             } else {
                 $paginated[$i] = [$e];
@@ -177,8 +176,8 @@ class Project extends Model
     {
         return Attribute::make(
             fn(): string => $this->minimum != $this->scope
-                ? (int)$this->minimum . ' - ' . (int)$this->scope . ' ' . trans_choice('hour', 2)
-                : (int)$this->scope . ' ' . trans_choice('hour', (int)$this->scope)
+                ? (int) $this->minimum . ' - ' . (int) $this->scope . ' ' . trans_choice('hour', 2)
+                : (int) $this->scope . ' ' . trans_choice('hour', (int) $this->scope),
         );
     }
 
@@ -187,7 +186,7 @@ class Project extends Model
      */
     protected function pricePerUnit(): Attribute
     {
-        return Attribute::make(fn(): string => $this->price . ' € / ' . match($this->pricing_unit) {
+        return Attribute::make(fn(): string => $this->price . ' € / ' . match ($this->pricing_unit) {
             PricingUnit::Hour => trans_choice('hour', 1),
             PricingUnit::Day => trans_choice('day', 1),
             PricingUnit::Project => trans_choice('project', 1),
@@ -201,8 +200,8 @@ class Project extends Model
     {
         return Attribute::make(
             fn(): float => $this->scope > 0
-                ? round($this->hours/$this->scope*100, 1)
-                : 0.0
+                ? round($this->hours / $this->scope * 100, 1)
+                : 0.0,
         );
     }
 
@@ -214,7 +213,7 @@ class Project extends Model
         return Attribute::make(
             fn(): string => $this->scope > 0
                 ? strval($this->progress) . ' %'
-                : __('n/a')
+                : __('n/a'),
         );
     }
 

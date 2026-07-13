@@ -10,7 +10,7 @@ use App\Livewire\HeadingWidget;
 
 class Dashboard extends BaseDashboard
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-chart-pie';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-chart-pie';
 
     public function getColumns(): int|array
     {

@@ -17,6 +17,14 @@ class Estimate extends Model
         'weight',
     ];
 
+    /**
+     * Get the client that ordered the project.
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
     protected function casts(): array
     {
         return [
@@ -27,13 +35,5 @@ class Estimate extends Model
             'created_at'  => 'datetime',
             'updated_at'  => 'datetime',
         ];
-    }
-
-    /**
-     * Get the client that ordered the project.
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
     }
 }

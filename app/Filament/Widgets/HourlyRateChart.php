@@ -13,7 +13,7 @@ class HourlyRateChart extends ChartWidget
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 3,
     ];
@@ -38,19 +38,21 @@ class HourlyRateChart extends ChartWidget
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
         $period = $period->toArray();
-        $count = array_fill(0, count($period)-1, 0);
-        $rates = array_fill(0, count($period)-1, 0);
+        $count = array_fill(0, count($period) - 1, 0);
+        $rates = array_fill(0, count($period) - 1, 0);
         foreach ($period as $i => $date) {
-            if ($i == count($period)-1) break;
+            if ($i == count($period) - 1) {
+                break;
+            }
             foreach ($invoices as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->paid_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->paid_at)) {
                     $rates[$i] += $obj->net;
                     $count[$i] += $obj->hours;
                 }
             }
         }
         foreach ($rates as $i => $rate) {
-            $rates[$i] = $count[$i] != 0 ? round($rate/$count[$i]) : 0;
+            $rates[$i] = $count[$i] != 0 ? round($rate / $count[$i]) : 0;
         }
 
         return [
@@ -62,7 +64,7 @@ class HourlyRateChart extends ChartWidget
                     'barPercentage' => 0.75,
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

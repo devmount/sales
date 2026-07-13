@@ -15,17 +15,6 @@ class ListInvoices extends ListRecords
 {
     protected static string $resource = InvoiceResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make()
-                ->icon('tabler-plus')
-                ->schema(InvoiceResource::formFields(6, false))
-                ->slideOver()
-                ->modalWidth(Width::ExtraLarge),
-        ];
-    }
-
     public function getTabs(): array
     {
         $active = Invoice::active();
@@ -40,19 +29,30 @@ class ListInvoices extends ListRecords
             'active' => Tab::make()
                 ->label(__('inProgress', ['net' => Number::currency($activeNet, 'eur') ]))
                 ->badge($activeCount)
-                ->modifyQueryUsing(fn (Builder $query) => $query->active()->orderBy('updated_at', 'desc')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->active()->orderBy('updated_at', 'desc')),
             'waiting' => Tab::make()
                 ->label(__('waitingForPayment', ['net' => Number::currency($waitingNet, 'eur') ]))
                 ->badge($waitingCount)
                 ->badgeColor($waitingCount > 0 ? 'warning' : 'gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->waiting()->orderBy('invoiced_at', 'desc')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->waiting()->orderBy('invoiced_at', 'desc')),
             'finished' => Tab::make()
                 ->label(__('finished'))
                 ->badge($finishedCount)
                 ->badgeColor('gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->finished()->orderBy('paid_at', 'desc')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->finished()->orderBy('paid_at', 'desc')),
             'all' => Tab::make()
                 ->label(__('all')),
+        ];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make()
+                ->icon('tabler-plus')
+                ->schema(InvoiceResource::formFields(6, false))
+                ->slideOver()
+                ->modalWidth(Width::ExtraLarge),
         ];
     }
 }

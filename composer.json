@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
+    "name": "devmount/sales",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "A service sales manager made for freelancers",
     "keywords": [
         "laravel",
         "framework"
@@ -54,7 +54,9 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ]
+        ],
+        "lint": "vendor/bin/pint --test --parallel",
+        "format": "vendor/bin/pint --parallel"
     },
     "extra": {
         "laravel": {

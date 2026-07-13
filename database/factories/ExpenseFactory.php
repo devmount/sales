@@ -43,7 +43,7 @@ class ExpenseFactory extends Factory
      */
     public function notTaxable(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'taxable' => false,
             'vat_rate' => null,
         ]);

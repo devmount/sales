@@ -28,7 +28,7 @@ use Filament\Tables\Table;
 class OfftimeResource extends Resource
 {
     protected static ?string $model = Offtime::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-beach';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-beach';
     protected static ?int $navigationSort = 60;
 
     public static function form(Schema $schema): Schema
@@ -46,7 +46,7 @@ class OfftimeResource extends Resource
                     ->sortable(),
                 TextColumn::make('days')
                     ->label(trans_choice('day', 2))
-                    ->state(fn (Offtime $record): string => $record->days_count ?? '')
+                    ->state(fn(Offtime $record): string => $record->days_count ?? '')
                     ->fontFamily(FontFamily::Mono)
                     ->sortable(),
                 TextColumn::make('category')
@@ -60,7 +60,7 @@ class OfftimeResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('category')
-                    ->options(OfftimeCategory::options())
+                    ->options(OfftimeCategory::options()),
             ])
             ->recordActions(
                 ActionGroup::make([
@@ -76,7 +76,7 @@ class OfftimeResource extends Resource
                         ->modalWidth(Width::Large),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             )
             ->toolbarActions([
                 BulkActionGroup::make([

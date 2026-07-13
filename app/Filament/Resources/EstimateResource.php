@@ -28,7 +28,7 @@ use Filament\Tables\Table;
 class EstimateResource extends Resource
 {
     protected static ?string $model = Estimate::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-clock-code';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-clock-code';
     protected static ?int $navigationSort = 25;
 
     public static function form(Schema $schema): Schema
@@ -43,12 +43,12 @@ class EstimateResource extends Resource
             ->columns([
                 ColorColumn::make('project.client.color')
                     ->label('')
-                    ->tooltip(fn (Estimate $record): ?string => $record->project?->client?->name),
+                    ->tooltip(fn(Estimate $record): ?string => $record->project?->client?->name),
                 TextColumn::make('title')
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Estimate $record): string => substr($record->description, 0, 75) . '...'),
+                    ->description(fn(Estimate $record): string => substr($record->description, 0, 75) . '...'),
                 TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
                     ->numeric()
@@ -73,7 +73,7 @@ class EstimateResource extends Resource
             ->filters([
                 SelectFilter::make('project')
                     ->label(trans_choice('project', 1))
-                    ->relationship('project', 'title')
+                    ->relationship('project', 'title'),
             ])
             ->recordActions(
                 ActionGroup::make([
@@ -89,7 +89,7 @@ class EstimateResource extends Resource
                         ->modalWidth(Width::Large),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             )
             ->toolbarActions([
                 BulkActionGroup::make([

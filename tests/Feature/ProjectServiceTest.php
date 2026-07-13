@@ -20,62 +20,6 @@ class ProjectServiceTest extends TestCase
     private string $logoPath;
     private string $signaturePath;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Storage::fake();
-
-        $this->logoPath = tempnam(sys_get_temp_dir(), 'logo') . '.jpg';
-        imagejpeg(imagecreatetruecolor(10, 10), $this->logoPath);
-
-        $this->signaturePath = tempnam(sys_get_temp_dir(), 'signature') . '.png';
-        imagepng(imagecreatetruecolor(10, 10), $this->signaturePath);
-
-        $this->seedSettings();
-    }
-
-    protected function tearDown(): void
-    {
-        @unlink($this->logoPath);
-        @unlink($this->signaturePath);
-
-        parent::tearDown();
-    }
-
-    private function seedSettings(): void
-    {
-        $values = [
-            'accountHolder' => 'Account Holder',
-            'bank' => 'Test Bank',
-            'bic' => 'TESTBIC1',
-            'city' => 'Berlin',
-            'company' => 'Acme UG',
-            'country' => 'Germany',
-            'email' => 'contact@acme.test',
-            'iban' => 'DE00000000000000000000',
-            'logo' => $this->logoPath,
-            'name' => 'Acme UG',
-            'phone' => '+49123456789',
-            'signature' => $this->signaturePath,
-            'street' => 'Main Street 1',
-            'taxOffice' => 'Finanzamt Berlin',
-            'vatId' => 'DE123456789',
-            'vatRate' => '0.19',
-            'website' => 'https://acme.test',
-            'zip' => '12345',
-        ];
-
-        foreach ($values as $field => $value) {
-            Setting::where('field', $field)->update(['value' => $value]);
-        }
-    }
-
-    private function expectedFilename(): string
-    {
-        return strtolower(now()->format('Ymd') . '_' . __('quote', locale: 'de') . '_Acme UG.pdf');
-    }
-
     #[Test]
     public function it_generates_and_saves_a_quote_pdf_for_an_hourly_project(): void
     {
@@ -132,5 +76,61 @@ class ProjectServiceTest extends TestCase
 
         Storage::assertExists($filename);
         $this->assertStringStartsWith('%PDF-', Storage::get($filename));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake();
+
+        $this->logoPath = tempnam(sys_get_temp_dir(), 'logo') . '.jpg';
+        imagejpeg(imagecreatetruecolor(10, 10), $this->logoPath);
+
+        $this->signaturePath = tempnam(sys_get_temp_dir(), 'signature') . '.png';
+        imagepng(imagecreatetruecolor(10, 10), $this->signaturePath);
+
+        $this->seedSettings();
+    }
+
+    protected function tearDown(): void
+    {
+        @unlink($this->logoPath);
+        @unlink($this->signaturePath);
+
+        parent::tearDown();
+    }
+
+    private function seedSettings(): void
+    {
+        $values = [
+            'accountHolder' => 'Account Holder',
+            'bank' => 'Test Bank',
+            'bic' => 'TESTBIC1',
+            'city' => 'Berlin',
+            'company' => 'Acme UG',
+            'country' => 'Germany',
+            'email' => 'contact@acme.test',
+            'iban' => 'DE00000000000000000000',
+            'logo' => $this->logoPath,
+            'name' => 'Acme UG',
+            'phone' => '+49123456789',
+            'signature' => $this->signaturePath,
+            'street' => 'Main Street 1',
+            'taxOffice' => 'Finanzamt Berlin',
+            'vatId' => 'DE123456789',
+            'vatRate' => '0.19',
+            'website' => 'https://acme.test',
+            'zip' => '12345',
+        ];
+
+        foreach ($values as $field => $value) {
+            Setting::where('field', $field)->update(['value' => $value]);
+        }
+    }
+
+    private function expectedFilename(): string
+    {
+        return strtolower(now()->format('Ymd') . '_' . __('quote', locale: 'de') . '_Acme UG.pdf');
     }
 }

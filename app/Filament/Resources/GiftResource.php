@@ -27,7 +27,7 @@ use Filament\Tables\Table;
 class GiftResource extends Resource
 {
     protected static ?string $model = Gift::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-gift';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-gift';
     protected static ?int $navigationSort = 50;
 
     public static function form(Schema $schema): Schema
@@ -51,7 +51,7 @@ class GiftResource extends Resource
                     ->label(__('name'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Gift $record): string => $record->email ?? ''),
+                    ->description(fn(Gift $record): string => $record->email ?? ''),
                 TextColumn::make('amount')
                     ->label(__('amount'))
                     ->money('eur')
@@ -87,7 +87,7 @@ class GiftResource extends Resource
                         ->modalWidth(Width::Large),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             )
             ->toolbarActions([
                 BulkActionGroup::make([

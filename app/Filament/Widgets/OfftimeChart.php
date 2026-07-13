@@ -11,11 +11,11 @@ use Filament\Widgets\ChartWidget;
 
 class OfftimeChart extends ChartWidget
 {
-    protected ?string $maxHeight = '180px';
     public ?string $filter = 'y';
+    protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -38,22 +38,24 @@ class OfftimeChart extends ChartWidget
         array_pop($labels);
         $period = $period->toArray();
 
-        $weekendData = array_fill(0, count($period)-1, 0);
-        $plannedData = array_fill(0, count($period)-1, 0);
-        $unplannedData = array_fill(0, count($period)-1, 0);
-        $totalData = array_fill(0, count($period)-1, 0);
-        $workedData = array_fill(0, count($period)-1, 0);
+        $weekendData = array_fill(0, count($period) - 1, 0);
+        $plannedData = array_fill(0, count($period) - 1, 0);
+        $unplannedData = array_fill(0, count($period) - 1, 0);
+        $totalData = array_fill(0, count($period) - 1, 0);
+        $workedData = array_fill(0, count($period) - 1, 0);
 
         foreach ($period as $i => $date) {
-            if ($i == count($period)-1) break;
+            if ($i == count($period) - 1) {
+                break;
+            }
             [$w, $p, $u, $t] = Offtime::daysCountByYear(intval($date->format('Y')));
             $weekendData[$i] = $w;
             $plannedData[$i] = $p;
             $unplannedData[$i] = $u;
             $totalData[$i] = $t;
-            $workedData[$i] = Position::whereBetween('started_at', [$date, $period[$i+1]])
+            $workedData[$i] = Position::whereBetween('started_at', [$date, $period[$i + 1]])
                 ->get(['started_at'])
-                ->map(fn ($obj) => $obj->started_at->format('Y-m-d'))
+                ->map(fn($obj) => $obj->started_at->format('Y-m-d'))
                 ->unique()
                 ->count();
         }
@@ -96,7 +98,7 @@ class OfftimeChart extends ChartWidget
                     'borderColor' => '#39444b',
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

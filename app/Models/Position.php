@@ -21,6 +21,14 @@ class Position extends Model
         'remote',
     ];
 
+    /**
+     * Get the invoice this position was made for.
+     */
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
     protected function casts(): array
     {
         return [
@@ -35,21 +43,13 @@ class Position extends Model
     }
 
     /**
-     * Get the invoice this position was made for.
-     */
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    /**
      * Total duration of the position in hours
      */
     protected function duration(): Attribute
     {
         return Attribute::make(
             fn(): float => Carbon::parse($this->started_at)
-                ->diffInMinutes(Carbon::parse($this->finished_at))/60 - $this->pause_duration
+                ->diffInMinutes(Carbon::parse($this->finished_at)) / 60 - $this->pause_duration,
         );
     }
 
@@ -64,7 +64,7 @@ class Position extends Model
 
         $net = 0;
         if ($this->invoice->pricing_unit === PricingUnit::Project) {
-            $net = $this->invoice->hours/$this->invoice->net * $this->duration;
+            $net = $this->invoice->hours / $this->invoice->net * $this->duration;
         } else {
             $net += $this->duration * $this->invoice->price / $this->invoice->pricing_hours;
         }
@@ -78,7 +78,7 @@ class Position extends Model
     {
         return Attribute::make(
             fn(): string => Carbon::parse($this->started_at)->isoFormat('lll')
-                . Carbon::parse($this->finished_at)->format(' - H.i')
+                . Carbon::parse($this->finished_at)->format(' - H.i'),
         );
     }
 }

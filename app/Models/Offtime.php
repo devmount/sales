@@ -21,32 +21,6 @@ class Offtime extends Model
         'description',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'start' => 'date',
-            'end' => 'date',
-            'category' => OfftimeCategory::class,
-            'description' => 'string',
-        ];
-    }
-
-    /**
-     * Year the time off is assigned to
-     */
-    protected function year(): Attribute
-    {
-        return Attribute::make(fn(): int => intval($this->start->format('Y')));
-    }
-
-    /**
-     * Number of days this off time consists of
-     */
-    protected function daysCount(): Attribute
-    {
-        return Attribute::make(fn(): int => $this->end ? intval($this->start->diffInDays($this->end)) + 1 : 1);
-    }
-
     /**
      * Get a time off on a given date or null if none exists
      */
@@ -104,6 +78,32 @@ class Offtime extends Model
         }
 
         return [$weekends, $cat['planned'], $cat['unplanned'], $total->count()];
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'start' => 'date',
+            'end' => 'date',
+            'category' => OfftimeCategory::class,
+            'description' => 'string',
+        ];
+    }
+
+    /**
+     * Year the time off is assigned to
+     */
+    protected function year(): Attribute
+    {
+        return Attribute::make(fn(): int => intval($this->start->format('Y')));
+    }
+
+    /**
+     * Number of days this off time consists of
+     */
+    protected function daysCount(): Attribute
+    {
+        return Attribute::make(fn(): int => $this->end ? intval($this->start->diffInDays($this->end)) + 1 : 1);
     }
 
 

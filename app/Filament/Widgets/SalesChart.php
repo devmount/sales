@@ -12,11 +12,11 @@ use Filament\Widgets\ChartWidget;
 
 class SalesChart extends ChartWidget
 {
-    protected ?string $maxHeight = '180px';
     public ?string $filter = 'y';
+    protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 5,
     ];
@@ -45,35 +45,37 @@ class SalesChart extends ChartWidget
             ->whereIn('category', ExpenseCategory::taxCategories())
             ->oldest('expended_at')
             ->get();
-        $period = match($this->filter) {
+        $period = match ($this->filter) {
             'y' => Carbon::parse($invoices->first()?->paid_at)->startOfYear()->yearsUntil(now()->addYear()),
             'q' => Carbon::parse($invoices->first()?->paid_at)->startOfQuarter()->quartersUntil(now()->addQuarter()),
             'm' => Carbon::parse($invoices->first()?->paid_at)->startOfMonth()->monthsUntil(now()->addMonth()),
         };
-        $labels = iterator_to_array($period->map(fn(Carbon $date) => match($this->filter) {
+        $labels = iterator_to_array($period->map(fn(Carbon $date) => match ($this->filter) {
             'y' => $date->format('Y'),
             'q' => $date->isoFormat('YYYY [Q]Q'),
             'm' => $date->isoFormat('YYYY MMM'),
         }));
         array_pop($labels);
         $period = $period->toArray();
-        $invoiceData = array_fill(0, count($period)-1, 0);
-        $expenseData = array_fill(0, count($period)-1, 0);
-        $taxData = array_fill(0, count($period)-1, 0);
+        $invoiceData = array_fill(0, count($period) - 1, 0);
+        $expenseData = array_fill(0, count($period) - 1, 0);
+        $taxData = array_fill(0, count($period) - 1, 0);
         foreach ($period as $i => $date) {
-            if ($i == count($period)-1) break;
+            if ($i == count($period) - 1) {
+                break;
+            }
             foreach ($invoices as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->paid_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->paid_at)) {
                     $invoiceData[$i] += $obj->net;
                 }
             }
             foreach ($expenses as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->expended_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->expended_at)) {
                     $expenseData[$i] += $obj->net;
                 }
             }
             foreach ($taxes as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->expended_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->expended_at)) {
                     $taxData[$i] += $obj->net;
                 }
             }
@@ -103,7 +105,7 @@ class SalesChart extends ChartWidget
                     'borderColor' => '#f97316',
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

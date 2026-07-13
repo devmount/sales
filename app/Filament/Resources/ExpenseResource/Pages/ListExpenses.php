@@ -14,6 +14,20 @@ class ListExpenses extends ListRecords
 {
     protected static string $resource = ExpenseResource::class;
 
+    public function getTabs(): array
+    {
+        return [
+            'deliverables' => Tab::make()
+                ->label(__('deliverables'))
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereIn('category', ExpenseCategory::deliverableCategories())),
+            'tax' => Tab::make()
+                ->label(__('taxes'))
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereIn('category', ExpenseCategory::taxCategories())),
+            'all' => Tab::make()
+                ->label(__('all')),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -22,20 +36,6 @@ class ListExpenses extends ListRecords
                 ->schema(ExpenseResource::formFields(6, false))
                 ->slideOver()
                 ->modalWidth(Width::Large),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'deliverables' => Tab::make()
-                ->label(__('deliverables'))
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('category', ExpenseCategory::deliverableCategories())),
-            'tax' => Tab::make()
-                ->label(__('taxes'))
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('category', ExpenseCategory::taxCategories())),
-            'all' => Tab::make()
-                ->label(__('all')),
         ];
     }
 }

@@ -13,7 +13,7 @@ class ClientProfitChart extends ChartWidget
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -49,7 +49,7 @@ class ClientProfitChart extends ChartWidget
             $client = Client::find($clientId);
             $datasets[] = [
                 'label' => $client->name,
-                'data' => array_map(fn ($i) => $yearly[$i] ?? 0, array_keys($labels)),
+                'data' => array_map(fn($i) => $yearly[$i] ?? 0, array_keys($labels)),
                 'fill' => 'start',
                 'borderColor' => $client->color,
                 'backgroundColor' => $client->color . '22',
@@ -58,7 +58,7 @@ class ClientProfitChart extends ChartWidget
 
         return [
             'datasets' => $datasets,
-            'labels' => array_map(fn ($year) => (string) $year, $labels),
+            'labels' => array_map(fn($year) => (string) $year, $labels),
         ];
     }
 

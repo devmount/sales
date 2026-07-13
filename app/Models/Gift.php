@@ -18,19 +18,6 @@ class Gift extends Model
         'email',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'received_at' => 'date',
-            'amount'      => 'float',
-            'subject'     => 'string',
-            'name'        => 'string',
-            'email'       => 'string',
-            'created_at'  => 'datetime',
-            'updated_at'  => 'datetime',
-        ];
-    }
-
     /**
      * Calculate array holding all years having gifts
      * sorted from current to past
@@ -43,9 +30,22 @@ class Gift extends Model
         $period = Carbon::parse($firstDate)->startOfYear()->yearsUntil(now());
         $years = array_reverse(
             iterator_to_array(
-                $period->map(fn(Carbon $date) => $date->format('Y'))
-            )
+                $period->map(fn(Carbon $date) => $date->format('Y')),
+            ),
         );
         return array_combine($years, $years);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'received_at' => 'date',
+            'amount'      => 'float',
+            'subject'     => 'string',
+            'name'        => 'string',
+            'email'       => 'string',
+            'created_at'  => 'datetime',
+            'updated_at'  => 'datetime',
+        ];
     }
 }

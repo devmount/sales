@@ -11,13 +11,13 @@ use Filament\Widgets\ChartWidget;
 
 class RecentPositionsChart extends ChartWidget
 {
-    protected ?string $maxHeight = '180px';
     public ?string $filter = '60';
 
-    public int | string | array $columnSpan = [
+    public int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 6,
     ];
+    protected ?string $maxHeight = '180px';
 
     public function getHeading(): string
     {
@@ -33,7 +33,7 @@ class RecentPositionsChart extends ChartWidget
     {
         $labels = [];
         $datasets = [];
-        $period = CarbonPeriod::create(Carbon::now()->subDays((int)$this->filter), '1 day', 'now');
+        $period = CarbonPeriod::create(Carbon::now()->subDays((int) $this->filter), '1 day', 'now');
         foreach ($period as $i => $date) {
             // X-Axis labels
             $labels[] = $date->isoFormat('dd, D. MMM');
