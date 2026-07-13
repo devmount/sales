@@ -14,6 +14,32 @@ class ListProjects extends ListRecords
 {
     protected static string $resource = ProjectResource::class;
 
+    public function getTabs(): array
+    {
+        return [
+            'active' => Tab::make()
+                ->label(__('active'))
+                ->badge(Project::active()->count())
+                ->modifyQueryUsing(fn(Builder $query) => $query->active()),
+            'upcoming' => Tab::make()
+                ->label(__('upcoming'))
+                ->badge(Project::upcoming()->count())
+                ->modifyQueryUsing(fn(Builder $query) => $query->upcoming()),
+            'finished' => Tab::make()
+                ->label(__('finished'))
+                ->badge(Project::finished()->count())
+                ->badgeColor('gray')
+                ->modifyQueryUsing(fn(Builder $query) => $query->finished()),
+            'aborted' => Tab::make()
+                ->label(__('aborted'))
+                ->badge(Project::aborted()->count())
+                ->badgeColor('gray')
+                ->modifyQueryUsing(fn(Builder $query) => $query->aborted()),
+            'all' => Tab::make()
+                ->label(__('all')),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -22,32 +48,6 @@ class ListProjects extends ListRecords
                 ->schema(ProjectResource::formFields(6, false))
                 ->slideOver()
                 ->modalWidth(Width::Large),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'active' => Tab::make()
-                ->label(__('active'))
-                ->badge(Project::active()->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->active()),
-            'upcoming' => Tab::make()
-                ->label(__('upcoming'))
-                ->badge(Project::upcoming()->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->upcoming()),
-            'finished' => Tab::make()
-                ->label(__('finished'))
-                ->badge(Project::finished()->count())
-                ->badgeColor('gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->finished()),
-            'aborted' => Tab::make()
-                ->label(__('aborted'))
-                ->badge(Project::aborted()->count())
-                ->badgeColor('gray')
-                ->modifyQueryUsing(fn (Builder $query) => $query->aborted()),
-            'all' => Tab::make()
-                ->label(__('all')),
         ];
     }
 }

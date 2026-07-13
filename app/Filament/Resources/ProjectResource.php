@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Storage;
 class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-package';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-package';
     protected static ?int $navigationSort = 20;
 
     public static function getNavigationBadge(): ?string
@@ -65,24 +65,26 @@ class ProjectResource extends Resource
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Project $record): string => $record->client?->name)
-                    ->tooltip(fn (Project $record): ?string => $record->description),
+                    ->description(fn(Project $record): string => $record->client?->name)
+                    ->tooltip(fn(Project $record): ?string => $record->description),
                 TextColumn::make('date_range')
                     ->label(__('dateRange'))
-                    ->state(fn (Project $record): string => Carbon::parse($record->start_at)
-                        ->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2)
+                    ->state(
+                        fn(Project $record): string => Carbon::parse($record->start_at)
+                        ->longAbsoluteDiffForHumans(Carbon::parse($record->due_at), 2),
                     )
-                    ->description(fn (Project $record): string => Carbon::parse($record->start_at)
-                        ->isoFormat('ll') . ' - ' . ($record->due_at ? Carbon::parse($record->due_at)->isoFormat('ll') : '∞')
+                    ->description(
+                        fn(Project $record): string => Carbon::parse($record->start_at)
+                        ->isoFormat('ll') . ' - ' . ($record->due_at ? Carbon::parse($record->due_at)->isoFormat('ll') : '∞'),
                     ),
                 TextColumn::make('scope')
                     ->label(__('scope'))
-                    ->state(fn (Project $record): string => $record->scope_range)
-                    ->description(fn (Project $record): string => $record->price_per_unit),
+                    ->state(fn(Project $record): string => $record->scope_range)
+                    ->description(fn(Project $record): string => $record->price_per_unit),
                 TextColumn::make('progress')
                     ->label(__('progress'))
-                    ->state(fn (Project $record): string => $record->hours_with_label)
-                    ->description(fn (Project $record): string => $record->progress_percent),
+                    ->state(fn(Project $record): string => $record->hours_with_label)
+                    ->description(fn(Project $record): string => $record->progress_percent),
                 TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
@@ -122,7 +124,7 @@ class ProjectResource extends Resource
                         }),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             )
             ->toolbarActions([
                 BulkActionGroup::make([

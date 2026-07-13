@@ -14,7 +14,7 @@ class ActiveInvoices extends TableWidget
 {
     public ?Invoice $record = null;
 
-    protected int | string | array $columnSpan = 6;
+    protected int|string|array $columnSpan = 6;
 
     public function table(Table $table): Table
     {
@@ -33,7 +33,7 @@ class ActiveInvoices extends TableWidget
                 Action::make('edit')
                     ->label('')
                     ->icon('tabler-edit')
-                    ->url(fn (Invoice $i): string => InvoiceResource::getUrl('edit', ['record' => $i])),
+                    ->url(fn(Invoice $i): string => InvoiceResource::getUrl('edit', ['record' => $i])),
             ]);
     }
 }

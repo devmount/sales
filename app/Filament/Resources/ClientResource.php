@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Mail;
 class ClientResource extends Resource
 {
     protected static ?string $model = Client::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-users';
     protected static ?int $navigationSort = 10;
 
     public static function getNavigationBadge(): ?string
@@ -70,7 +70,7 @@ class ClientResource extends Resource
                     ->label(__('name'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Client $record): string => $record->full_address)
+                    ->description(fn(Client $record): string => $record->full_address)
                     ->wrap(),
                 TextColumn::make('language')
                     ->label(__('language'))
@@ -80,14 +80,14 @@ class ClientResource extends Resource
                     ->label(__('net'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->state(fn (Client $record): float => $record->net)
-                    ->description(fn (Client $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
+                    ->state(fn(Client $record): float => $record->net)
+                    ->description(fn(Client $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
                 TextColumn::make('days_to_pay')
                     ->label(__('payment'))
                     ->abbr(__('averagePaymentDuration'), asTooltip: true)
                     ->numeric(1)
                     ->fontFamily(FontFamily::Mono)
-                    ->state(fn (Client $record): float => $record->avg_payment_delay)
+                    ->state(fn(Client $record): float => $record->avg_payment_delay)
                     ->description(trans_choice('day', 2)),
                 TextColumn::make('created_at')
                     ->label(__('createdAt'))
@@ -107,9 +107,9 @@ class ClientResource extends Resource
             ->recordActions(ActionGroup::make([
                 EditAction::make()->icon('tabler-edit'),
                 Action::make('kontaktieren')
-                    ->disabled(fn (Client $record) => !boolval($record->email))
+                    ->disabled(fn(Client $record) => !boolval($record->email))
                     ->icon('tabler-mail')
-                    ->schema(fn (Client $record) => [
+                    ->schema(fn(Client $record) => [
                         TextInput::make('subject')
                             ->label(__('subject'))
                             ->required(),
@@ -118,12 +118,12 @@ class ClientResource extends Resource
                             ->required()
                             ->default(__("email.template.contact.body", [
                                 'name' => $record->name,
-                                'sender' => Setting::get('name')
+                                'sender' => Setting::get('name'),
                             ])),
                     ])
                     ->action(function (Client $record, array $data) {
                         Mail::to($record->email)->send(
-                            (new ContactClient(body: $data['content']))->subject($data['subject'])
+                            (new ContactClient(body: $data['content']))->subject($data['subject']),
                         );
                     })
                     ->slideOver()

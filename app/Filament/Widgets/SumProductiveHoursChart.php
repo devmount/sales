@@ -10,11 +10,11 @@ use Filament\Widgets\ChartWidget;
 
 class SumProductiveHoursChart extends ChartWidget
 {
-    protected ?string $maxHeight = '180px';
     public ?string $filter = 'y';
+    protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -33,23 +33,25 @@ class SumProductiveHoursChart extends ChartWidget
     {
         $positions = Position::oldest('started_at')->get();
         $start = $positions->first()?->started_at;
-        $period = match($this->filter) {
+        $period = match ($this->filter) {
             'y' => Carbon::parse($start)->startOfYear()->yearsUntil(now()->addYear()),
             'q' => Carbon::parse($start)->startOfQuarter()->quartersUntil(now()->addQuarter()),
             'm' => Carbon::parse($start)->startOfMonth()->monthsUntil(now()->addMonth()),
         };
-        $labels = iterator_to_array($period->map(fn(Carbon $date) => match($this->filter) {
+        $labels = iterator_to_array($period->map(fn(Carbon $date) => match ($this->filter) {
             'y' => $date->format('Y'),
             'q' => $date->isoFormat('YYYY [Q]Q'),
             'm' => $date->isoFormat('YYYY MMM'),
         }));
         array_pop($labels);
         $period = $period->toArray();
-        $hours = array_fill(0, count($period)-1, 0);
+        $hours = array_fill(0, count($period) - 1, 0);
         foreach ($period as $i => $date) {
-            if ($i == count($period)-1) break;
+            if ($i == count($period) - 1) {
+                break;
+            }
             foreach ($positions as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->started_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->started_at)) {
                     $hours[$i] += $obj->duration;
                 }
             }
@@ -65,7 +67,7 @@ class SumProductiveHoursChart extends ChartWidget
                     'borderColor' => '#3b82f6',
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

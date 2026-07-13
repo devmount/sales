@@ -29,6 +29,22 @@ class Client extends Model
         'vat_id',
     ];
 
+    /**
+     * The projects this client ordered.
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    /**
+     * The projects this client ordered.
+     */
+    public function invoices(): HasManyThrough
+    {
+        return $this->hasManyThrough(Invoice::class, Project::class);
+    }
+
     protected function casts(): array
     {
         return [
@@ -47,22 +63,6 @@ class Client extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * The projects this client ordered.
-     */
-    public function projects(): HasMany
-    {
-        return $this->hasMany(Project::class);
-    }
-
-    /**
-     * The projects this client ordered.
-     */
-    public function invoices(): HasManyThrough
-    {
-        return $this->hasManyThrough(Invoice::class, Project::class);
     }
 
     /**
@@ -117,6 +117,6 @@ class Client extends Model
                 }
             }
         }
-        return Attribute::make(fn(): float => count($days) ? array_sum($days)/count($days) : 0.0);
+        return Attribute::make(fn(): float => count($days) ? array_sum($days) / count($days) : 0.0);
     }
 }

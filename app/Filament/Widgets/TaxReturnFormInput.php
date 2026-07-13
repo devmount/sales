@@ -16,8 +16,8 @@ use Illuminate\Support\Number;
 
 class TaxReturnFormInput extends TableWidget
 {
-    protected int | string | array $columnSpan = 12;
     public ?int $filter = null;
+    protected int|string|array $columnSpan = 12;
 
     public function __construct()
     {
@@ -37,15 +37,15 @@ class TaxReturnFormInput extends TableWidget
                 TextColumn::make('itr')
                     ->label(__('itr'))
                     ->fontFamily(FontFamily::Mono)
-                    ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
+                    ->formatStateUsing(fn(?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
                 TextColumn::make('vr')
                     ->label(__('vr'))
                     ->fontFamily(FontFamily::Mono)
-                    ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
+                    ->formatStateUsing(fn(?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
                 TextColumn::make('rsc')
                     ->label(__('rsc'))
                     ->fontFamily(FontFamily::Mono)
-                    ->formatStateUsing(fn (?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
+                    ->formatStateUsing(fn(?string $state) => $state ? __('lineN', ['n' => $state]) : ''),
                 TextColumn::make('help')
                     ->color('gray')
                     ->label(__('helpText')),
@@ -56,7 +56,7 @@ class TaxReturnFormInput extends TableWidget
                     ->alignRight()
                     ->color(fn(array $record) => $record['color'] ?? false)
                     ->copyable()
-                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+                    ->copyableState(fn(string $state): string => Number::format(floatval($state))),
             ]);
     }
 

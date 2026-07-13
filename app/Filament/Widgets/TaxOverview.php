@@ -20,10 +20,10 @@ use Illuminate\Support\Number;
 class TaxOverview extends TableWidget implements HasActions
 {
     use InteractsWithActions;
-
-    protected int | string | array $columnSpan = 12;
-    protected static int $entryCount = 14;
     public ?string $filter = 'm';
+
+    protected int|string|array $columnSpan = 12;
+    protected static int $entryCount = 14;
 
     public function lastAdvanceVatAction(): Action
     {
@@ -61,18 +61,18 @@ class TaxOverview extends TableWidget implements HasActions
                     ->label(__('netTaxable'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->color(fn (string $state): string => !$state ? 'gray' : 'primary')
+                    ->color(fn(string $state): string => !$state ? 'gray' : 'primary')
                     ->alignRight()
                     ->copyable()
-                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+                    ->copyableState(fn(string $state): string => Number::format(floatval($state))),
                 TextColumn::make('netUntaxable')
                     ->label(__('netUntaxable'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->color(fn (string $state): string => !$state ? 'gray' : 'primary')
+                    ->color(fn(string $state): string => !$state ? 'gray' : 'primary')
                     ->alignRight()
                     ->copyable()
-                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+                    ->copyableState(fn(string $state): string => Number::format(floatval($state))),
                 TextColumn::make('totalNet')
                     ->label(__('netTotal'))
                     ->money('eur')
@@ -80,29 +80,29 @@ class TaxOverview extends TableWidget implements HasActions
                     ->color('gray')
                     ->alignRight()
                     ->copyable()
-                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+                    ->copyableState(fn(string $state): string => Number::format(floatval($state))),
                 TextColumn::make('vatExpenses')
                     ->label(__('vatExpenses'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->color(fn (string $state): string => !$state ? 'gray' : 'danger')
+                    ->color(fn(string $state): string => !$state ? 'gray' : 'danger')
                     ->alignRight()
                     ->copyable()
-                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+                    ->copyableState(fn(string $state): string => Number::format(floatval($state))),
                 TextColumn::make('totalVat')
                     ->label(__('totalVat'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->color(fn (string $state): string => !$state ? 'gray' : 'normal')
+                    ->color(fn(string $state): string => !$state ? 'gray' : 'normal')
                     ->alignRight()
                     ->copyable()
-                    ->copyableState(fn (string $state): string => Number::format(floatval($state))),
+                    ->copyableState(fn(string $state): string => Number::format(floatval($state))),
             ]);
     }
 
     public function getTableRecords(): Collection
     {
-        return match($this->filter) {
+        return match ($this->filter) {
             'm' => $this->getMonthData(),
             'q' => $this->getQuarterData(),
             'y' => $this->getYearData(),
@@ -114,7 +114,7 @@ class TaxOverview extends TableWidget implements HasActions
         $records = [];
         $dt = Carbon::today();
 
-        for ($i=0; $i < static::$entryCount; $i++) {
+        for ($i = 0; $i < static::$entryCount; $i++) {
             [$netTaxable, $netUntaxable, $vatEarned] = Invoice::ofTime($dt, TimeUnit::MONTH);
             [, $vatExpended] = Expense::ofTime($dt, TimeUnit::MONTH);
 
@@ -139,7 +139,7 @@ class TaxOverview extends TableWidget implements HasActions
         $records = [];
         $dt = Carbon::today();
 
-        for ($i=0; $i < static::$entryCount; $i++) {
+        for ($i = 0; $i < static::$entryCount; $i++) {
             [$netTaxable, $netUntaxable, $vatEarned] = Invoice::ofTime($dt, TimeUnit::QUARTER);
             [, $vatExpended] = Expense::ofTime($dt, TimeUnit::QUARTER);
 
@@ -164,7 +164,7 @@ class TaxOverview extends TableWidget implements HasActions
         $records = [];
         $dt = Carbon::today();
 
-        for ($i=0; $i < static::$entryCount; $i++) {
+        for ($i = 0; $i < static::$entryCount; $i++) {
             [$netTaxable, $netUntaxable, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
             [, $vatExpended] = Expense::ofTime($dt, TimeUnit::YEAR);
 

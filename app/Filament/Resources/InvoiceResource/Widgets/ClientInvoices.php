@@ -14,15 +14,15 @@ class ClientInvoices extends TableWidget
 {
     public ?Invoice $record = null;
 
-    protected int | string | array $columnSpan = 6;
+    protected int|string|array $columnSpan = 6;
 
     public function table(Table $table): Table
     {
         return $table
             ->heading(__('otherInvoices'))
             ->query(
-                Invoice::whereHas('project', fn ($query) => $query->where('client_id', $this->record?->project->client_id))
-                    ->whereNot('id', $this->record?->id)
+                Invoice::whereHas('project', fn($query) => $query->where('client_id', $this->record?->project->client_id))
+                    ->whereNot('id', $this->record?->id),
             )
             ->paginated([8])
             ->defaultSort('created_at', 'desc')
@@ -39,7 +39,7 @@ class ClientInvoices extends TableWidget
                 Action::make('edit')
                     ->label('')
                     ->icon('tabler-edit')
-                    ->url(fn (Invoice $i): string => InvoiceResource::getUrl('edit', ['record' => $i])),
+                    ->url(fn(Invoice $i): string => InvoiceResource::getUrl('edit', ['record' => $i])),
             ]);
     }
 }

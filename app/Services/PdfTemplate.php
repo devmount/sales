@@ -55,7 +55,7 @@ class PdfTemplate extends PdfDocument
                 DocumentType::QUOTE => $this->getPage() <= 2
                     ? __("quote", locale: $this->lang)
                     : __("costEstimate", locale: $this->lang),
-            }
+            },
         );
         $this->setFont('FiraSans-ExtraLight', fontSizeInPoint: 26)
             ->setTextColor(Color::LIGHT->pdfColor())
@@ -181,8 +181,8 @@ class PdfTemplate extends PdfDocument
         }
         $this->writer->putf('/Names <</EmbeddedFiles %d 0 R>>', $this->attachmentNumber);
         $array = \array_map(
-            static fn (PdfAttachment $attachment): string => $attachment->formatNumber(),
-            $this->attachments
+            static fn(PdfAttachment $attachment): string => $attachment->formatNumber(),
+            $this->attachments,
         );
         $this->writer->putf('/AF [%s]', \implode(' ', $array));
     }

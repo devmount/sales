@@ -41,7 +41,7 @@ class OfftimeFactory extends Factory
      */
     public function singleDay(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'end' => null,
         ]);
     }
@@ -51,7 +51,7 @@ class OfftimeFactory extends Factory
      */
     public function vacation(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'category' => OfftimeCategory::Vacation->value,
         ]);
     }
@@ -61,7 +61,7 @@ class OfftimeFactory extends Factory
      */
     public function sick(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'category' => OfftimeCategory::Sick->value,
         ]);
     }

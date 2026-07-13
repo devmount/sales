@@ -35,35 +35,36 @@ class InvoicesRelationManager extends RelationManager
                 TextColumn::make('title')
                     ->label(__('title'))
                     ->sortable()
-                    ->description(fn (Invoice $record): string =>
-                        ($record->invoiced_at ? __('invoicedAt') . ' ' . Carbon::parse($record->invoiced_at)->isoFormat('LL') : '') .
-                        ($record->paid_at ? ', ' . __('paidAt') . ' ' . Carbon::parse($record->paid_at)->isoFormat('LL') : '')
+                    ->description(
+                        fn(Invoice $record): string
+                        => ($record->invoiced_at ? __('invoicedAt') . ' ' . Carbon::parse($record->invoiced_at)->isoFormat('LL') : '')
+                        . ($record->paid_at ? ', ' . __('paidAt') . ' ' . Carbon::parse($record->paid_at)->isoFormat('LL') : ''),
                     )
-                    ->tooltip(fn (Invoice $record): ?string => $record->description),
+                    ->tooltip(fn(Invoice $record): ?string => $record->description),
                 TextColumn::make('price')
                     ->label(__('price'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->description(fn (Invoice $record): string => $record->pricing_unit->getLabel()),
+                    ->description(fn(Invoice $record): string => $record->pricing_unit->getLabel()),
                 TextColumn::make('net')
                     ->label(__('net'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->state(fn (Invoice $record): float => $record->net)
-                    ->description(fn (Invoice $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
+                    ->state(fn(Invoice $record): float => $record->net)
+                    ->description(fn(Invoice $record): string => $record->hours . ' ' . trans_choice('hour', $record->hours)),
                 TextColumn::make('total')
                     ->label(__('total'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->state(fn (Invoice $record): float => $record->final)
-                    ->description(fn (Invoice $record): string => Number::currency($record->vat, 'eur') . ' ' . __('vat')),
+                    ->state(fn(Invoice $record): float => $record->final)
+                    ->description(fn(Invoice $record): string => Number::currency($record->vat, 'eur') . ' ' . __('vat')),
             ])
             ->headerActions([
                 CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->schema(InvoiceResource::formFields(6, false))
-                    ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
+                    ->visible(fn(): bool => $this->getOwnerRecord() instanceof Project)
                     ->mountUsing(function (Schema $schema) {
                         $schema->fill();
                         if ($this->getOwnerRecord() instanceof Project) {
@@ -86,7 +87,7 @@ class InvoicesRelationManager extends RelationManager
                         ->slideOver()
                         ->modalWidth(Width::ExtraLarge),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -99,7 +100,7 @@ class InvoicesRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('create'))
                     ->schema(InvoiceResource::formFields(6, false))
-                    ->visible(fn (): bool => $this->getOwnerRecord() instanceof Project)
+                    ->visible(fn(): bool => $this->getOwnerRecord() instanceof Project)
                     ->mountUsing(function (Schema $schema) {
                         $schema->fill();
                         if ($this->getOwnerRecord() instanceof Project) {

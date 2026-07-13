@@ -63,7 +63,7 @@ class OfftimeChartTest extends TestCase
         $this->assertSame(0, $unplanned['data'][$yearIndex]);
         $this->assertSame(
             $weekend['data'][$yearIndex] + $planned['data'][$yearIndex] + $unplanned['data'][$yearIndex],
-            $total['data'][$yearIndex]
+            $total['data'][$yearIndex],
         );
         $this->assertSame(1, $worked['data'][$yearIndex]);
     }

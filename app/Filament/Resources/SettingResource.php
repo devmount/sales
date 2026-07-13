@@ -12,7 +12,7 @@ use Filament\Tables\Table;
 class SettingResource extends Resource
 {
     protected static ?string $model = Setting::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-adjustments';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-adjustments';
 
     public static function table(Table $table): Table
     {
@@ -21,7 +21,7 @@ class SettingResource extends Resource
             ->columns([
                 TextColumn::make('field')
                     ->label(__('field'))
-                    ->state(fn (Setting $record): string => "{$record->label} (<code>{$record->field}</code>)")
+                    ->state(fn(Setting $record): string => "{$record->label} (<code>{$record->field}</code>)")
                     ->html(),
                 TextInputColumn::make('value')
                     ->label(__('value'))

@@ -33,7 +33,7 @@ use Filament\Tables\Table;
 class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'tabler-credit-card';
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-credit-card';
     protected static ?int $navigationSort = 40;
 
     public static function form(Schema $schema): Schema
@@ -65,8 +65,8 @@ class ExpenseResource extends Resource
                     ->label(__('vat'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->state(fn (Expense $record): float => $record->vat)
-                    ->color(fn (string $state): string => $state == 0 ? 'gray' : 'normal')
+                    ->state(fn(Expense $record): float => $record->vat)
+                    ->color(fn(string $state): string => $state == 0 ? 'gray' : 'normal')
                     ->sortable(),
                 TextColumn::make('quantity')
                     ->label(__('quantity'))
@@ -94,7 +94,7 @@ class ExpenseResource extends Resource
             ->filters([
                 SelectFilter::make('category')
                     ->label(__('category'))
-                    ->options(ExpenseCategory::options())
+                    ->options(ExpenseCategory::options()),
             ])
             ->recordActions(
                 ActionGroup::make([
@@ -110,7 +110,7 @@ class ExpenseResource extends Resource
                         ->modalWidth(Width::Large),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             )
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -216,7 +216,7 @@ class ExpenseResource extends Resource
                 ->suffixIcon('tabler-receipt-tax')
                 ->columnSpan($columns / 2)
                 ->required()
-                ->hidden(fn (Get $get): bool => !$get('taxable')),
+                ->hidden(fn(Get $get): bool => !$get('taxable')),
             Textarea::make('description')
                 ->label(__('description'))
                 ->maxLength(65535)

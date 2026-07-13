@@ -17,6 +17,11 @@ class EditInvoice extends EditRecord
 {
     protected static string $resource = InvoiceResource::class;
 
+    public function getFooterWidgetsColumns(): int|array
+    {
+        return 12;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -38,11 +43,6 @@ class EditInvoice extends EditRecord
                 }),
             DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
         ];
-    }
-
-    public function getFooterWidgetsColumns(): int|array
-    {
-        return 12;
     }
 
     protected function getFooterWidgets(): array

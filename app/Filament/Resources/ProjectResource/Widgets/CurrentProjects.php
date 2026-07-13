@@ -11,7 +11,7 @@ class CurrentProjects extends Widget
 
     protected string $view = 'filament.widgets.current-projects-widget';
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 6,
     ];

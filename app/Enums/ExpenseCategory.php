@@ -26,7 +26,7 @@ enum ExpenseCategory: string implements HasLabel, HasColor
         };
     }
 
-    public function getColor(): string | array | null
+    public function getColor(): string|array|null
     {
         return match ($this) {
             self::Vat => 'teal',

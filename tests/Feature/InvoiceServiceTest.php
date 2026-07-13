@@ -21,84 +21,6 @@ class InvoiceServiceTest extends TestCase
     private string $logoPath;
     private string $signaturePath;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Storage::fake();
-
-        $this->logoPath = tempnam(sys_get_temp_dir(), 'logo') . '.jpg';
-        imagejpeg(imagecreatetruecolor(10, 10), $this->logoPath);
-
-        $this->signaturePath = tempnam(sys_get_temp_dir(), 'signature') . '.png';
-        imagepng(imagecreatetruecolor(10, 10), $this->signaturePath);
-
-        $this->seedSettings();
-    }
-
-    protected function tearDown(): void
-    {
-        @unlink($this->logoPath);
-        @unlink($this->signaturePath);
-
-        parent::tearDown();
-    }
-
-    private function seedSettings(): void
-    {
-        $values = [
-            'accountHolder' => 'Account Holder',
-            'bank' => 'Test Bank',
-            'bic' => 'TESTBIC1',
-            'city' => 'Berlin',
-            'company' => 'Acme UG',
-            'country' => 'Germany',
-            'email' => 'contact@acme.test',
-            'iban' => 'DE00000000000000000000',
-            'logo' => $this->logoPath,
-            'name' => 'Acme UG',
-            'phone' => '+49123456789',
-            'signature' => $this->signaturePath,
-            'street' => 'Main Street 1',
-            'taxOffice' => 'Finanzamt Berlin',
-            'vatId' => 'DE123456789',
-            'vatRate' => '0.19',
-            'website' => 'https://acme.test',
-            'zip' => '12345',
-        ];
-
-        foreach ($values as $field => $value) {
-            Setting::where('field', $field)->update(['value' => $value]);
-        }
-    }
-
-    private function makeInvoice(array $attributes = []): Invoice
-    {
-        $client = Client::factory()->create([
-            'language' => $attributes['language'] ?? LanguageCode::DE,
-            'name' => 'Client GmbH',
-        ]);
-        unset($attributes['language']);
-        $project = Project::factory()->for($client)->hourly()->create();
-
-        return Invoice::factory()->for($project)->create(array_merge([
-            'taxable' => true,
-            'vat_rate' => 0.19,
-            'discount' => null,
-            'undated' => false,
-        ], $attributes));
-    }
-
-    private function expectedPdfFilename(Invoice $invoice, string $locale = 'de'): string
-    {
-        return strtolower("{$invoice->current_number}_" . trans_choice('invoice', 1, [], $locale) . '_Acme UG.pdf');
-    }
-
-    private function expectedXmlFilename(Invoice $invoice, string $locale = 'de'): string
-    {
-        return strtolower("{$invoice->current_number}_" . trans_choice('invoice', 1, [], $locale) . '_Acme UG.xml');
-    }
-
     #[Test]
     public function it_generates_and_saves_an_invoice_pdf_with_an_xml_attachment(): void
     {
@@ -199,5 +121,83 @@ class InvoiceServiceTest extends TestCase
         $this->assertStringContainsString('<cbc:RegistrationName>Acme UG</cbc:RegistrationName>', $xml);
         $this->assertStringContainsString('<cbc:RegistrationName>' . $invoice->project->client->name . '</cbc:RegistrationName>', $xml);
         $this->assertStringContainsString('<cbc:PayableAmount currencyID="EUR">' . $invoice->gross . '</cbc:PayableAmount>', $xml);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake();
+
+        $this->logoPath = tempnam(sys_get_temp_dir(), 'logo') . '.jpg';
+        imagejpeg(imagecreatetruecolor(10, 10), $this->logoPath);
+
+        $this->signaturePath = tempnam(sys_get_temp_dir(), 'signature') . '.png';
+        imagepng(imagecreatetruecolor(10, 10), $this->signaturePath);
+
+        $this->seedSettings();
+    }
+
+    protected function tearDown(): void
+    {
+        @unlink($this->logoPath);
+        @unlink($this->signaturePath);
+
+        parent::tearDown();
+    }
+
+    private function seedSettings(): void
+    {
+        $values = [
+            'accountHolder' => 'Account Holder',
+            'bank' => 'Test Bank',
+            'bic' => 'TESTBIC1',
+            'city' => 'Berlin',
+            'company' => 'Acme UG',
+            'country' => 'Germany',
+            'email' => 'contact@acme.test',
+            'iban' => 'DE00000000000000000000',
+            'logo' => $this->logoPath,
+            'name' => 'Acme UG',
+            'phone' => '+49123456789',
+            'signature' => $this->signaturePath,
+            'street' => 'Main Street 1',
+            'taxOffice' => 'Finanzamt Berlin',
+            'vatId' => 'DE123456789',
+            'vatRate' => '0.19',
+            'website' => 'https://acme.test',
+            'zip' => '12345',
+        ];
+
+        foreach ($values as $field => $value) {
+            Setting::where('field', $field)->update(['value' => $value]);
+        }
+    }
+
+    private function makeInvoice(array $attributes = []): Invoice
+    {
+        $client = Client::factory()->create([
+            'language' => $attributes['language'] ?? LanguageCode::DE,
+            'name' => 'Client GmbH',
+        ]);
+        unset($attributes['language']);
+        $project = Project::factory()->for($client)->hourly()->create();
+
+        return Invoice::factory()->for($project)->create(array_merge([
+            'taxable' => true,
+            'vat_rate' => 0.19,
+            'discount' => null,
+            'undated' => false,
+        ], $attributes));
+    }
+
+    private function expectedPdfFilename(Invoice $invoice, string $locale = 'de'): string
+    {
+        return strtolower("{$invoice->current_number}_" . trans_choice('invoice', 1, [], $locale) . '_Acme UG.pdf');
+    }
+
+    private function expectedXmlFilename(Invoice $invoice, string $locale = 'de'): string
+    {
+        return strtolower("{$invoice->current_number}_" . trans_choice('invoice', 1, [], $locale) . '_Acme UG.xml');
     }
 }

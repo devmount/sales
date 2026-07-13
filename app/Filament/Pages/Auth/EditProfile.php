@@ -19,7 +19,7 @@ class EditProfile extends BaseEditProfile
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
                         $this->getCurrentPasswordFormComponent(),
-                    ])
+                    ]),
             ]);
     }
 }

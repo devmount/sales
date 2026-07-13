@@ -33,14 +33,14 @@ class PositionsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('description')
                     ->label(__('description'))
-                    ->formatStateUsing(fn (string $state): string => nl2br($state))
+                    ->formatStateUsing(fn(string $state): string => nl2br($state))
                     ->html(),
                 TextColumn::make('amount')
                     ->label(trans_choice('hour', 2))
-                    ->state(fn (Position $record): float => $record->duration)
+                    ->state(fn(Position $record): float => $record->duration)
                     ->weight(FontWeight::ExtraBold)
                     ->fontFamily(FontFamily::Mono)
-                    ->description(fn (Position $record): string => $record->time_range),
+                    ->description(fn(Position $record): string => $record->time_range),
                 ToggleColumn::make('remote')
                     ->label(__('remote')),
             ])

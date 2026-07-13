@@ -30,21 +30,22 @@ class ProjectsRelationManager extends RelationManager
                     ->label(__('title'))
                     ->searchable()
                     ->sortable()
-                    ->tooltip(fn (Project $record): ?string => $record->description),
+                    ->tooltip(fn(Project $record): ?string => $record->description),
                 TextColumn::make('date_range')
                     ->label(__('dateRange'))
-                    ->state(fn (Project $record): string => Carbon::parse($record->start_at)
-                        ->isoFormat('ll') . ' - ' . ($record->due_at ? Carbon::parse($record->due_at)->isoFormat('ll') : '∞')
+                    ->state(
+                        fn(Project $record): string => Carbon::parse($record->start_at)
+                        ->isoFormat('ll') . ' - ' . ($record->due_at ? Carbon::parse($record->due_at)->isoFormat('ll') : '∞'),
                     ),
                 TextColumn::make('scope')
                     ->label(__('scope'))
-                    ->state(fn (Project $record): string => $record->scope_range),
+                    ->state(fn(Project $record): string => $record->scope_range),
                 TextColumn::make('price_per_unit')
                     ->label(__('price'))
-                    ->state(fn (Project $record): string => $record->price_per_unit),
+                    ->state(fn(Project $record): string => $record->price_per_unit),
                 TextColumn::make('progress')
                     ->label(__('progress'))
-                    ->state(fn (Project $record): string => $record->hours_with_label),
+                    ->state(fn(Project $record): string => $record->hours_with_label),
                 TextColumn::make('created_at')
                     ->label(__('createdAt'))
                     ->datetime('j. F Y, H:i:s')
@@ -84,7 +85,7 @@ class ProjectsRelationManager extends RelationManager
                         ->slideOver()
                         ->modalWidth(Width::Large),
                 ])
-                ->icon('tabler-dots-vertical')
+                ->icon('tabler-dots-vertical'),
             ]);
     }
 

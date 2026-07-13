@@ -13,7 +13,7 @@ class WeeklyHoursChart extends ChartWidget
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -35,20 +35,22 @@ class WeeklyHoursChart extends ChartWidget
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
         $period = $period->toArray();
-        $countWeeks = array_fill(0, count($period)-1, 0);
-        $avgWeeklyHours = array_fill(0, count($period)-1, 0);
+        $countWeeks = array_fill(0, count($period) - 1, 0);
+        $avgWeeklyHours = array_fill(0, count($period) - 1, 0);
         foreach ($period as $i => $date) {
-            if ($i == count($period)-1) break;
+            if ($i == count($period) - 1) {
+                break;
+            }
             $weeks = [];
             $hours = 0;
             foreach ($positions as $obj) {
-                if (CarbonPeriod::create($date, $period[$i+1])->contains($obj->started_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->started_at)) {
                     $weeks[Carbon::parse($obj->started_at)->isoWeek()] = 1;
                     $hours += $obj->duration;
                 }
             }
             $countWeeks[$i] = count($weeks);
-            $avgWeeklyHours[$i] = count($weeks) != 0 ? round($hours/count($weeks)) : 0;
+            $avgWeeklyHours[$i] = count($weeks) != 0 ? round($hours / count($weeks)) : 0;
         }
 
         return [
@@ -70,7 +72,7 @@ class WeeklyHoursChart extends ChartWidget
                     'yAxisID' => 'y2',
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

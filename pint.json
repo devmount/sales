@@ -1,0 +1,27 @@
+{
+    "preset": "per",
+    "rules": {
+        "ordered_class_elements": {
+            "order": [
+                "use_trait",
+                "case",
+                "constant_public",
+                "constant_protected",
+                "constant_private",
+                "property_public",
+                "property_protected",
+                "property_private",
+                "construct",
+                "destruct",
+                "magic",
+                "method_public",
+                "method_protected",
+                "method_private"
+            ],
+            "sort_algorithm": "none"
+        },
+        "types_spaces": {
+            "space": "none"
+        }
+    }
+}

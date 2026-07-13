@@ -54,7 +54,9 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ]
+        ],
+        "lint": "vendor/bin/pint --test --parallel",
+        "format": "vendor/bin/pint --parallel"
     },
     "extra": {
         "laravel": {

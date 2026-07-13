@@ -12,12 +12,12 @@ use Filament\Widgets\ChartWidget;
 class ClientProfitDistributionChart extends ChartWidget
 {
     use HasEmptyStateChart;
+    public ?string $filter = '';
 
     protected ?string $maxHeight = '180px';
-    public ?string $filter = '';
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'sm' => 12,
         'xl' => 4,
     ];
@@ -48,8 +48,8 @@ class ClientProfitDistributionChart extends ChartWidget
                 : $obj->net;
         }
         $sum = array_sum($profit);
-        $labels = array_map(fn ($id, $p) => '(' . round($p/$sum*100, 1) . '%) ' . Client::find($id)->name, array_keys($profit), $profit);
-        $colors = array_map(fn ($id) => Client::find($id)->color, array_keys($profit));
+        $labels = array_map(fn($id, $p) => '(' . round($p / $sum * 100, 1) . '%) ' . Client::find($id)->name, array_keys($profit), $profit);
+        $colors = array_map(fn($id) => Client::find($id)->color, array_keys($profit));
 
         return [
             'datasets' => [
@@ -57,10 +57,10 @@ class ClientProfitDistributionChart extends ChartWidget
                     'data' => array_values($profit),
                     'borderColor' => $colors,
                     'backgroundColor' => $colors,
-                    'hoverOffset' => 4
+                    'hoverOffset' => 4,
                 ],
             ],
-            'labels' => $labels
+            'labels' => $labels,
         ];
     }
 

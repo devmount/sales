@@ -48,7 +48,7 @@ class ProjectFactory extends Factory
      */
     public function active(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'start_at' => fake()->dateTimeBetween('-3 months', 'now')->format('Y-m-d'),
             'due_at' => fake()->dateTimeBetween('now', '+3 months')->format('Y-m-d'),
             'aborted' => false,
@@ -60,7 +60,7 @@ class ProjectFactory extends Factory
      */
     public function upcoming(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'start_at' => fake()->dateTimeBetween('now', '+2 months')->format('Y-m-d'),
             'due_at' => fake()->dateTimeBetween('+6 months', '+12 months')->format('Y-m-d'),
             'aborted' => false,
@@ -72,7 +72,7 @@ class ProjectFactory extends Factory
      */
     public function finished(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'start_at' => fake()->dateTimeBetween('-12 months', '-6 months')->format('Y-m-d'),
             'due_at' => fake()->dateTimeBetween('-4 months', 'now')->format('Y-m-d'),
             'aborted' => false,
@@ -84,7 +84,7 @@ class ProjectFactory extends Factory
      */
     public function aborted(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'aborted' => true,
         ]);
     }
@@ -94,7 +94,7 @@ class ProjectFactory extends Factory
      */
     public function hourly(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'price' => fake()->randomFloat(2, 50, 150),
             'pricing_unit' => PricingUnit::Hour->value,
         ]);
@@ -105,7 +105,7 @@ class ProjectFactory extends Factory
      */
     public function daily(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'price' => fake()->randomFloat(2, 450, 1250),
             'pricing_unit' => PricingUnit::Day->value,
         ]);
@@ -116,7 +116,7 @@ class ProjectFactory extends Factory
      */
     public function project(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'price' => fake()->randomFloat(2, 500, 15000),
             'pricing_unit' => PricingUnit::Project->value,
         ]);

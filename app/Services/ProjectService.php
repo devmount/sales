@@ -23,7 +23,8 @@ class ProjectService
      * @param Project $project Record to export
      * @return string
      */
-    public static function generateQuotePdf(Project $project): string {
+    public static function generateQuotePdf(Project $project): string
+    {
         $conf = Setting::pluck('value', 'field');
         $client = $project?->client;
         $lang = $client?->language->value ?? 'de';
@@ -42,12 +43,12 @@ class ProjectService
             'hours' => Number::format($billedPerProject ? $project->scope ?? 0 : $project->estimated_hours, 1, locale: $lang),
             'net' => Number::currency($project->estimated_net, 'EUR', locale: $lang),
             'number' => $now->format('Ymd'),
-            'price' => Number::currency($billedPerProject ? ($project->scope ? $project->price/$project->scope : 0) : $project->price, 'EUR', locale: $lang),
+            'price' => Number::currency($billedPerProject ? ($project->scope ? $project->price / $project->scope : 0) : $project->price, 'EUR', locale: $lang),
             'start' => Carbon::parse($project->start_at)->locale($lang)->isoFormat('LL'),
             'title' => $project->title,
             'validDate' => $now->addWeeks(3)->locale($lang)->isoFormat('LL'),
             'vat' => Number::currency($project->estimated_vat, 'EUR', locale: $lang),
-            'vatRate' => Number::percentage($conf['vatRate']*100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
+            'vatRate' => Number::percentage($conf['vatRate'] * 100, 2, locale: $lang) . ' ' . __("vat", locale: $lang),
         ]);
 
         $label = collect([
@@ -93,9 +94,9 @@ class ProjectService
         ]);
 
         // Convert to supported char encoding
-        $conf = $conf->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
-        $data = $data->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
-        $label = $label->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+        $conf = $conf->map(fn($e) => iconv('UTF-8', 'windows-1252', $e));
+        $data = $data->map(fn($e) => iconv('UTF-8', 'windows-1252', $e));
+        $label = $label->map(fn($e) => iconv('UTF-8', 'windows-1252', $e));
 
         // Init document
         $pdf = new PdfTemplate($lang, DocumentType::QUOTE);
@@ -232,7 +233,8 @@ class ProjectService
             $rowHeight = 3.5;
             $totalHeight = array_reduce(
                 $estimates,
-                fn ($a, $c) => $a + count(explode("\n", $c->description)) + 2, 0
+                fn($a, $c) => $a + count(explode("\n", $c->description)) + 2,
+                0,
             ) * $rowHeight + 32;
 
             $pdf->addPage();
@@ -286,7 +288,7 @@ class ProjectService
                 ]);
 
                 // Convert to supported char encoding
-                $estData = $estData->map(fn ($e) => iconv('UTF-8', 'windows-1252', $e));
+                $estData = $estData->map(fn($e) => iconv('UTF-8', 'windows-1252', $e));
 
                 $pdf->setTextColor(Color::DARK->pdfColor())
                     ->setFont('FiraSans-Regular')

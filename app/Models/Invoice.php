@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Number;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Collection;
 
 class Invoice extends Model
 {
@@ -35,6 +34,65 @@ class Invoice extends Model
         'deduction',
     ];
 
+    /**
+     * Get the project this invoice is assigned to.
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * The positions of this invoice.
+     */
+    public function positions(): HasMany
+    {
+        return $this->hasMany(Position::class);
+    }
+
+    /**
+     * Calculate array holding all years having paid invoices
+     * sorted from current to past
+     *
+     * @return array<int>
+     */
+    public static function getYearList(): array
+    {
+        $firstDate = self::whereNotNull('paid_at')
+            ->where('transitory', 0)
+            ->oldest('paid_at')
+            ->first()?->paid_at;
+        $period = Carbon::parse($firstDate)->startOfYear()->yearsUntil(now());
+        $years = array_reverse(
+            iterator_to_array(
+                $period->map(fn(Carbon $date) => $date->format('Y')),
+            ),
+        );
+        return array_combine($years, $years);
+    }
+
+    /**
+     * Sum of net and vat amounts of given time range
+     */
+    public static function ofTime(Carbon $d, TimeUnit $u): array
+    {
+        $start = match ($u) {
+            TimeUnit::MONTH => $d->startOfMonth()->toDateString(),
+            TimeUnit::QUARTER => $d->startOfQuarter()->toDateString(),
+            TimeUnit::YEAR => $d->startOfYear()->toDateString(),
+        };
+        $end = match ($u) {
+            TimeUnit::MONTH => $d->endOfMonth()->toDateString(),
+            TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
+            TimeUnit::YEAR => $d->endOfYear()->toDateString(),
+        };
+        $records = self::where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->get();
+        $netTaxable = $records->filter(fn(self $r) => $r->taxable)->map(fn(self $r) => $r->net)->sum();
+        $netUntaxable = $records->filter(fn(self $r) => !$r->taxable)->map(fn(self $r) => $r->net)->sum();
+        $vat = $records->map(fn(self $r) => $r->vat)->sum();
+        return [$netTaxable, $netUntaxable, $vat];
+    }
+
     protected function casts(): array
     {
         return [
@@ -53,22 +111,6 @@ class Invoice extends Model
             'created_at'   => 'datetime',
             'updated_at'   => 'datetime',
         ];
-    }
-
-    /**
-     * Get the project this invoice is assigned to.
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
-    }
-
-    /**
-     * The positions of this invoice.
-     */
-    public function positions(): HasMany
-    {
-        return $this->hasMany(Position::class);
     }
 
     /**
@@ -105,7 +147,7 @@ class Invoice extends Model
     {
         // If undated, sort by positions creation date, if dated, sort by positions starting date
         return Attribute::make(
-            get: fn(): array => $this->positions->sortBy($this->undated ? 'created_at' : 'started_at')->all()
+            get: fn(): array => $this->positions->sortBy($this->undated ? 'created_at' : 'started_at')->all(),
         );
     }
 
@@ -121,8 +163,8 @@ class Invoice extends Model
             // Take the description lines and the position title (2 lines) into account
             $lineCount = count(explode("\n", trim($p->description))) + 2;
             $linesProcessed += $lineCount;
-            $i = intval(floor($linesProcessed/50));
-            if (key_exists($i,$paginated)) {
+            $i = intval(floor($linesProcessed / 50));
+            if (key_exists($i, $paginated)) {
                 $paginated[$i][] = $p;
             } else {
                 $paginated[$i] = [$p];
@@ -137,7 +179,7 @@ class Invoice extends Model
     protected function positionsFormatted(): Attribute
     {
         return Attribute::make(
-            fn(): string => count($this->positions) . ' ' . trans_choice('position', count($this->positions))
+            fn(): string => count($this->positions) . ' ' . trans_choice('position', count($this->positions)),
         );
     }
 
@@ -255,48 +297,5 @@ class Invoice extends Model
             $this->invoiced_at && $this->paid_at => InvoiceStatus::PAID,
             default => InvoiceStatus::INVALID,
         });
-    }
-
-    /**
-     * Calculate array holding all years having paid invoices
-     * sorted from current to past
-     *
-     * @return array<int>
-     */
-    public static function getYearList(): array
-    {
-        $firstDate = self::whereNotNull('paid_at')
-            ->where('transitory', 0)
-            ->oldest('paid_at')
-            ->first()?->paid_at;
-        $period = Carbon::parse($firstDate)->startOfYear()->yearsUntil(now());
-        $years = array_reverse(
-            iterator_to_array(
-                $period->map(fn(Carbon $date) => $date->format('Y'))
-            )
-        );
-        return array_combine($years, $years);
-    }
-
-    /**
-     * Sum of net and vat amounts of given time range
-     */
-    public static function ofTime(Carbon $d, TimeUnit $u): array
-    {
-        $start = match ($u) {
-            TimeUnit::MONTH => $d->startOfMonth()->toDateString(),
-            TimeUnit::QUARTER => $d->startOfQuarter()->toDateString(),
-            TimeUnit::YEAR => $d->startOfYear()->toDateString(),
-        };
-        $end = match ($u) {
-            TimeUnit::MONTH => $d->endOfMonth()->toDateString(),
-            TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
-            TimeUnit::YEAR => $d->endOfYear()->toDateString(),
-        };
-        $records = self::where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->get();
-        $netTaxable = $records->filter(fn (self $r) => $r->taxable)->map(fn (self $r) => $r->net)->sum();
-        $netUntaxable = $records->filter(fn (self $r) => !$r->taxable)->map(fn (self $r) => $r->net)->sum();
-        $vat = $records->map(fn (self $r) => $r->vat)->sum();
-        return [$netTaxable, $netUntaxable, $vat];
     }
 }
