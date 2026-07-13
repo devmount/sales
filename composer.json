@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
+    "name": "devmount/sales",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "A service sales manager made for freelancers",
     "keywords": [
         "laravel",
         "framework"
