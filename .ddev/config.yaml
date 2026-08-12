@@ -12,7 +12,7 @@ database:
 use_dns_when_possible: true
 composer_version: "2"
 web_environment: []
-corepack_enable: false
+corepack_enable: true
 
 # Key features of DDEV's config.yaml:
 
