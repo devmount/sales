@@ -50,7 +50,7 @@ touch database/database.sqlite # create database file (or setup your database of
 php artisan migrate            # create database structure
 php artisan key:generate       # build a secure key for the app
 php artisan db:seed            # create initial admin user
-npm i
+pnpm install
 ```
 
 ## Commands
@@ -101,7 +101,7 @@ php artisan config:cache # combine all configuration files into a single, cached
 php artisan route:cache  # reduce all route registrations into a single method call within a cached file
 php artisan view:cache   # precompile all blade views
 php artisan icons:cache  # precompile all icons
-npm run build
+pnpm build
 ```
 
 In `.env` set `APP_DEBUG` to false and `APP_URL` to your production url. Change more values if needed.
