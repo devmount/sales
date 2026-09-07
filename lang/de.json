@@ -120,6 +120,7 @@
     "minimum": "Minimum",
     "minorAssets": "GWG",
     "minorAssetsNetLimitExceeded": "Der Nettobetrag darf bei GWG nicht :max € oder mehr betragen.",
+    "minorAssetsRegister": "GWG-Verzeichnis",
     "month": "Monat",
     "monthlyIncome": "Monatliches Einkommen",
     "mostRecentWorkingHoursPerDay": "Zuletzt geleistete bezahlte Arbeitsstunden",

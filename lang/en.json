@@ -120,6 +120,7 @@
     "minimum": "Minimum",
     "minorAssets": "Minor assets",
     "minorAssetsNetLimitExceeded": "The net amount must not be :max € or more for minor assets.",
+    "minorAssetsRegister": "Minor assets register",
     "month": "Month",
     "monthlyIncome": "Monthly income",
     "mostRecentWorkingHours": "Most recent paid working hours",

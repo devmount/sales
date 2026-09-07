@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Taxes;
+use App\Filament\Widgets\MinorAssetsList;
 use App\Filament\Widgets\TaxOverview;
 use App\Filament\Widgets\TaxReturnFormInput;
 use App\Models\User;
@@ -33,7 +34,7 @@ class TaxesTest extends TestCase
     public function it_includes_the_tax_overview_and_tax_return_form_input_widgets(): void
     {
         $this->assertSame(
-            [TaxOverview::class, TaxReturnFormInput::class],
+            [TaxOverview::class, TaxReturnFormInput::class, MinorAssetsList::class],
             (new Taxes())->getWidgets(),
         );
     }
