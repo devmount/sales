@@ -52,6 +52,15 @@ class SalesChartTest extends TestCase
             'taxable' => false,
         ]);
 
+        Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::Rent,
+            'price' => 100,
+            'quantity' => 1,
+            'taxable' => false,
+            'taxable_ratio' => 0.5,
+        ]);
+
         $widget = new SalesChart();
         $widget->filter = 'y';
         $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
@@ -63,7 +72,8 @@ class SalesChartTest extends TestCase
 
         $this->assertNotFalse($yearIndex);
         $this->assertSame(500.0, $income['data'][$yearIndex]);
-        $this->assertSame(100.0, $expense['data'][$yearIndex]);
+        // 100 (good, full ratio) + 50 (rent, pro-rated by taxable_ratio 0.5)
+        $this->assertSame(150.0, $expense['data'][$yearIndex]);
         $this->assertSame(50.0, $taxes['data'][$yearIndex]);
     }
 }

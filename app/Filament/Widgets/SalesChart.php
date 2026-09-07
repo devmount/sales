@@ -71,7 +71,7 @@ class SalesChart extends ChartWidget
             }
             foreach ($expenses as $obj) {
                 if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->expended_at)) {
-                    $expenseData[$i] += $obj->net;
+                    $expenseData[$i] += $obj->deductibleNet;
                 }
             }
             foreach ($taxes as $obj) {
