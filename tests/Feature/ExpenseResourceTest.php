@@ -72,6 +72,61 @@ class ExpenseResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_rejects_a_minor_assets_expense_with_a_net_value_of_800_euros_or_more(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->callAction(CreateAction::class, data: [
+                'expended_at' => '2026-01-15',
+                'category' => ExpenseCategory::MinorAssets->value,
+                'price' => 800,
+                'quantity' => 1,
+                'taxable' => false,
+            ])
+            ->assertHasFormErrors(['price']);
+
+        $this->assertDatabaseCount('expenses', 0);
+    }
+
+    #[Test]
+    public function it_accepts_a_minor_assets_expense_with_a_net_value_below_800_euros(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->callAction(CreateAction::class, data: [
+                'expended_at' => '2026-01-15',
+                'category' => ExpenseCategory::MinorAssets->value,
+                'price' => 799,
+                'quantity' => 1,
+                'taxable' => false,
+            ])
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('expenses', [
+            'category' => ExpenseCategory::MinorAssets->value,
+            'price' => 799,
+        ]);
+    }
+
+    #[Test]
+    public function it_allows_a_non_minor_assets_expense_with_a_net_value_of_800_euros_or_more(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->callAction(CreateAction::class, data: [
+                'expended_at' => '2026-01-15',
+                'category' => ExpenseCategory::Good->value,
+                'price' => 1000,
+                'quantity' => 1,
+                'taxable' => false,
+            ])
+            ->assertHasNoFormErrors();
+    }
+
+    #[Test]
     public function it_requires_expended_at_category_price_and_quantity_when_creating_an_expense(): void
     {
         $this->actingAs(User::factory()->create());
