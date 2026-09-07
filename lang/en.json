@@ -69,6 +69,7 @@
         "rsc16": "Sales tax collected",
         "rsc26": "Goods, raw materials and auxiliary materials",
         "rsc27": "Purchased services",
+        "rsc36": "Immediately deductible expenses (GWG)",
         "rsc55": "Input tax paid",
         "rsc65a": "Rent",
         "rsc65b": "Utility costs",

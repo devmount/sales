@@ -68,6 +68,14 @@ class TaxReturnFormInputTest extends TestCase
             'taxable' => false,
         ]);
 
+        Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::MinorAssets,
+            'price' => 500,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
         $widget = new TaxReturnFormInput();
         $widget->filter = $year;
         $records = $widget->getTableRecords()->keyBy('__key');
@@ -76,7 +84,8 @@ class TaxReturnFormInputTest extends TestCase
         $this->assertSame(0, $records[3]['value']); // rsc16 - net untaxable earned
         $this->assertSame(190.0, $records[4]['value']); // rsc17 - vat earned
         $this->assertSame(84.03, $records[5]['value']); // rsc27 - net goods/services expended
-        $this->assertSame(50.0, $records[8]['value']); // rsc65a - rent expended
-        $this->assertEqualsWithDelta(866.0, $records[1]['value'], 0.01); // itr1 - taxable profit
+        $this->assertSame(500.0, $records[7]['value']); // rsc36 - net minor assets expended
+        $this->assertSame(50.0, $records[9]['value']); // rsc65a - rent expended
+        $this->assertEqualsWithDelta(366.0, $records[1]['value'], 0.01); // itr1 - taxable profit
     }
 }
