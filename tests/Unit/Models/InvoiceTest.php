@@ -260,6 +260,7 @@ it('sums taxable and untaxable net plus vat of invoices paid within a time range
         'discount' => null,
         'taxable' => true,
         'vat_rate' => 0.19,
+        'transitory' => false,
     ]);
     Invoice::factory()->create([
         'paid_at' => '2026-03-20',
@@ -268,6 +269,7 @@ it('sums taxable and untaxable net plus vat of invoices paid within a time range
         'discount' => null,
         'taxable' => false,
         'vat_rate' => null,
+        'transitory' => false,
     ]);
     // Outside the requested month, must be excluded.
     Invoice::factory()->create([
@@ -277,6 +279,16 @@ it('sums taxable and untaxable net plus vat of invoices paid within a time range
         'discount' => null,
         'taxable' => false,
         'vat_rate' => null,
+    ]);
+    // Transitory (pass-through) invoice within the month, must be excluded.
+    Invoice::factory()->create([
+        'paid_at' => '2026-03-10',
+        'pricing_unit' => PricingUnit::Project,
+        'price' => 1000,
+        'discount' => null,
+        'taxable' => true,
+        'vat_rate' => 0.19,
+        'transitory' => true,
     ]);
 
     [$netTaxable, $netUntaxable, $vat] = Invoice::ofTime(Carbon::parse('2026-03-15'), TimeUnit::MONTH);

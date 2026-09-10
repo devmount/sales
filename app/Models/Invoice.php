@@ -86,7 +86,7 @@ class Invoice extends Model
             TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
             TimeUnit::YEAR => $d->endOfYear()->toDateString(),
         };
-        $records = self::where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->get();
+        $records = self::where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->where('transitory', 0)->get();
         $netTaxable = $records->filter(fn(self $r) => $r->taxable)->map(fn(self $r) => $r->net)->sum();
         $netUntaxable = $records->filter(fn(self $r) => !$r->taxable)->map(fn(self $r) => $r->net)->sum();
         $vat = $records->map(fn(self $r) => $r->vat)->sum();
