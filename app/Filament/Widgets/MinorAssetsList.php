@@ -6,6 +6,7 @@ use App\Enums\ExpenseCategory;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -37,10 +38,34 @@ class MinorAssetsList extends TableWidget
                     ->date('j. F Y'),
                 TextColumn::make('description')
                     ->label(__('description')),
+                TextColumn::make('quantity')
+                    ->label(__('quantity'))
+                    ->numeric()
+                    ->fontFamily(FontFamily::Mono)
+                    ->sortable(),
+                TextColumn::make('price')
+                    ->label(__('gross'))
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->alignment(Alignment::End)
+                    ->sortable(),
+                TextColumn::make('vat')
+                    ->label(__('vat'))
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn(Expense $record): float => $record->vat)
+                    ->color(fn(string $state): string => $state == 0 ? 'gray' : 'normal')
+                    ->sortable(),
                 TextColumn::make('net')
                     ->label(__('net'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
+                    ->alignRight(),
+                TextColumn::make('deductible_net')
+                    ->label(__('deductibleNet'))
+                    ->money('eur')
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn(Expense $record): float => $record->deductibleNet)
                     ->alignRight(),
             ]);
     }
