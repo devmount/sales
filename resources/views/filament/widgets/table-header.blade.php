@@ -1,5 +1,10 @@
 <header class="table-header">
-    <h2>{{ $heading }}</h2>
+    <div class="table-header-heading">
+        <h2>{{ $heading }}</h2>
+        @if ($description ?? null)
+            <p class="table-header-description">{{ $description }}</p>
+        @endif
+    </div>
     <div class="table-controls">
         @if ($options)
             <div class="table-filter">

@@ -29,6 +29,10 @@ class MinorAssetsList extends TableWidget
         return $table
             ->header(view('filament.widgets.table-header', [
                 'heading' => __('minorAssetsRegister'),
+                'description' => __('minorAssetsRegisterDescription', [
+                    'min' => config('business.minor_assets.tracking_min_net'),
+                    'max' => config('business.minor_assets.max_net'),
+                ]),
                 'options' => Invoice::getYearList(),
                 'actions' => null,
             ]))
