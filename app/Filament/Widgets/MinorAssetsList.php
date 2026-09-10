@@ -88,7 +88,7 @@ class MinorAssetsList extends TableWidget
             ->where('expended_at', '>=', $dt->startOfYear()->toDateString())
             ->where('expended_at', '<=', $dt->endOfYear()->toDateString())
             ->get()
-            ->filter(fn(Expense $expense): bool => $expense->net >= $minNet && $expense->net < $maxNet)
+            ->filter(fn(Expense $expense): bool => $expense->net > $minNet && $expense->net <= $maxNet)
             ->sortByDesc('expended_at')
             ->values();
     }

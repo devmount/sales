@@ -72,7 +72,25 @@ class ExpenseResourceTest extends TestCase
     }
 
     #[Test]
-    public function it_rejects_a_minor_assets_expense_with_a_net_value_of_800_euros_or_more(): void
+    public function it_rejects_a_minor_assets_expense_with_a_net_value_exceeding_800_euros(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->callAction(CreateAction::class, data: [
+                'expended_at' => '2026-01-15',
+                'category' => ExpenseCategory::MinorAssets->value,
+                'price' => 800.01,
+                'quantity' => 1,
+                'taxable' => false,
+            ])
+            ->assertHasFormErrors(['price']);
+
+        $this->assertDatabaseCount('expenses', 0);
+    }
+
+    #[Test]
+    public function it_accepts_a_minor_assets_expense_with_a_net_value_of_exactly_800_euros(): void
     {
         $this->actingAs(User::factory()->create());
 
@@ -84,9 +102,12 @@ class ExpenseResourceTest extends TestCase
                 'quantity' => 1,
                 'taxable' => false,
             ])
-            ->assertHasFormErrors(['price']);
+            ->assertHasNoFormErrors();
 
-        $this->assertDatabaseCount('expenses', 0);
+        $this->assertDatabaseHas('expenses', [
+            'category' => ExpenseCategory::MinorAssets->value,
+            'price' => 800,
+        ]);
     }
 
     #[Test]
