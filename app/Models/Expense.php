@@ -18,6 +18,7 @@ class Expense extends Model
         'price',
         'taxable',
         'vat_rate',
+        'taxable_ratio',
         'quantity',
         'category',
         'description',
@@ -65,7 +66,7 @@ class Expense extends Model
             ->where('expended_at', '<=', $end)
             ->whereIn('category', $categories)
             ->get();
-        $net = array_sum($records->map(fn(self $r) => $r->net)->toArray());
+        $net = array_sum($records->map(fn(self $r) => $r->deductibleNet)->toArray());
         $vat = array_sum($records->map(fn(self $r) => $r->vat)->toArray());
         return [$net, $vat];
     }
@@ -73,15 +74,16 @@ class Expense extends Model
     protected function casts(): array
     {
         return [
-            'expended_at' => 'date',
-            'price'       => 'float',
-            'taxable'     => 'bool',
-            'vat_rate'    => 'float',
-            'quantity'    => 'int',
-            'category'    => ExpenseCategory::class,
-            'description' => 'string',
-            'created_at'  => 'datetime',
-            'updated_at'  => 'datetime',
+            'expended_at'   => 'date',
+            'price'         => 'float',
+            'taxable'       => 'bool',
+            'vat_rate'      => 'float',
+            'taxable_ratio' => 'float',
+            'quantity'      => 'int',
+            'category'      => ExpenseCategory::class,
+            'description'   => 'string',
+            'created_at'    => 'datetime',
+            'updated_at'    => 'datetime',
         ];
     }
 
@@ -116,5 +118,13 @@ class Expense extends Model
     protected function vat(): Attribute
     {
         return Attribute::make(fn(): float => round($this->gross - $this->net, 2));
+    }
+
+    /**
+     * Net amount of this expense that is actually deductible, pro-rated by taxable_ratio
+     */
+    protected function deductibleNet(): Attribute
+    {
+        return Attribute::make(fn(): float => round($this->net * $this->taxable_ratio, 2));
     }
 }

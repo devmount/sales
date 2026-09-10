@@ -22,6 +22,7 @@ class Taxes extends BaseDashboard
         return [
             AppWidgets\TaxOverview::class,
             AppWidgets\TaxReturnFormInput::class,
+            AppWidgets\MinorAssetsList::class,
         ];
     }
 

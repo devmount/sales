@@ -17,12 +17,24 @@ iframe#preview {
     flex-wrap: wrap;
     gap: 1rem;
 
+    .table-header-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 1rem;
+    }
+
     h2 {
         font-size: var(--text-base);
         --tw-leading: calc(var(--spacing)*6);
         line-height: calc(var(--spacing)*6);
         --tw-font-weight: var(--font-weight-semibold);
         font-weight: var(--font-weight-semibold);
+    }
+
+    .table-header-description {
+        font-size: var(--text-sm);
+        color: var(--gray-500);
     }
 
     .table-controls {

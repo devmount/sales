@@ -9,6 +9,7 @@ enum ExpenseCategory: string implements HasLabel, HasColor
 {
     case Vat = 'vat';
     case Good = 'good';
+    case MinorAssets = 'minor_assets';
     case Service = 'service';
     case Tax = 'tax';
     case Rent = 'rent';
@@ -19,6 +20,7 @@ enum ExpenseCategory: string implements HasLabel, HasColor
         return match ($this) {
             self::Vat => __('vat'),
             self::Good => __('good'),
+            self::MinorAssets => __('minorAssets'),
             self::Service => __('service'),
             self::Tax => __('incomeTax'),
             self::Rent => __('rent'),
@@ -31,6 +33,7 @@ enum ExpenseCategory: string implements HasLabel, HasColor
         return match ($this) {
             self::Vat => 'teal',
             self::Good => 'blue',
+            self::MinorAssets => 'indigo',
             self::Service => 'purple',
             self::Tax => 'rose',
             self::Rent => 'amber',
@@ -42,6 +45,7 @@ enum ExpenseCategory: string implements HasLabel, HasColor
     {
         return [
             self::Good,
+            self::MinorAssets,
             self::Service,
             self::Rent,
             self::Utility,
@@ -61,6 +65,7 @@ enum ExpenseCategory: string implements HasLabel, HasColor
         return [
             self::Vat->value => __('vat'),
             self::Good->value => __('good'),
+            self::MinorAssets->value => __('minorAssets'),
             self::Service->value => __('service'),
             self::Tax->value => __('incomeTax'),
             self::Rent->value => __('rent'),

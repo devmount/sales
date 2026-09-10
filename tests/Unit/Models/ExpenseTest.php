@@ -11,6 +11,7 @@ it('has expected fillable attributes', function () {
         'price',
         'taxable',
         'vat_rate',
+        'taxable_ratio',
         'quantity',
         'category',
         'description',
@@ -23,6 +24,7 @@ it('casts attributes to their expected types', function () {
         'price' => '19.99',
         'taxable' => 1,
         'vat_rate' => '0.19',
+        'taxable_ratio' => '0.5',
         'quantity' => '3',
         'category' => 'good',
     ]);
@@ -31,8 +33,39 @@ it('casts attributes to their expected types', function () {
         ->and($expense->price)->toBeFloat()
         ->and($expense->taxable)->toBeTrue()
         ->and($expense->vat_rate)->toBeFloat()
+        ->and($expense->taxable_ratio)->toBeFloat()
         ->and($expense->quantity)->toBeInt()
         ->and($expense->category)->toBe(ExpenseCategory::Good);
+});
+
+it('defaults taxable_ratio to 1', function () {
+    $expense = Expense::factory()->create();
+
+    expect($expense->refresh()->taxable_ratio)->toBe(1.0);
+});
+
+it('pro-rates the deductible net amount by taxable_ratio', function () {
+    $expense = Expense::factory()->create([
+        'price' => 100,
+        'quantity' => 1,
+        'taxable' => true,
+        'vat_rate' => 0.19,
+        'taxable_ratio' => 0.5,
+    ]);
+
+    expect($expense->net)->toBe(84.03)
+        ->and($expense->deductibleNet)->toBe(42.02);
+});
+
+it('leaves the deductible net amount unchanged when taxable_ratio is 1', function () {
+    $expense = Expense::factory()->create([
+        'price' => 100,
+        'quantity' => 1,
+        'taxable' => true,
+        'vat_rate' => 0.19,
+    ])->refresh();
+
+    expect($expense->deductibleNet)->toBe($expense->net);
 });
 
 it('calculates gross, net and vat amounts based on price, quantity and vat rate', function () {
@@ -152,4 +185,22 @@ it('sums net and vat of a single expense category within a time range', function
 
     expect($net)->toBe(50.0)
         ->and($vat)->toBe(0.0);
+});
+
+it('sums the deductible net amount honoring taxable_ratio within a time range', function () {
+    $month = Carbon::parse('2026-03-15');
+
+    Expense::factory()->create([
+        'expended_at' => '2026-03-01',
+        'price' => 100,
+        'quantity' => 1,
+        'taxable' => true,
+        'vat_rate' => 0.19,
+        'taxable_ratio' => 0.5,
+        'category' => ExpenseCategory::Good,
+    ]);
+
+    [$net] = Expense::ofTime($month, TimeUnit::MONTH, ExpenseCategory::Good);
+
+    expect($net)->toBe(42.02);
 });

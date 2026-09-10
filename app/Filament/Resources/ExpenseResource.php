@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\ExpenseCategory;
 use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
 use App\Models\Expense;
+use Closure;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -17,6 +18,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -185,12 +187,29 @@ class ExpenseResource extends Resource
                 ->suffixIcon('tabler-tag')
                 ->columnSpanFull(),
             TextInput::make('price')
-                ->label(__('price'))
+                ->label(__('priceGross'))
                 ->numeric()
                 ->step(0.01)
                 ->suffixIcon('tabler-currency-euro')
                 ->columnSpan($columns / 2)
-                ->required(),
+                ->required()
+                ->live()
+                ->rules([
+                    fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                        if ($get('category') !== ExpenseCategory::MinorAssets) {
+                            return;
+                        }
+
+                        $quantity = (float) ($get('quantity') ?: 0);
+                        $rate = $get('taxable') ? (float) ($get('vat_rate') ?: 0) : 0;
+                        $net = round(round((float) $value * $quantity, 2) / (1 + $rate), 2);
+                        $max = config('business.minor_assets.max_net');
+
+                        if ($net >= $max) {
+                            $fail(__('minorAssetsNetLimitExceeded', ['max' => $max]));
+                        }
+                    },
+                ]),
             TextInput::make('quantity')
                 ->label(__('quantity'))
                 ->numeric()
@@ -198,6 +217,28 @@ class ExpenseResource extends Resource
                 ->minValue(1)
                 ->default(1)
                 ->suffixIcon('tabler-stack')
+                ->columnSpan($columns / 2)
+                ->required()
+                ->live(),
+            TextEntry::make('net_preview')
+                ->label(__('priceNet'))
+                ->state(function (Get $get): float {
+                    $quantity = (float) ($get('quantity') ?: 0);
+                    $rate = $get('taxable') ? (float) ($get('vat_rate') ?: 0) : 0;
+                    $gross = round((float) ($get('price') ?: 0) * $quantity, 2);
+
+                    return round($gross / (1 + $rate), 2);
+                })
+                ->money('eur')
+                ->columnSpan($columns / 2),
+            TextInput::make('taxable_ratio')
+                ->label(__('taxableRatio'))
+                ->numeric()
+                ->step(0.01)
+                ->minValue(0)
+                ->maxValue(1)
+                ->default(1)
+                ->suffixIcon('tabler-percentage')
                 ->columnSpan($columns / 2)
                 ->required(),
             Toggle::make('taxable')
@@ -216,6 +257,7 @@ class ExpenseResource extends Resource
                 ->suffixIcon('tabler-receipt-tax')
                 ->columnSpan($columns / 2)
                 ->required()
+                ->live()
                 ->hidden(fn(Get $get): bool => !$get('taxable')),
             Textarea::make('description')
                 ->label(__('description'))

@@ -89,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
             'purple' => Color::Purple,
             'rose' => Color::Rose,
             'amber' => Color::Amber,
+            'indigo' => Color::Indigo,
         ]);
 
         // Customize Filament icons

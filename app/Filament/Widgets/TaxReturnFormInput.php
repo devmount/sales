@@ -69,9 +69,10 @@ class TaxReturnFormInput extends TableWidget
         [$netServiceExpended, $vatServiceExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Service);
         [$rentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Rent);
         [$utilityCostsExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Utility);
+        [$netMinorAssetsExpended, $vatMinorAssetsExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::MinorAssets);
 
-        $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended;
-        $vatExpended = $vatGoodExpended + $vatServiceExpended;
+        $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended + $netMinorAssetsExpended;
+        $vatExpended = $vatGoodExpended + $vatServiceExpended + $vatMinorAssetsExpended;
 
         return collect([
             [
@@ -131,6 +132,15 @@ class TaxReturnFormInput extends TableWidget
             [
                 '__key' => 7,
                 'itr' => null,
+                'vr' => null,
+                'rsc' => '36',
+                'value' => $netMinorAssetsExpended,
+                'help' => __('formLabels')['rsc36'],
+                'color' => 'danger',
+            ],
+            [
+                '__key' => 8,
+                'itr' => null,
                 'vr' => '79',
                 'rsc' => '57',
                 'value' => $vatExpended,
@@ -138,7 +148,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 8,
+                '__key' => 9,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '65',
@@ -147,7 +157,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 9,
+                '__key' => 10,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '65',
@@ -156,7 +166,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 10,
+                '__key' => 11,
                 'itr' => null,
                 'vr' => '118',
                 'rsc' => null,
@@ -165,7 +175,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 11,
+                '__key' => 12,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
