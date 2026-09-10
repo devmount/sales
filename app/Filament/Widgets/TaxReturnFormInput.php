@@ -67,17 +67,17 @@ class TaxReturnFormInput extends TableWidget
         [$netEarned, $netUntaxableEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
         [$netGoodExpended, $vatGoodExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Good);
         [$netServiceExpended, $vatServiceExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Service);
-        [$rentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Rent);
-        [$utilityCostsExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Utility);
+        [$rentExpended, $vatRentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Rent);
+        [$utilityCostsExpended, $vatUtilityExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Utility);
         [$netMinorAssetsExpended, $vatMinorAssetsExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::MinorAssets);
         [$netEdvExpended, $vatEdvExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Edv);
         [$netWorkEquipmentExpended, $vatWorkEquipmentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::WorkEquipment);
         [$netAdvertisingExpended, $vatAdvertisingExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Advertising);
 
-        $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended + $netMinorAssetsExpended
-            + $netEdvExpended + $netWorkEquipmentExpended + $netAdvertisingExpended;
-        $vatExpended = $vatGoodExpended + $vatServiceExpended + $vatMinorAssetsExpended
-            + $vatEdvExpended + $vatWorkEquipmentExpended + $vatAdvertisingExpended;
+        $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended
+            + $netMinorAssetsExpended + $netEdvExpended + $netWorkEquipmentExpended + $netAdvertisingExpended;
+        $vatExpended = $vatGoodExpended + $vatServiceExpended + $vatMinorAssetsExpended + $vatEdvExpended
+            + $vatWorkEquipmentExpended + $vatAdvertisingExpended + $vatRentExpended + $vatUtilityExpended;
 
         return collect([
             [
