@@ -14,6 +14,9 @@ enum ExpenseCategory: string implements HasLabel, HasColor
     case Tax = 'tax';
     case Rent = 'rent';
     case Utility = 'utility';
+    case Edv = 'edv';
+    case WorkEquipment = 'work_equipment';
+    case Advertising = 'advertising';
 
     public function getLabel(): ?string
     {
@@ -25,6 +28,9 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Tax => __('incomeTax'),
             self::Rent => __('rent'),
             self::Utility => __('utilityCosts'),
+            self::Edv => __('edv'),
+            self::WorkEquipment => __('workEquipment'),
+            self::Advertising => __('advertising'),
         };
     }
 
@@ -38,6 +44,9 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Tax => 'rose',
             self::Rent => 'amber',
             self::Utility => 'amber',
+            self::Edv => 'cyan',
+            self::WorkEquipment => 'lime',
+            self::Advertising => 'fuchsia',
         };
     }
 
@@ -49,6 +58,9 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Service,
             self::Rent,
             self::Utility,
+            self::Edv,
+            self::WorkEquipment,
+            self::Advertising,
         ];
     }
 
@@ -70,6 +82,9 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Tax->value => __('incomeTax'),
             self::Rent->value => __('rent'),
             self::Utility->value => __('utilityCosts'),
+            self::Edv->value => __('edv'),
+            self::WorkEquipment->value => __('workEquipment'),
+            self::Advertising->value => __('advertising'),
         ];
     }
 }
