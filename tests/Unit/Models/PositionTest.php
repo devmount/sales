@@ -65,20 +65,27 @@ it('calculates net for an hourly invoice based on duration and price', function 
 it('calculates net for a project-priced invoice proportional to its share of hours', function () {
     $invoice = Invoice::factory()->create([
         'pricing_unit' => PricingUnit::Project,
-        'price' => 1000,
+        'price' => 3000,
         'discount' => null,
     ]);
-    $position = Position::factory()->create([
+    $shorter = Position::factory()->create([
         'invoice_id' => $invoice->id,
         'started_at' => '2026-03-01 09:00:00',
-        'finished_at' => '2026-03-01 14:00:00',
+        'finished_at' => '2026-03-01 19:00:00',
         'pause_duration' => 0,
     ]);
-    $position->refresh();
+    $longer = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-02 09:00:00',
+        'finished_at' => '2026-03-03 05:00:00',
+        'pause_duration' => 0,
+    ]);
 
-    $expected = round($invoice->fresh()->hours / $invoice->fresh()->net * $position->duration, 2);
-
-    expect($position->net)->toBe($expected);
+    // total invoice hours: 10 + 20 = 30, flat invoice net: 3000 -> 100 €/hour
+    expect($shorter->duration)->toBe(10.0)
+        ->and($longer->duration)->toBe(20.0)
+        ->and($shorter->net)->toBe(1000.0)
+        ->and($longer->net)->toBe(2000.0);
 });
 
 it('formats the time range using the start and finish timestamps', function () {
