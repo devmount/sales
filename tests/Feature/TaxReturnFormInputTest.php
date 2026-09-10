@@ -76,6 +76,30 @@ class TaxReturnFormInputTest extends TestCase
             'taxable' => false,
         ]);
 
+        Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::Edv,
+            'price' => 80,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
+        Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::WorkEquipment,
+            'price' => 60,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
+        Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::Advertising,
+            'price' => 40,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
         $widget = new TaxReturnFormInput();
         $widget->filter = $year;
         $records = $widget->getTableRecords()->keyBy('__key');
@@ -85,7 +109,10 @@ class TaxReturnFormInputTest extends TestCase
         $this->assertSame(190.0, $records[4]['value']); // rsc17 - vat earned
         $this->assertSame(84.03, $records[5]['value']); // rsc27 - net goods/services expended
         $this->assertSame(500.0, $records[7]['value']); // rsc36 - net minor assets expended
-        $this->assertSame(50.0, $records[9]['value']); // rsc65a - rent expended
-        $this->assertEqualsWithDelta(366.0, $records[1]['value'], 0.01); // itr1 - taxable profit
+        $this->assertSame(80.0, $records[8]['value']); // rsc50 - net edv expended
+        $this->assertSame(60.0, $records[9]['value']); // rsc51 - net work equipment expended
+        $this->assertSame(40.0, $records[10]['value']); // rsc54 - net advertising expended
+        $this->assertSame(50.0, $records[12]['value']); // rsc65a - rent expended
+        $this->assertEqualsWithDelta(186.0, $records[1]['value'], 0.01); // itr1 - taxable profit
     }
 }
