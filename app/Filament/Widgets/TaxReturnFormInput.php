@@ -96,7 +96,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => '22',
                 'rsc' => '15',
                 'value' => $netEarned,
-                'help' => __('formLabels')['rsc14'],
+                'help' => __('formLabels')['rsc15'],
                 'color' => 'primary',
             ],
             [
@@ -114,7 +114,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => null,
                 'rsc' => '17',
                 'value' => $vatEarned,
-                'help' => __('formLabels')['rsc16'],
+                'help' => __('formLabels')['rsc17'],
                 'color' => 'primary',
             ],
             [
@@ -123,7 +123,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => null,
                 'rsc' => '27',
                 'value' => $netGoodExpended,
-                'help' => __('formLabels')['rsc26'],
+                'help' => __('formLabels')['rsc27'],
                 'color' => 'danger',
             ],
             [
@@ -132,7 +132,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => null,
                 'rsc' => '29',
                 'value' => $netServiceExpended,
-                'help' => __('formLabels')['rsc27'],
+                'help' => __('formLabels')['rsc29'],
                 'color' => 'danger',
             ],
             [
@@ -177,7 +177,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => '79',
                 'rsc' => '57',
                 'value' => $vatExpended,
-                'help' => __('formLabels')['rsc55'],
+                'help' => __('formLabels')['rsc57'],
                 'color' => 'danger',
             ],
             [
