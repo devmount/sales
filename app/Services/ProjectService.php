@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DocumentColor as Color;
 use App\Enums\DocumentType;
 use App\Enums\PricingUnit;
+use App\Models\Document;
 use App\Models\Project;
 use App\Models\Setting;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use fpdf\Enums\PdfRectangleStyle;
 use fpdf\Enums\PdfTextAlignment;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 
 class ProjectService
 {
@@ -312,5 +314,24 @@ class ProjectService
         $filename = strtolower("{$data['number']}_{$label['quote']}_{$conf['company']}.pdf");
         $pdf->output(PdfDestination::FILE, Storage::path($filename));
         return $filename;
+    }
+
+    /**
+     * Generate the quote PDF and permanently attach it to the project as a document
+     */
+    public static function generateDocument(Project $project): Document
+    {
+        $scratchFile = self::generateQuotePdf($project);
+        $extension = pathinfo($scratchFile, PATHINFO_EXTENSION);
+        $path = "documents/projects/{$project->id}/" . Str::uuid() . ".{$extension}";
+        Storage::move($scratchFile, $path);
+
+        return $project->documents()->create([
+            'disk' => config('filesystems.default'),
+            'path' => $path,
+            'filename' => $scratchFile,
+            'mime_type' => 'application/pdf',
+            'size' => Storage::size($path),
+        ]);
     }
 }

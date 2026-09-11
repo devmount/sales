@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\PricingUnit;
+use App\Filament\Relations\DocumentsRelationManager;
 use App\Filament\Relations\EstimatesRelationManager;
 use App\Filament\Relations\InvoicesRelationManager;
 use App\Filament\Resources\ProjectResource\Pages\EditProject;
@@ -23,6 +24,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -101,7 +103,16 @@ class ProjectResource extends Resource
                     ->label(trans_choice('client', 1))
                     ->relationship('client', 'name'),
             ])
-            ->recordActions(
+            ->recordActions([
+                Action::make('pdf')
+                    ->label('')
+                    ->tooltip(__('downloadFiletype', ['type' => 'pdf']))
+                    ->icon('tabler-file-type-pdf')
+                    ->hidden(fn(Project $record) => !$record->documents()->exists())
+                    ->action(function (Project $record) {
+                        $document = $record->documents()->latest()->firstOrFail();
+                        return Storage::disk($document->disk)->download($document->path, $document->filename);
+                    }),
                 ActionGroup::make([
                     EditAction::make()->icon('tabler-edit'),
                     ReplicateAction::make()
@@ -114,18 +125,17 @@ class ProjectResource extends Resource
                         ->schema(self::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(Width::Large),
-                    Action::make('download')
-                        ->label(__('quote'))
-                        ->icon('tabler-file-type-pdf')
+                    Action::make('generate')
+                        ->label(__('generateQuote'))
+                        ->icon('tabler-file-plus')
                         ->action(function (Project $record) {
-                            Storage::delete(Storage::allFiles());
-                            $file = ProjectService::generateQuotePdf($record);
-                            return response()->download(Storage::path($file));
+                            ProjectService::generateDocument($record);
+                            Notification::make()->title(__('quoteGenerated'))->success()->send();
                         }),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical'),
-            )
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->icon('tabler-trash'),
@@ -149,6 +159,7 @@ class ProjectResource extends Resource
         return [
             EstimatesRelationManager::class,
             InvoicesRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 

@@ -86,6 +86,7 @@
         "vr75": "Übrige nicht steuerbare Umsätze (Leistungsort nicht im Inland)"
     },
     "generateInvoiceDocument": "Rechnung generieren",
+    "generateQuote": "Angebot generieren",
     "gift": "Schenkung|Schenkungen",
     "good": "Ware",
     "gross": "Brutto",
@@ -176,6 +177,7 @@
     "quarter": "Quartal",
     "quote": "Angebot",
     "quote.explanation": "Ich bedanke mich für das Interesse und freue mich auf die Zusammenarbeit! ",
+    "quoteGenerated": "Angebot generiert",
     "receivedAt": "Erhalten am",
     "referenceUse": "Referenznutzung",
     "referenceUseText": "Der Auftragnehmer ist berechtigt, den Auftraggeber in Text (insb. Firmenname) und Bild (insbes. Firmenlogo) als Referenzkunde in einer Referenzliste oder Presseinformation anzugeben.",

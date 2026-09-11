@@ -86,6 +86,7 @@
         "vr75": "Other non-taxable transactions (place of performance not in the country)"
     },
     "generateInvoiceDocument": "Generate invoice document",
+    "generateQuote": "Generate quote",
     "gift": "Gift|Gifts",
     "good": "Good",
     "gross": "Gross",
@@ -176,6 +177,7 @@
     "quarter": "Quarter",
     "quote": "Quote",
     "quote.explanation": "Thank you for your interest and I look forward to working with you! ",
+    "quoteGenerated": "Quote generated",
     "receivedAt": "Received at",
     "referenceUse": "Reference Usage",
     "referenceUseText": "The Contractor is authorised to name the Client in text (in particular company name) and image (in particular company logo) as a reference customer in a reference list or press release.",
