@@ -2,6 +2,7 @@
 
 use App\Enums\PricingUnit;
 use App\Models\Client;
+use App\Models\Document;
 use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Position;
@@ -50,6 +51,13 @@ it('has many estimates and invoices', function () {
 
     expect($project->estimates)->toHaveCount(2)
         ->and($project->invoices)->toHaveCount(3);
+});
+
+it('has many documents', function () {
+    $project = Project::factory()->create();
+    Document::factory()->count(2)->for($project, 'documentable')->create();
+
+    expect($project->documents)->toHaveCount(2);
 });
 
 it('scopes projects by their active, upcoming, finished and aborted state', function () {

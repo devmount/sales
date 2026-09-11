@@ -6,6 +6,7 @@ use App\Enums\ExpenseCategory;
 use App\Enums\TimeUnit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -23,6 +24,14 @@ class Expense extends Model
         'category',
         'description',
     ];
+
+    /**
+     * The documents attached to this expense.
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
 
     public static function lastAdvanceVatExists(): bool
     {

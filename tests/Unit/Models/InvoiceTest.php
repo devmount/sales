@@ -3,6 +3,7 @@
 use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
 use App\Enums\TimeUnit;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\Position;
 use App\Models\Project;
@@ -47,6 +48,13 @@ it('belongs to a project and has many positions', function () {
 
     expect($invoice->project->id)->toBe($project->id)
         ->and($invoice->positions)->toHaveCount(2);
+});
+
+it('has many documents', function () {
+    $invoice = Invoice::factory()->create();
+    Document::factory()->count(2)->for($invoice, 'documentable')->create();
+
+    expect($invoice->documents)->toHaveCount(2);
 });
 
 it('scopes invoices by their active, waiting and finished state', function () {
