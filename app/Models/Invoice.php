@@ -224,7 +224,10 @@ class Invoice extends Model
         if ($this->pricing_unit === PricingUnit::Project) {
             $net = $this->price;
         } else {
-            $net += $this->hours * $this->price / $this->pricing_hours;
+            // Sum each position's own already rounded net to avoid rounding differences
+            foreach ($this->positions as $position) {
+                $net += $position->net;
+            }
         }
         return Attribute::make(fn(): float => round($net, 2));
     }

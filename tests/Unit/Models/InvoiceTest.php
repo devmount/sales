@@ -160,6 +160,23 @@ it('calculates real net based on worked hours for hourly pricing', function () {
     expect($invoice->real_net)->toBe(550.0);
 });
 
+it('calculates real net as the sum of its positions rounded nets, not a top-down rounded total', function () {
+    $invoice = Invoice::factory()->create(['pricing_unit' => PricingUnit::Hour, 'price' => 100]);
+    // three positions of 20 minutes each (1.0h total): each position's net rounds to 33.33,
+    // summing to 99.99 - one cent below the top-down calculation (1.0 * 100 = 100.00), which
+    // would make the PDF's own printed position rows not add up to the printed invoice total.
+    for ($i = 1; $i <= 3; $i++) {
+        Position::factory()->create([
+            'invoice_id' => $invoice->id,
+            'started_at' => "2026-03-0{$i} 09:00:00",
+            'finished_at' => "2026-03-0{$i} 09:20:00",
+            'pause_duration' => 0,
+        ]);
+    }
+
+    expect($invoice->real_net)->toBe(99.99);
+});
+
 it('uses the flat price as real net for project-based pricing', function () {
     $invoice = Invoice::factory()->create(['pricing_unit' => PricingUnit::Project, 'price' => 2000]);
     Position::factory()->create([
