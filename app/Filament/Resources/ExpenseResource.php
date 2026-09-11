@@ -205,7 +205,7 @@ class ExpenseResource extends Resource
                         $net = round(round((float) $value * $quantity, 2) / (1 + $rate), 2);
                         $max = config('business.minor_assets.max_net');
 
-                        if ($net >= $max) {
+                        if ($net > $max) {
                             $fail(__('minorAssetsNetLimitExceeded', ['max' => $max]));
                         }
                     },

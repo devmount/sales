@@ -67,17 +67,17 @@ class TaxReturnFormInput extends TableWidget
         [$netEarned, $netUntaxableEarned, $vatEarned] = Invoice::ofTime($dt, TimeUnit::YEAR);
         [$netGoodExpended, $vatGoodExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Good);
         [$netServiceExpended, $vatServiceExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Service);
-        [$rentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Rent);
-        [$utilityCostsExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Utility);
+        [$rentExpended, $vatRentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Rent);
+        [$utilityCostsExpended, $vatUtilityExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Utility);
         [$netMinorAssetsExpended, $vatMinorAssetsExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::MinorAssets);
         [$netEdvExpended, $vatEdvExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Edv);
         [$netWorkEquipmentExpended, $vatWorkEquipmentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::WorkEquipment);
         [$netAdvertisingExpended, $vatAdvertisingExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Advertising);
 
-        $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended + $netMinorAssetsExpended
-            + $netEdvExpended + $netWorkEquipmentExpended + $netAdvertisingExpended;
-        $vatExpended = $vatGoodExpended + $vatServiceExpended + $vatMinorAssetsExpended
-            + $vatEdvExpended + $vatWorkEquipmentExpended + $vatAdvertisingExpended;
+        $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended
+            + $netMinorAssetsExpended + $netEdvExpended + $netWorkEquipmentExpended + $netAdvertisingExpended;
+        $vatExpended = $vatGoodExpended + $vatServiceExpended + $vatMinorAssetsExpended + $vatEdvExpended
+            + $vatWorkEquipmentExpended + $vatAdvertisingExpended + $vatRentExpended + $vatUtilityExpended;
 
         return collect([
             [
@@ -85,7 +85,8 @@ class TaxReturnFormInput extends TableWidget
                 'itr' => '1 (S)',
                 'vr' => null,
                 'rsc' => null,
-                'value' => round($netEarned + $netUntaxableEarned - $netExpended),
+                // Elster requires the income tax return's profit line (Zeile 1 ESt Anlage S) in whole euros
+                'value' => round($netEarned + $netUntaxableEarned - $netExpended, 0),
                 'help' => __('formLabels')['itr1'],
                 'color' => 'primary',
             ],
@@ -95,7 +96,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => '22',
                 'rsc' => '15',
                 'value' => $netEarned,
-                'help' => __('formLabels')['rsc14'],
+                'help' => __('formLabels')['rsc15'],
                 'color' => 'primary',
             ],
             [
@@ -113,7 +114,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => null,
                 'rsc' => '17',
                 'value' => $vatEarned,
-                'help' => __('formLabels')['rsc16'],
+                'help' => __('formLabels')['rsc17'],
                 'color' => 'primary',
             ],
             [
@@ -122,7 +123,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => null,
                 'rsc' => '27',
                 'value' => $netGoodExpended,
-                'help' => __('formLabels')['rsc26'],
+                'help' => __('formLabels')['rsc27'],
                 'color' => 'danger',
             ],
             [
@@ -131,7 +132,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => null,
                 'rsc' => '29',
                 'value' => $netServiceExpended,
-                'help' => __('formLabels')['rsc27'],
+                'help' => __('formLabels')['rsc29'],
                 'color' => 'danger',
             ],
             [
@@ -176,7 +177,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => '79',
                 'rsc' => '57',
                 'value' => $vatExpended,
-                'help' => __('formLabels')['rsc55'],
+                'help' => __('formLabels')['rsc57'],
                 'color' => 'danger',
             ],
             [
@@ -211,7 +212,7 @@ class TaxReturnFormInput extends TableWidget
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
-                'value' => $netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended,
+                'value' => round($netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended, 2),
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
             ],

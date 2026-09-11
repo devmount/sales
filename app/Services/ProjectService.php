@@ -284,7 +284,7 @@ class ProjectService
                     'hours' => Number::format($estimate->amount, 1, locale: $lang),
                     'price' => $billedPerProject ? '' : Number::currency($project->price, 'EUR', locale: $lang),
                     'title' => $estimate->title,
-                    'total' => $billedPerProject ? '' : Number::currency($project->price * $estimate->amount, 'EUR', locale: $lang),
+                    'total' => $billedPerProject ? '' : Number::currency($estimate->net, 'EUR', locale: $lang),
                 ]);
 
                 // Convert to supported char encoding

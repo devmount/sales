@@ -76,4 +76,34 @@ class SalesChartTest extends TestCase
         $this->assertSame(150.0, $expense['data'][$yearIndex]);
         $this->assertSame(50.0, $taxes['data'][$yearIndex]);
     }
+
+    #[Test]
+    public function it_does_not_double_count_an_invoice_paid_exactly_on_a_year_boundary(): void
+    {
+        $anchorYear = now()->year - 4;
+        $boundaryYear = now()->year - 2;
+
+        // establishes the chart's period start well before the boundary under test
+        Invoice::factory()
+            ->for(Project::factory())
+            ->create(['paid_at' => "$anchorYear-01-15", 'transitory' => false, 'pricing_unit' => PricingUnit::Project, 'price' => 1, 'discount' => null]);
+
+        // paid exactly on the year boundary: must count only for $boundaryYear, not also for $boundaryYear - 1
+        Invoice::factory()
+            ->for(Project::factory())
+            ->create(['paid_at' => "$boundaryYear-01-01", 'transitory' => false, 'pricing_unit' => PricingUnit::Project, 'price' => 1200, 'discount' => null]);
+
+        $widget = new SalesChart();
+        $widget->filter = 'y';
+        $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
+
+        $income = collect($data['datasets'])->firstWhere('label', __('income'));
+        $previousYearIndex = array_search((string) ($boundaryYear - 1), $data['labels'], true);
+        $boundaryYearIndex = array_search((string) $boundaryYear, $data['labels'], true);
+
+        $this->assertNotFalse($previousYearIndex);
+        $this->assertNotFalse($boundaryYearIndex);
+        $this->assertEquals(0, $income['data'][$previousYearIndex]);
+        $this->assertSame(1200.0, $income['data'][$boundaryYearIndex]);
+    }
 }

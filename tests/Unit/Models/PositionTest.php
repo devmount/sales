@@ -62,23 +62,47 @@ it('calculates net for an hourly invoice based on duration and price', function 
     expect($position->net)->toBe(500.0);
 });
 
-it('calculates net for a project-priced invoice proportional to its share of hours', function () {
+it('calculates net for a day-priced invoice by dividing the day rate across its pricing hours', function () {
     $invoice = Invoice::factory()->create([
-        'pricing_unit' => PricingUnit::Project,
-        'price' => 1000,
+        'pricing_unit' => PricingUnit::Day,
+        'price' => 800,
         'discount' => null,
     ]);
     $position = Position::factory()->create([
         'invoice_id' => $invoice->id,
         'started_at' => '2026-03-01 09:00:00',
-        'finished_at' => '2026-03-01 14:00:00',
+        'finished_at' => '2026-03-01 13:00:00',
         'pause_duration' => 0,
     ]);
-    $position->refresh();
 
-    $expected = round($invoice->fresh()->hours / $invoice->fresh()->net * $position->duration, 2);
+    // 4 hours worked, day rate split across 8 pricing hours: 800 / 8 * 4
+    expect($position->net)->toBe(400.0);
+});
 
-    expect($position->net)->toBe($expected);
+it('calculates net for a project-priced invoice proportional to its share of hours', function () {
+    $invoice = Invoice::factory()->create([
+        'pricing_unit' => PricingUnit::Project,
+        'price' => 3000,
+        'discount' => null,
+    ]);
+    $shorter = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-01 09:00:00',
+        'finished_at' => '2026-03-01 19:00:00',
+        'pause_duration' => 0,
+    ]);
+    $longer = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-02 09:00:00',
+        'finished_at' => '2026-03-03 05:00:00',
+        'pause_duration' => 0,
+    ]);
+
+    // total invoice hours: 10 + 20 = 30, flat invoice net: 3000 -> 100 €/hour
+    expect($shorter->duration)->toBe(10.0)
+        ->and($longer->duration)->toBe(20.0)
+        ->and($shorter->net)->toBe(1000.0)
+        ->and($longer->net)->toBe(2000.0);
 });
 
 it('formats the time range using the start and finish timestamps', function () {

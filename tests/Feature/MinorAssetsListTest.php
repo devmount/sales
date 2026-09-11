@@ -44,6 +44,15 @@ class MinorAssetsListTest extends TestCase
             'taxable' => false,
         ]);
 
+        // exactly at the 800 € GWG cap, must be included (§6(2) EStG: costs not exceeding 800 €)
+        $atUpperBound = Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::MinorAssets,
+            'price' => 800,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
         // below the 250 € tracking threshold, must be excluded
         Expense::factory()->create([
             'expended_at' => "$year-06-01",
@@ -53,11 +62,20 @@ class MinorAssetsListTest extends TestCase
             'taxable' => false,
         ]);
 
-        // at/above the 800 € GWG cap, must be excluded
+        // exactly at the 250 € tracking threshold, must be excluded (§6(2) EStG: costs exceeding 250 €)
         Expense::factory()->create([
             'expended_at' => "$year-06-01",
             'category' => ExpenseCategory::MinorAssets,
-            'price' => 800,
+            'price' => 250,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
+        // above the 800 € GWG cap, must be excluded
+        Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::MinorAssets,
+            'price' => 801,
             'quantity' => 1,
             'taxable' => false,
         ]);
@@ -73,8 +91,9 @@ class MinorAssetsListTest extends TestCase
 
         $records = (new MinorAssetsList())->getTableRecords();
 
-        $this->assertCount(1, $records);
+        $this->assertCount(2, $records);
         $this->assertTrue($records->contains($trackable));
+        $this->assertTrue($records->contains($atUpperBound));
     }
 
     #[Test]

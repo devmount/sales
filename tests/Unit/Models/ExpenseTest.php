@@ -18,6 +18,12 @@ it('has expected fillable attributes', function () {
     ]);
 });
 
+it('derives the year from the expended_at date', function () {
+    $expense = Expense::factory()->create(['expended_at' => '2026-03-15']);
+
+    expect($expense->year)->toBe(2026);
+});
+
 it('casts attributes to their expected types', function () {
     $expense = Expense::factory()->create([
         'expended_at' => '2026-03-15',

@@ -65,17 +65,17 @@ class SalesChart extends ChartWidget
                 break;
             }
             foreach ($invoices as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->paid_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->excludeEndDate()->contains($obj->paid_at)) {
                     $invoiceData[$i] += $obj->net;
                 }
             }
             foreach ($expenses as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->expended_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->excludeEndDate()->contains($obj->expended_at)) {
                     $expenseData[$i] += $obj->deductibleNet;
                 }
             }
             foreach ($taxes as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->expended_at)) {
+                if (CarbonPeriod::create($date, $period[$i + 1])->excludeEndDate()->contains($obj->expended_at)) {
                     $taxData[$i] += $obj->net;
                 }
             }
