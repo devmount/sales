@@ -152,20 +152,20 @@ class InvoiceResourceTest extends TestCase
     }
 
     #[Test]
-    public function it_hides_pdf_and_xml_downloads_from_the_edit_page_until_matching_documents_exist(): void
+    public function it_disables_pdf_and_xml_downloads_on_the_edit_page_until_matching_documents_exist(): void
     {
         $this->actingAs(User::factory()->create());
         $invoice = Invoice::factory()->create();
 
         Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
-            ->assertActionHidden('pdf')
-            ->assertActionHidden('xml');
+            ->assertActionDisabled('pdf')
+            ->assertActionDisabled('xml');
 
         Document::factory()->for($invoice, 'documentable')->create(['filename' => 'invoice.pdf', 'attachment_path' => null]);
 
         Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
-            ->assertActionVisible('pdf')
-            ->assertActionHidden('xml');
+            ->assertActionEnabled('pdf')
+            ->assertActionDisabled('xml');
 
         Document::factory()->for($invoice, 'documentable')->create([
             'filename' => 'invoice.pdf',
@@ -174,12 +174,12 @@ class InvoiceResourceTest extends TestCase
         ]);
 
         Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
-            ->assertActionVisible('pdf')
-            ->assertActionVisible('xml');
+            ->assertActionEnabled('pdf')
+            ->assertActionEnabled('xml');
     }
 
     #[Test]
-    public function it_hides_pdf_and_xml_downloads_from_the_table_until_matching_documents_exist(): void
+    public function it_hides_pdf_and_xml_downloads_in_the_table_until_matching_documents_exist(): void
     {
         $this->actingAs(User::factory()->create());
         $invoice = Invoice::factory()->create();

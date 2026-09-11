@@ -36,7 +36,7 @@ class EditInvoice extends EditRecord
             Action::make('pdf')
                 ->label(__('downloadFiletype', ['type' => 'pdf']))
                 ->icon('tabler-file-type-pdf')
-                ->hidden(fn(Invoice $record) => !$record->documents()->exists())
+                ->disabled(fn(Invoice $record) => !$record->documents()->exists())
                 ->action(function (Invoice $record) {
                     $document = $record->documents()->latest()->firstOrFail();
                     return Storage::disk($document->disk)->download($document->path, $document->filename);
@@ -44,7 +44,7 @@ class EditInvoice extends EditRecord
             Action::make('xml')
                 ->label(__('downloadFiletype', ['type' => 'xml']))
                 ->icon('tabler-file-type-xml')
-                ->hidden(fn(Invoice $record) => !$record->documents()->whereNotNull('attachment_path')->exists())
+                ->disabled(fn(Invoice $record) => !$record->documents()->whereNotNull('attachment_path')->exists())
                 ->action(function (Invoice $record) {
                     $document = $record->documents()->whereNotNull('attachment_path')->latest()->firstOrFail();
                     return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);

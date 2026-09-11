@@ -147,7 +147,25 @@ class InvoiceResource extends Resource
                     ->label(trans_choice('client', 1))
                     ->relationship('project.client', 'name'),
             ])
-            ->recordActions(
+            ->recordActions([
+                Action::make('pdf')
+                    ->label('')
+                    ->tooltip(__('downloadFiletype', ['type' => 'pdf']))
+                    ->icon('tabler-file-type-pdf')
+                    ->hidden(fn(Invoice $record) => !$record->documents()->exists())
+                    ->action(function (Invoice $record) {
+                        $document = $record->documents()->latest()->firstOrFail();
+                        return Storage::disk($document->disk)->download($document->path, $document->filename);
+                    }),
+                Action::make('xml')
+                    ->label('')
+                    ->tooltip(__('downloadFiletype', ['type' => 'xml']))
+                    ->icon('tabler-file-type-xml')
+                    ->hidden(fn(Invoice $record) => !$record->documents()->whereNotNull('attachment_path')->exists())
+                    ->action(function (Invoice $record) {
+                        $document = $record->documents()->whereNotNull('attachment_path')->latest()->firstOrFail();
+                        return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
+                    }),
                 ActionGroup::make([
                     EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(Width::Large),
                     ReplicateAction::make()
@@ -165,22 +183,6 @@ class InvoiceResource extends Resource
                         ->action(function (Invoice $record) {
                             InvoiceService::generateDocuments($record);
                             Notification::make()->title(__('invoiceDocumentGenerated'))->success()->send();
-                        }),
-                    Action::make('pdf')
-                        ->label(__('downloadFiletype', ['type' => 'pdf']))
-                        ->icon('tabler-file-type-pdf')
-                        ->hidden(fn(Invoice $record) => !$record->documents()->exists())
-                        ->action(function (Invoice $record) {
-                            $document = $record->documents()->latest()->firstOrFail();
-                            return Storage::disk($document->disk)->download($document->path, $document->filename);
-                        }),
-                    Action::make('xml')
-                        ->label(__('downloadFiletype', ['type' => 'xml']))
-                        ->icon('tabler-file-type-xml')
-                        ->hidden(fn(Invoice $record) => !$record->documents()->whereNotNull('attachment_path')->exists())
-                        ->action(function (Invoice $record) {
-                            $document = $record->documents()->whereNotNull('attachment_path')->latest()->firstOrFail();
-                            return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
                         }),
                     Action::make('send')
                         ->label(__('send'))
@@ -227,7 +229,7 @@ class InvoiceResource extends Resource
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical'),
-            )
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->icon('tabler-trash'),
