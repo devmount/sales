@@ -128,4 +128,41 @@ class TaxReturnFormInputTest extends TestCase
         $this->assertSame(169.24, $records[14]['value']); // vr118 - vat payable, must reflect the utility expense's vat too
         $this->assertSame(161.0, $records[1]['value']); // itr1 - taxable profit, rounded to whole euros for Elster (raw value is 160.76)
     }
+
+    #[Test]
+    public function it_rounds_the_final_profit_line_to_cents_despite_floating_point_noise(): void
+    {
+        $year = now()->year - 1;
+
+        Invoice::factory()
+            ->for(Project::factory())
+            ->create([
+                'paid_at' => "$year-06-01",
+                'transitory' => false,
+                'pricing_unit' => PricingUnit::Project,
+                'price' => 1192.14,
+                'discount' => null,
+                'taxable' => true,
+                'vat_rate' => 0.19,
+            ]);
+
+        // gross values chosen so summing their rounded net/vat amounts leaves binary floating-point
+        // residue (e.g. -864.54999999999972715159 instead of exactly -864.55) unless rsc97 is rounded.
+        foreach ([129.63, 326.69, 182.57, 493.48, 490.55, 660.28] as $gross) {
+            Expense::factory()->create([
+                'expended_at' => "$year-06-01",
+                'category' => ExpenseCategory::Good,
+                'price' => $gross,
+                'quantity' => 1,
+                'taxable' => true,
+                'vat_rate' => 0.19,
+            ]);
+        }
+
+        $widget = new TaxReturnFormInput();
+        $widget->filter = $year;
+        $records = $widget->getTableRecords()->keyBy('__key');
+
+        $this->assertSame(-864.55, $records[15]['value']); // rsc97 - final profit, must be exactly 2 decimals
+    }
 }

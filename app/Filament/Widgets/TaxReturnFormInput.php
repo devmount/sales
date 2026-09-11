@@ -212,7 +212,7 @@ class TaxReturnFormInput extends TableWidget
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
-                'value' => $netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended,
+                'value' => round($netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended, 2),
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
             ],
