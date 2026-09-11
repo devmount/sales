@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\LanguageCode;
 use App\Models\Client;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\Position;
 use App\Models\Project;
@@ -121,6 +122,45 @@ class InvoiceServiceTest extends TestCase
         $this->assertStringContainsString('<cbc:RegistrationName>Acme UG</cbc:RegistrationName>', $xml);
         $this->assertStringContainsString('<cbc:RegistrationName>' . $invoice->project->client->name . '</cbc:RegistrationName>', $xml);
         $this->assertStringContainsString('<cbc:PayableAmount currencyID="EUR">' . $invoice->gross . '</cbc:PayableAmount>', $xml);
+    }
+
+    #[Test]
+    public function it_generates_a_single_document_holding_the_pdf_and_its_xml_attachment(): void
+    {
+        $invoice = $this->makeInvoice();
+        Position::factory()->for($invoice)->create(['pause_duration' => 0]);
+
+        InvoiceService::generateDocuments($invoice);
+
+        $this->assertSame(1, $invoice->documents()->count());
+
+        $document = $invoice->documents()->sole();
+
+        $this->assertSame($this->expectedPdfFilename($invoice), $document->filename);
+        $this->assertSame('application/pdf', $document->mime_type);
+        $this->assertSame('local', $document->disk);
+        $this->assertGreaterThan(0, $document->size);
+        Storage::assertExists($document->path);
+        $this->assertStringStartsWith('%PDF-', Storage::get($document->path));
+
+        $this->assertSame($this->expectedXmlFilename($invoice), $document->attachment_filename);
+        $this->assertSame('application/xml', $document->attachment_mime_type);
+        $this->assertGreaterThan(0, $document->attachment_size);
+        Storage::assertExists($document->attachment_path);
+    }
+
+    #[Test]
+    public function it_keeps_previous_documents_when_generating_again(): void
+    {
+        $invoice = $this->makeInvoice();
+        Position::factory()->for($invoice)->create(['pause_duration' => 0]);
+
+        InvoiceService::generateDocuments($invoice);
+        InvoiceService::generateDocuments($invoice);
+
+        $this->assertSame(2, $invoice->documents()->count());
+        $this->assertCount(2, Document::all()->pluck('path')->unique());
+        $this->assertCount(2, Document::all()->pluck('attachment_path')->unique());
     }
 
     protected function setUp(): void

@@ -18,6 +18,10 @@ return new class extends Migration {
             $table->string('filename');
             $table->string('mime_type');
             $table->unsignedInteger('size');
+            $table->string('attachment_path')->nullable();
+            $table->string('attachment_filename')->nullable();
+            $table->string('attachment_mime_type')->nullable();
+            $table->unsignedInteger('attachment_size')->nullable();
             $table->timestamps();
         });
     }

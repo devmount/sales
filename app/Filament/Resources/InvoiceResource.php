@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
+use App\Filament\Relations\DocumentsRelationManager;
 use App\Filament\Relations\PositionsRelationManager;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
@@ -158,21 +159,28 @@ class InvoiceResource extends Resource
                         ->schema(self::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(Width::ExtraLarge),
+                    Action::make('generate')
+                        ->label(__('generateInvoiceDocument'))
+                        ->icon('tabler-file-plus')
+                        ->action(function (Invoice $record) {
+                            InvoiceService::generateDocuments($record);
+                            Notification::make()->title(__('invoiceDocumentGenerated'))->success()->send();
+                        }),
                     Action::make('pdf')
                         ->label(__('downloadFiletype', ['type' => 'pdf']))
                         ->icon('tabler-file-type-pdf')
+                        ->hidden(fn(Invoice $record) => !$record->documents()->exists())
                         ->action(function (Invoice $record) {
-                            Storage::delete(Storage::allFiles());
-                            $file = InvoiceService::generatePdf($record);
-                            return response()->download(Storage::path($file));
+                            $document = $record->documents()->latest()->firstOrFail();
+                            return Storage::disk($document->disk)->download($document->path, $document->filename);
                         }),
                     Action::make('xml')
                         ->label(__('downloadFiletype', ['type' => 'xml']))
                         ->icon('tabler-file-type-xml')
+                        ->hidden(fn(Invoice $record) => !$record->documents()->whereNotNull('attachment_path')->exists())
                         ->action(function (Invoice $record) {
-                            Storage::delete(Storage::allFiles());
-                            $file = InvoiceService::generateEn16931Xml($record);
-                            return response()->download(Storage::path($file));
+                            $document = $record->documents()->whereNotNull('attachment_path')->latest()->firstOrFail();
+                            return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
                         }),
                     Action::make('send')
                         ->label(__('send'))
@@ -238,6 +246,7 @@ class InvoiceResource extends Resource
     {
         return [
             PositionsRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 

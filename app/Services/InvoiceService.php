@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\DocumentColor as Color;
 use App\Enums\PricingUnit;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\Setting;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use fpdf\Enums\PdfRectangleStyle;
 use fpdf\Enums\PdfTextAlignment;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 use XMLWriter;
 
 class InvoiceService
@@ -312,6 +314,20 @@ class InvoiceService
     }
 
     /**
+     * Generate the invoice PDF and XML and permanently attach both to the invoice as a single document
+     */
+    public static function generateDocuments(Invoice $invoice): Document
+    {
+        return self::persistDocument(
+            $invoice,
+            self::generatePdf($invoice),
+            'application/pdf',
+            self::generateEn16931Xml($invoice),
+            'application/xml',
+        );
+    }
+
+    /**
      * Generate invoice XML (EN16931 conform), save it and return path/filename
      * @see https://validator.invoice-portal.de for validation check
      *
@@ -506,5 +522,43 @@ class InvoiceService
         $x->flush();
         unset($x);
         return $filename;
+    }
+
+    /**
+     * Move a generated scratch file into permanent per-document storage and attach it to the invoice
+     */
+    private static function persistDocument(
+        Invoice $invoice,
+        string $scratchFile,
+        string $mimeType,
+        ?string $attachmentScratchFile = null,
+        ?string $attachmentMimeType = null,
+    ): Document {
+        $path = self::moveToPermanentStorage($invoice, $scratchFile);
+        $attachmentPath = $attachmentScratchFile ? self::moveToPermanentStorage($invoice, $attachmentScratchFile) : null;
+
+        return $invoice->documents()->create([
+            'disk' => config('filesystems.default'),
+            'path' => $path,
+            'filename' => $scratchFile,
+            'mime_type' => $mimeType,
+            'size' => Storage::size($path),
+            'attachment_path' => $attachmentPath,
+            'attachment_filename' => $attachmentScratchFile,
+            'attachment_mime_type' => $attachmentPath ? $attachmentMimeType : null,
+            'attachment_size' => $attachmentPath ? Storage::size($attachmentPath) : null,
+        ]);
+    }
+
+    /**
+     * Move a generated scratch file into permanent per-invoice document storage
+     */
+    private static function moveToPermanentStorage(Invoice $invoice, string $scratchFile): string
+    {
+        $extension = pathinfo($scratchFile, PATHINFO_EXTENSION);
+        $path = "documents/invoices/{$invoice->id}/" . Str::uuid() . ".{$extension}";
+        Storage::move($scratchFile, $path);
+
+        return $path;
     }
 }

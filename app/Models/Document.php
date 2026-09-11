@@ -18,6 +18,10 @@ class Document extends Model
         'filename',
         'mime_type',
         'size',
+        'attachment_path',
+        'attachment_filename',
+        'attachment_mime_type',
+        'attachment_size',
     ];
 
     /**
@@ -32,15 +36,19 @@ class Document extends Model
     {
         static::deleting(function (self $document) {
             Storage::disk($document->disk)->delete($document->path);
+            if ($document->attachment_path) {
+                Storage::disk($document->disk)->delete($document->attachment_path);
+            }
         });
     }
 
     protected function casts(): array
     {
         return [
-            'size'       => 'integer',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'size'            => 'integer',
+            'attachment_size' => 'integer',
+            'created_at'      => 'datetime',
+            'updated_at'      => 'datetime',
         ];
     }
 
