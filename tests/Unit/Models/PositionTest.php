@@ -62,6 +62,23 @@ it('calculates net for an hourly invoice based on duration and price', function 
     expect($position->net)->toBe(500.0);
 });
 
+it('calculates net for a day-priced invoice by dividing the day rate across its pricing hours', function () {
+    $invoice = Invoice::factory()->create([
+        'pricing_unit' => PricingUnit::Day,
+        'price' => 800,
+        'discount' => null,
+    ]);
+    $position = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-01 09:00:00',
+        'finished_at' => '2026-03-01 13:00:00',
+        'pause_duration' => 0,
+    ]);
+
+    // 4 hours worked, day rate split across 8 pricing hours: 800 / 8 * 4
+    expect($position->net)->toBe(400.0);
+});
+
 it('calculates net for a project-priced invoice proportional to its share of hours', function () {
     $invoice = Invoice::factory()->create([
         'pricing_unit' => PricingUnit::Project,
