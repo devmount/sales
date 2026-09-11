@@ -6,12 +6,14 @@ use App\Enums\ExpenseCategory;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class MinorAssetsList extends TableWidget
 {
@@ -27,6 +29,7 @@ class MinorAssetsList extends TableWidget
     public function table(Table $table): Table
     {
         return $table
+            ->query(fn() => Expense::query()->where('category', ExpenseCategory::MinorAssets))
             ->header(view('filament.widgets.table-header', [
                 'heading' => __('minorAssetsRegister'),
                 'description' => __('minorAssetsRegisterDescription', [
@@ -71,6 +74,17 @@ class MinorAssetsList extends TableWidget
                     ->fontFamily(FontFamily::Mono)
                     ->state(fn(Expense $record): float => $record->deductibleNet)
                     ->alignRight(),
+            ])
+            ->recordActions([
+                Action::make('bill')
+                    ->label('')
+                    ->tooltip(__('bill'))
+                    ->icon('tabler-receipt')
+                    ->hidden(fn(Expense $record) => !$record->documents()->exists())
+                    ->action(function (Expense $record) {
+                        $document = $record->documents()->latest()->firstOrFail();
+                        return Storage::disk($document->disk)->download($document->path, $document->filename);
+                    }),
             ]);
     }
 

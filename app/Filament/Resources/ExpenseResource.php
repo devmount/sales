@@ -6,6 +6,9 @@ use App\Enums\ExpenseCategory;
 use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
 use App\Models\Expense;
 use Closure;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -14,6 +17,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -23,6 +28,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontFamily;
@@ -98,22 +104,39 @@ class ExpenseResource extends Resource
                     ->label(__('category'))
                     ->options(ExpenseCategory::options()),
             ])
-            ->recordActions(
+            ->recordActions([
+                Action::make('bill')
+                    ->label('')
+                    ->tooltip(__('bill'))
+                    ->icon('tabler-receipt')
+                    ->hidden(fn(Expense $record) => !$record->documents()->exists())
+                    ->action(function (Expense $record) {
+                        $document = $record->documents()->latest()->firstOrFail();
+                        return Storage::disk($document->disk)->download($document->path, $document->filename);
+                    }),
                 ActionGroup::make([
                     EditAction::make()
                         ->icon('tabler-edit')
                         ->schema(self::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(Width::Large),
+                        ->modalWidth(Width::Large)
+                        ->using(function (array $data, Expense $record): void {
+                            $record->update(Arr::except($data, ['bill', 'bill_original_name']));
+                            self::syncBillDocument($record, $data);
+                        }),
                     ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->schema(self::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(Width::Large),
+                        ->modalWidth(Width::Large)
+                        ->beforeReplicaSaved(function (Expense $replica) {
+                            unset($replica->bill, $replica->bill_original_name);
+                        })
+                        ->after(fn(array $data, Expense $replica) => self::syncBillDocument($replica, $data)),
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical'),
-            )
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->icon('tabler-trash'),
@@ -125,7 +148,8 @@ class ExpenseResource extends Resource
                     ->icon('tabler-plus')
                     ->schema(self::formFields(6, false))
                     ->slideOver()
-                    ->modalWidth(Width::Large),
+                    ->modalWidth(Width::Large)
+                    ->using(fn(array $data): Expense => self::createWithBill($data)),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('expended_at', 'desc')
@@ -263,10 +287,68 @@ class ExpenseResource extends Resource
                 ->label(__('description'))
                 ->maxLength(65535)
                 ->columnSpanFull(),
+            FileUpload::make('bill')
+                ->label(__('bill'))
+                ->disk('local')
+                ->directory('documents/expenses')
+                ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/webp'])
+                ->storeFileNamesIn('bill_original_name')
+                ->openable()
+                ->downloadable()
+                ->previewable(false)
+                ->afterStateHydrated(function (FileUpload $component, Set $set, ?Expense $record) {
+                    $document = $record?->documents()->latest()->first();
+                    $component->state($document?->path);
+                    $set('bill_original_name', $document?->filename);
+                })
+                ->columnSpanFull(),
+            Hidden::make('bill_original_name'),
         ];
 
         return $useSection
             ? [Section::make()->columnSpan($columns)->schema($fields)->columns($columns)]
             : [Grid::make()->columns($columns)->schema($fields)];
+    }
+
+    /**
+     * Create an expense from form data and attach its bill, if one was uploaded.
+     * Used instead of the default CreateAction process because "bill"/"bill_original_name"
+     * are virtual form fields with no matching column on the expenses table.
+     */
+    public static function createWithBill(array $data): Expense
+    {
+        $expense = Expense::create(Arr::except($data, ['bill', 'bill_original_name']));
+        self::syncBillDocument($expense, $data);
+
+        return $expense;
+    }
+
+    /**
+     * Keep the expense's bill in sync with the "bill" form field: attach a new
+     * document when a file was uploaded or replaced, remove it when cleared, and
+     * leave the existing document alone when the field wasn't touched.
+     */
+    public static function syncBillDocument(Expense $expense, array $data): void
+    {
+        $path = $data['bill'] ?? null;
+        $current = $expense->documents()->latest()->first();
+
+        if ($current?->path === $path) {
+            return;
+        }
+
+        $current?->delete();
+
+        if ($path === null) {
+            return;
+        }
+
+        $expense->documents()->create([
+            'disk' => config('filesystems.default'),
+            'path' => $path,
+            'filename' => $data['bill_original_name'] ?? basename($path),
+            'mime_type' => Storage::mimeType($path) ?: 'application/octet-stream',
+            'size' => Storage::size($path),
+        ]);
     }
 }
