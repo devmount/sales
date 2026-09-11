@@ -70,8 +70,8 @@ it('builds the full address without an address line when absent', function () {
 it('sums worked hours across all its projects, invoices and positions', function () {
     $client = Client::factory()->create();
     $project = Project::factory()->create(['client_id' => $client->id]);
-    $invoiceOne = Invoice::factory()->create(['project_id' => $project->id]);
-    $invoiceTwo = Invoice::factory()->create(['project_id' => $project->id]);
+    $invoiceOne = Invoice::factory()->create(['project_id' => $project->id, 'paid_at' => '2026-03-01', 'transitory' => false]);
+    $invoiceTwo = Invoice::factory()->create(['project_id' => $project->id, 'paid_at' => '2026-03-02', 'transitory' => false]);
     Position::factory()->create([
         'invoice_id' => $invoiceOne->id,
         'started_at' => '2026-03-01 09:00:00',
@@ -88,6 +88,34 @@ it('sums worked hours across all its projects, invoices and positions', function
     expect($client->hours)->toBe(8.0);
 });
 
+it('excludes unpaid and transitory invoices when summing worked hours', function () {
+    $client = Client::factory()->create();
+    $project = Project::factory()->create(['client_id' => $client->id]);
+    $paid = Invoice::factory()->create(['project_id' => $project->id, 'paid_at' => '2026-03-01', 'transitory' => false]);
+    $unpaid = Invoice::factory()->create(['project_id' => $project->id, 'paid_at' => null, 'transitory' => false]);
+    $transitory = Invoice::factory()->create(['project_id' => $project->id, 'paid_at' => '2026-03-02', 'transitory' => true]);
+    Position::factory()->create([
+        'invoice_id' => $paid->id,
+        'started_at' => '2026-03-01 09:00:00',
+        'finished_at' => '2026-03-01 14:00:00',
+        'pause_duration' => 0,
+    ]);
+    Position::factory()->create([
+        'invoice_id' => $unpaid->id,
+        'started_at' => '2026-03-02 09:00:00',
+        'finished_at' => '2026-03-02 12:00:00',
+        'pause_duration' => 0,
+    ]);
+    Position::factory()->create([
+        'invoice_id' => $transitory->id,
+        'started_at' => '2026-03-03 09:00:00',
+        'finished_at' => '2026-03-03 12:00:00',
+        'pause_duration' => 0,
+    ]);
+
+    expect($client->hours)->toBe(5.0);
+});
+
 it('sums the net amount earned across all its projects and invoices', function () {
     $client = Client::factory()->create();
     $project = Project::factory()->create(['client_id' => $client->id]);
@@ -96,12 +124,16 @@ it('sums the net amount earned across all its projects and invoices', function (
         'pricing_unit' => PricingUnit::Hour,
         'price' => 100,
         'discount' => null,
+        'paid_at' => '2026-03-01',
+        'transitory' => false,
     ]);
     $invoiceTwo = Invoice::factory()->create([
         'project_id' => $project->id,
         'pricing_unit' => PricingUnit::Hour,
         'price' => 100,
         'discount' => null,
+        'paid_at' => '2026-03-02',
+        'transitory' => false,
     ]);
     Position::factory()->create([
         'invoice_id' => $invoiceOne->id,
@@ -117,6 +149,39 @@ it('sums the net amount earned across all its projects and invoices', function (
     ]);
 
     expect($client->net)->toBe(800.0);
+});
+
+it('excludes unpaid and transitory invoices when summing the net amount earned', function () {
+    $client = Client::factory()->create();
+    $project = Project::factory()->create(['client_id' => $client->id]);
+    Invoice::factory()->create([
+        'project_id' => $project->id,
+        'pricing_unit' => PricingUnit::Project,
+        'price' => 500,
+        'discount' => null,
+        'paid_at' => '2026-03-01',
+        'transitory' => false,
+    ]);
+    // unpaid draft, must be excluded
+    Invoice::factory()->create([
+        'project_id' => $project->id,
+        'pricing_unit' => PricingUnit::Project,
+        'price' => 1000,
+        'discount' => null,
+        'paid_at' => null,
+        'transitory' => false,
+    ]);
+    // transitory pass-through amount, must be excluded
+    Invoice::factory()->create([
+        'project_id' => $project->id,
+        'pricing_unit' => PricingUnit::Project,
+        'price' => 1000,
+        'discount' => null,
+        'paid_at' => '2026-03-02',
+        'transitory' => true,
+    ]);
+
+    expect($client->net)->toBe(500.0);
 });
 
 it('calculates the average payment delay across paid invoices', function () {

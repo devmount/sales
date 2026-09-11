@@ -75,13 +75,16 @@ class Client extends Model
     }
 
     /**
-     * Number of hours worked for this client
+     * Number of hours worked for this client, based on paid, non-transitory invoices
      */
     protected function hours(): Attribute
     {
         $hours = 0.0;
         foreach ($this->projects as $project) {
             foreach ($project->invoices as $invoice) {
+                if (!$invoice->paid_at || $invoice->transitory) {
+                    continue;
+                }
                 foreach ($invoice->positions as $position) {
                     $hours += $position->duration;
                 }
@@ -91,13 +94,16 @@ class Client extends Model
     }
 
     /**
-     * Net amount earned by this client
+     * Net amount earned by this client, based on paid, non-transitory invoices
      */
     protected function net(): Attribute
     {
         $net = 0.0;
         foreach ($this->projects as $project) {
             foreach ($project->invoices as $invoice) {
+                if (!$invoice->paid_at || $invoice->transitory) {
+                    continue;
+                }
                 $net += $invoice->net;
             }
         }
