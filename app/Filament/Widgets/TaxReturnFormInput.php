@@ -85,7 +85,8 @@ class TaxReturnFormInput extends TableWidget
                 'itr' => '1 (S)',
                 'vr' => null,
                 'rsc' => null,
-                'value' => round($netEarned + $netUntaxableEarned - $netExpended),
+                // Elster requires the income tax return's profit line (Zeile 1 ESt Anlage S) in whole euros
+                'value' => round($netEarned + $netUntaxableEarned - $netExpended, 0),
                 'help' => __('formLabels')['itr1'],
                 'color' => 'primary',
             ],

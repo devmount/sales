@@ -126,6 +126,6 @@ class TaxReturnFormInputTest extends TestCase
         $this->assertSame(50.0, $records[12]['value']); // rsc65a - rent expended
         $this->assertSame(25.21, $records[13]['value']); // rsc65b - utility costs expended
         $this->assertSame(169.24, $records[14]['value']); // vr118 - vat payable, must reflect the utility expense's vat too
-        $this->assertEqualsWithDelta(161.0, $records[1]['value'], 0.01); // itr1 - taxable profit
+        $this->assertSame(161.0, $records[1]['value']); // itr1 - taxable profit, rounded to whole euros for Elster (raw value is 160.76)
     }
 }
