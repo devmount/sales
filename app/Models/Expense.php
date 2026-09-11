@@ -92,7 +92,7 @@ class Expense extends Model
      */
     protected function year(): Attribute
     {
-        return Attribute::make(fn(): int => intval(substr($this->expanded_at, 0, 4)));
+        return Attribute::make(fn(): int => intval(substr($this->expended_at, 0, 4)));
     }
 
     /**
