@@ -61,8 +61,9 @@ class MonthlyIncomeChart extends ChartWidget
             if ($this->filter === 'net') {
                 foreach ($taxes as $obj) {
                     // Shift yearly income taxes post pays to the year before
+                    // TODO: Make it more obvious in the UI that this happens
                     if ($i > 0 && !Str($obj->description)->contains('EStVA') && CarbonPeriod::create($date, $period[$i + 1])->excludeEndDate()->contains(Carbon::parse($obj->expended_at))) {
-                        $invoiceData[$i - 1] = round($invoiceData[$i - 1] - $obj->net / ($i == count($period) - 2 ? now()->month : 12), 2);
+                        $invoiceData[$i - 1] = round($invoiceData[$i - 1] - $obj->net / 12, 2);
                         continue;
                     }
                     // Handle income tax advance pays
