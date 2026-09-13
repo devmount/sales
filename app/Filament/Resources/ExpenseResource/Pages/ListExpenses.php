@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ExpenseResource\Pages;
 
 use App\Enums\ExpenseCategory;
 use App\Filament\Resources\ExpenseResource;
+use App\Models\Expense;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -35,7 +36,8 @@ class ListExpenses extends ListRecords
                 ->icon('tabler-plus')
                 ->schema(ExpenseResource::formFields(6, false))
                 ->slideOver()
-                ->modalWidth(Width::Large),
+                ->modalWidth(Width::Large)
+                ->using(fn(array $data): Expense => ExpenseResource::createWithBill($data)),
         ];
     }
 }

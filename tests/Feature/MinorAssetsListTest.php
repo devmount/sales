@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ExpenseCategory;
 use App\Filament\Widgets\MinorAssetsList;
+use App\Models\Document;
 use App\Models\Expense;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -124,5 +125,27 @@ class MinorAssetsListTest extends TestCase
 
         $this->assertCount(1, $records);
         $this->assertTrue($records->contains($inYear));
+    }
+
+    #[Test]
+    public function it_hides_the_bill_download_until_a_document_exists(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $year = now()->year - 1;
+        $expense = Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::MinorAssets,
+            'price' => 500,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
+        Livewire::test(MinorAssetsList::class)
+            ->assertTableActionHidden('bill', $expense);
+
+        Document::factory()->for($expense, 'documentable')->create();
+
+        Livewire::test(MinorAssetsList::class)
+            ->assertTableActionVisible('bill', $expense);
     }
 }

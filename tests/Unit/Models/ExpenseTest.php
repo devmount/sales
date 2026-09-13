@@ -2,6 +2,7 @@
 
 use App\Enums\ExpenseCategory;
 use App\Enums\TimeUnit;
+use App\Models\Document;
 use App\Models\Expense;
 use Carbon\Carbon;
 
@@ -16,6 +17,13 @@ it('has expected fillable attributes', function () {
         'category',
         'description',
     ]);
+});
+
+it('has many documents', function () {
+    $expense = Expense::factory()->create();
+    Document::factory()->count(2)->for($expense, 'documentable')->create();
+
+    expect($expense->documents)->toHaveCount(2);
 });
 
 it('derives the year from the expended_at date', function () {

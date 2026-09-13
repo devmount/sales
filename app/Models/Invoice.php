@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Number;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -48,6 +49,14 @@ class Invoice extends Model
     public function positions(): HasMany
     {
         return $this->hasMany(Position::class);
+    }
+
+    /**
+     * The documents attached to this invoice.
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 
     /**

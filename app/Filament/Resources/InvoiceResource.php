@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
+use App\Filament\Relations\DocumentsRelationManager;
 use App\Filament\Relations\PositionsRelationManager;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
@@ -146,7 +147,25 @@ class InvoiceResource extends Resource
                     ->label(trans_choice('client', 1))
                     ->relationship('project.client', 'name'),
             ])
-            ->recordActions(
+            ->recordActions([
+                Action::make('pdf')
+                    ->label('')
+                    ->tooltip(__('downloadFiletype', ['type' => 'pdf']))
+                    ->icon('tabler-file-type-pdf')
+                    ->hidden(fn(Invoice $record) => !$record->documents()->exists())
+                    ->action(function (Invoice $record) {
+                        $document = $record->documents()->latest()->firstOrFail();
+                        return Storage::disk($document->disk)->download($document->path, $document->filename);
+                    }),
+                Action::make('xml')
+                    ->label('')
+                    ->tooltip(__('downloadFiletype', ['type' => 'xml']))
+                    ->icon('tabler-file-type-xml')
+                    ->hidden(fn(Invoice $record) => !$record->documents()->whereNotNull('attachment_path')->exists())
+                    ->action(function (Invoice $record) {
+                        $document = $record->documents()->whereNotNull('attachment_path')->latest()->firstOrFail();
+                        return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
+                    }),
                 ActionGroup::make([
                     EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(Width::Large),
                     ReplicateAction::make()
@@ -158,21 +177,12 @@ class InvoiceResource extends Resource
                         ->schema(self::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(Width::ExtraLarge),
-                    Action::make('pdf')
-                        ->label(__('downloadFiletype', ['type' => 'pdf']))
-                        ->icon('tabler-file-type-pdf')
+                    Action::make('generate')
+                        ->label(__('generateInvoiceDocument'))
+                        ->icon('tabler-file-plus')
                         ->action(function (Invoice $record) {
-                            Storage::delete(Storage::allFiles());
-                            $file = InvoiceService::generatePdf($record);
-                            return response()->download(Storage::path($file));
-                        }),
-                    Action::make('xml')
-                        ->label(__('downloadFiletype', ['type' => 'xml']))
-                        ->icon('tabler-file-type-xml')
-                        ->action(function (Invoice $record) {
-                            Storage::delete(Storage::allFiles());
-                            $file = InvoiceService::generateEn16931Xml($record);
-                            return response()->download(Storage::path($file));
+                            InvoiceService::generateDocuments($record);
+                            Notification::make()->title(__('invoiceDocumentGenerated'))->success()->send();
                         }),
                     Action::make('send')
                         ->label(__('send'))
@@ -219,7 +229,7 @@ class InvoiceResource extends Resource
                     DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
                 ])
                 ->icon('tabler-dots-vertical'),
-            )
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->icon('tabler-trash'),
@@ -238,6 +248,7 @@ class InvoiceResource extends Resource
     {
         return [
             PositionsRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 

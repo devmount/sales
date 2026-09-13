@@ -6,13 +6,16 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\Project;
+use App\Models\Setting;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -20,6 +23,9 @@ use Tests\TestCase;
 class InvoiceResourceTest extends TestCase
 {
     use RefreshDatabase;
+
+    private string $logoPath;
+    private string $signaturePath;
 
     #[Test]
     public function it_redirects_guests_away_from_the_invoice_list(): void
@@ -143,5 +149,117 @@ class InvoiceResourceTest extends TestCase
             ->callAction(TestAction::make(DeleteAction::class)->table($invoice));
 
         $this->assertModelMissing($invoice);
+    }
+
+    #[Test]
+    public function it_disables_pdf_and_xml_downloads_on_the_edit_page_until_matching_documents_exist(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertActionDisabled('pdf')
+            ->assertActionDisabled('xml');
+
+        Document::factory()->for($invoice, 'documentable')->create(['filename' => 'invoice.pdf', 'attachment_path' => null]);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertActionEnabled('pdf')
+            ->assertActionDisabled('xml');
+
+        Document::factory()->for($invoice, 'documentable')->create([
+            'filename' => 'invoice.pdf',
+            'attachment_path' => 'documents/invoice.xml',
+            'attachment_filename' => 'invoice.xml',
+        ]);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertActionEnabled('pdf')
+            ->assertActionEnabled('xml');
+    }
+
+    #[Test]
+    public function it_hides_pdf_and_xml_downloads_in_the_table_until_matching_documents_exist(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->assertTableActionHidden('pdf', $invoice)
+            ->assertTableActionHidden('xml', $invoice);
+
+        Document::factory()->for($invoice, 'documentable')->create([
+            'filename' => 'invoice.pdf',
+            'attachment_path' => 'documents/invoice.xml',
+            'attachment_filename' => 'invoice.xml',
+        ]);
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->assertTableActionVisible('pdf', $invoice)
+            ->assertTableActionVisible('xml', $invoice);
+    }
+
+    #[Test]
+    public function it_generates_and_attaches_a_single_invoice_document_from_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->callAction('generate');
+
+        $this->assertSame(1, $invoice->documents()->count());
+        $this->assertDatabaseHas('documents', [
+            'documentable_type' => Invoice::class,
+            'documentable_id' => $invoice->id,
+            'mime_type' => 'application/pdf',
+            'attachment_mime_type' => 'application/xml',
+        ]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake();
+
+        $this->logoPath = tempnam(sys_get_temp_dir(), 'logo') . '.jpg';
+        imagejpeg(imagecreatetruecolor(10, 10), $this->logoPath);
+
+        $this->signaturePath = tempnam(sys_get_temp_dir(), 'signature') . '.png';
+        imagepng(imagecreatetruecolor(10, 10), $this->signaturePath);
+
+        $values = [
+            'accountHolder' => 'Account Holder',
+            'bank' => 'Test Bank',
+            'bic' => 'TESTBIC1',
+            'city' => 'Berlin',
+            'company' => 'Acme UG',
+            'country' => 'Germany',
+            'email' => 'contact@acme.test',
+            'iban' => 'DE00000000000000000000',
+            'logo' => $this->logoPath,
+            'name' => 'Acme UG',
+            'phone' => '+49123456789',
+            'signature' => $this->signaturePath,
+            'street' => 'Main Street 1',
+            'taxOffice' => 'Finanzamt Berlin',
+            'vatId' => 'DE123456789',
+            'vatRate' => '0.19',
+            'website' => 'https://acme.test',
+            'zip' => '12345',
+        ];
+
+        foreach ($values as $field => $value) {
+            Setting::where('field', $field)->update(['value' => $value]);
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        @unlink($this->logoPath);
+        @unlink($this->signaturePath);
+
+        parent::tearDown();
     }
 }

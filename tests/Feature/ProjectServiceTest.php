@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\LanguageCode;
 use App\Models\Client;
+use App\Models\Document;
 use App\Models\Estimate;
 use App\Models\Project;
 use App\Models\Setting;
@@ -76,6 +77,42 @@ class ProjectServiceTest extends TestCase
 
         Storage::assertExists($filename);
         $this->assertStringStartsWith('%PDF-', Storage::get($filename));
+    }
+
+    #[Test]
+    public function it_generates_and_attaches_a_quote_document_to_the_project(): void
+    {
+        $client = Client::factory()->create(['language' => LanguageCode::DE]);
+        $project = Project::factory()->for($client)->hourly()->create();
+        Estimate::factory()->for($project)->create();
+
+        ProjectService::generateDocument($project);
+
+        $this->assertSame(1, $project->documents()->count());
+
+        $document = $project->documents()->sole();
+
+        $this->assertSame($this->expectedFilename(), $document->filename);
+        $this->assertSame('application/pdf', $document->mime_type);
+        $this->assertSame('local', $document->disk);
+        $this->assertGreaterThan(0, $document->size);
+        $this->assertNull($document->attachment_path);
+        Storage::assertExists($document->path);
+        $this->assertStringStartsWith('%PDF-', Storage::get($document->path));
+    }
+
+    #[Test]
+    public function it_keeps_previous_quote_documents_when_generating_again(): void
+    {
+        $client = Client::factory()->create(['language' => LanguageCode::DE]);
+        $project = Project::factory()->for($client)->hourly()->create();
+        Estimate::factory()->for($project)->create();
+
+        ProjectService::generateDocument($project);
+        ProjectService::generateDocument($project);
+
+        $this->assertSame(2, $project->documents()->count());
+        $this->assertCount(2, Document::all()->pluck('path')->unique());
     }
 
     protected function setUp(): void
