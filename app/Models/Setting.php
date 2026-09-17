@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Setting extends Model
 {
@@ -21,6 +22,18 @@ class Setting extends Model
     public static function get(string $field)
     {
         return self::find($field)?->value;
+    }
+
+    /**
+     * Delete the old file from disk when an image setting's value is replaced or cleared
+     */
+    protected static function booted(): void
+    {
+        static::updating(function (self $setting) {
+            if ($setting->type === 'image' && $setting->isDirty('value') && $setting->getOriginal('value')) {
+                Storage::disk('local')->delete($setting->getOriginal('value'));
+            }
+        });
     }
 
     /**

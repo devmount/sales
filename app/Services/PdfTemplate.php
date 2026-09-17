@@ -10,6 +10,7 @@ use fpdf\Enums\PdfRectangleStyle;
 use fpdf\Enums\PdfTextAlignment;
 use fpdf\PdfDocument;
 use fpdf\Traits\PdfAttachmentTrait;
+use Illuminate\Support\Facades\Storage;
 
 class PdfTemplate extends PdfDocument
 {
@@ -42,8 +43,10 @@ class PdfTemplate extends PdfDocument
         // Title bar
         $this->setFillColor(Color::MAIN->pdfColor())
             ->rect(0, 9, 210, 30, PdfRectangleStyle::FILL);
-        // Logo
-        $this->image(Setting::get('logo'), 12, 13, 22, 22, 'JPEG');
+        // Logo (JPEG or PNG; type is inferred from the file extension)
+        if (($logo = Setting::get('logo')) && Storage::disk('local')->exists($logo)) {
+            $this->image(Storage::disk('local')->path($logo), 12, 13, height: 22);
+        }
         // Title text
         $title = strtoupper(
             match ($this->type) {
@@ -76,8 +79,10 @@ class PdfTemplate extends PdfDocument
         $this->setDrawColor(Color::LINE->pdfColor())
             ->setLineWidth(0.4)
             ->line(10, 277, 202, 277);
-        // Signature
-        $this->image(Setting::get('signature'), 13, 262, 24, 18, 'PNG');
+        // Signature (JPEG or PNG; type is inferred from the file extension)
+        if (($signature = Setting::get('signature')) && Storage::disk('local')->exists($signature)) {
+            $this->image(Storage::disk('local')->path($signature), 13, 262, height: 18);
+        }
         // Page number
         $this->setY(-26)
             ->setFontSizeInPoint(9)

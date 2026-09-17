@@ -3,10 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SettingResource\Pages\ManageSettings;
+use App\Filament\Resources\SettingResource\ValueColumn;
 use App\Models\Setting;
+use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
 
 class SettingResource extends Resource
@@ -16,16 +18,37 @@ class SettingResource extends Resource
 
     public static function table(Table $table): Table
     {
+        // Attached to the value column below, so clicking an image setting's cell opens the upload modal.
+        $upload = Action::make('upload')
+            ->schema([
+                FileUpload::make('value')
+                    ->label(fn(Setting $record): string => $record->label)
+                    ->disk('local')
+                    ->directory('settings')
+                    ->image()
+                    ->orientImagesFromExif(false) // Avoid re-encoding
+                    ->acceptedFileTypes(['image/jpeg', 'image/png'])
+                    ->imagePreviewHeight('120'),
+            ])
+            ->fillForm(fn(Setting $record): array => ['value' => $record->value])
+            ->action(fn(Setting $record, array $data) => $record->update(['value' => $data['value']]));
+
         return $table
             ->defaultSort('weight', 'asc')
             ->columns([
                 TextColumn::make('field')
                     ->label(__('field'))
                     ->state(fn(Setting $record): string => "{$record->label} (<code>{$record->field}</code>)")
-                    ->html(),
-                TextInputColumn::make('value')
+                    ->html()
+                    ->tooltip(fn(?Setting $record): ?string => match ($record?->field) {
+                        'logo' => __('expectedFormat', ['format' => 'JPEG/PNG']) . '. ' . __('squareRatioRecommended'),
+                        'signature' => __('expectedFormat', ['format' => 'JPEG/PNG']),
+                        default => null,
+                    }),
+                ValueColumn::make('value')
                     ->label(__('value'))
-                    ->grow(),
+                    ->grow()
+                    ->imageAction($upload),
             ])
             ->paginated(false);
     }
