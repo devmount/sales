@@ -61,6 +61,26 @@ class TaxOverviewTest extends TestCase
     }
 
     #[Test]
+    public function it_pro_rates_the_expense_vat_by_taxable_ratio(): void
+    {
+        Expense::factory()->create([
+            'expended_at' => now(),
+            'category' => ExpenseCategory::Good,
+            'price' => 100,
+            'quantity' => 1,
+            'taxable' => true,
+            'vat_rate' => 0.19,
+            'taxable_ratio' => 0.5,
+        ]);
+
+        $widget = new TaxOverview();
+        $record = $widget->getTableRecords()->first();
+
+        $this->assertSame(7.99, $record['vatExpenses']);
+        $this->assertSame(-7.99, $record['totalVat']);
+    }
+
+    #[Test]
     public function it_disables_the_last_advance_vat_action_when_it_already_exists(): void
     {
         Expense::saveLastAdvanceVat();

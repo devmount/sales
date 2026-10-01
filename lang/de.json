@@ -215,6 +215,7 @@
     "sumWorkingHoursPerYear": "Summe bezahlter Arbeitsstunden pro Jahr",
     "taxable": "Versteuert",
     "taxableRatio": "Abzugsfähiger Anteil",
+    "taxableRatioTooltip": "Anteilig :ratio von :vat USt.",
     "taxes": "Steuern",
     "taxOffice": "Finanzamt",
     "taxReport": "Steuererklärung",

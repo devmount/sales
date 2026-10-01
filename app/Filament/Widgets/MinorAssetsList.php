@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 
 class MinorAssetsList extends TableWidget
 {
@@ -60,8 +61,18 @@ class MinorAssetsList extends TableWidget
                     ->label(__('vat'))
                     ->money('eur')
                     ->fontFamily(FontFamily::Mono)
-                    ->state(fn(Expense $record): float => $record->vat)
-                    ->color(fn(string $state): string => $state == 0 ? 'gray' : 'normal')
+                    ->state(fn(Expense $record): float => $record->deductibleVat)
+                    ->color(fn(Expense $record): string => match (true) {
+                        $record->taxable_ratio < 1 => 'warning',
+                        $record->deductibleVat == 0 => 'gray',
+                        default => 'normal',
+                    })
+                    ->tooltip(fn(Expense $record): ?string => $record->taxable_ratio < 1
+                        ? __('taxableRatioTooltip', [
+                            'ratio' => Number::percentage($record->taxable_ratio * 100),
+                            'vat' => Number::currency($record->vat, 'eur'),
+                        ])
+                        : null)
                     ->sortable(),
                 TextColumn::make('net')
                     ->label(__('net'))

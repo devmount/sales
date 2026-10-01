@@ -76,7 +76,7 @@ class Expense extends Model
             ->whereIn('category', $categories)
             ->get();
         $net = array_sum($records->map(fn(self $r) => $r->deductibleNet)->toArray());
-        $vat = array_sum($records->map(fn(self $r) => $r->vat)->toArray());
+        $vat = array_sum($records->map(fn(self $r) => $r->deductibleVat)->toArray());
         return [$net, $vat];
     }
 
@@ -135,5 +135,13 @@ class Expense extends Model
     protected function deductibleNet(): Attribute
     {
         return Attribute::make(fn(): float => round($this->net * $this->taxable_ratio, 2));
+    }
+
+    /**
+     * Vat amount of this expense that is actually deductible, pro-rated by taxable_ratio
+     */
+    protected function deductibleVat(): Attribute
+    {
+        return Attribute::make(fn(): float => round($this->vat * $this->taxable_ratio, 2));
     }
 }

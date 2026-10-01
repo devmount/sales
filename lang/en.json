@@ -215,6 +215,7 @@
     "sumWorkingHoursPerYear": "Sum of paid working hours per year",
     "taxable": "Taxable",
     "taxableRatio": "Deductible share",
+    "taxableRatioTooltip": "Pro-rated to :ratio of :vat VAT",
     "taxes": "Taxes",
     "taxOffice": "Tax office",
     "taxReport": "Tax return",

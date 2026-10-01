@@ -82,6 +82,30 @@ it('leaves the deductible net amount unchanged when taxable_ratio is 1', functio
     expect($expense->deductibleNet)->toBe($expense->net);
 });
 
+it('pro-rates the deductible vat amount by taxable_ratio', function () {
+    $expense = Expense::factory()->create([
+        'price' => 100,
+        'quantity' => 1,
+        'taxable' => true,
+        'vat_rate' => 0.19,
+        'taxable_ratio' => 0.5,
+    ]);
+
+    expect($expense->vat)->toBe(15.97)
+        ->and($expense->deductibleVat)->toBe(7.99);
+});
+
+it('leaves the deductible vat amount unchanged when taxable_ratio is 1', function () {
+    $expense = Expense::factory()->create([
+        'price' => 100,
+        'quantity' => 1,
+        'taxable' => true,
+        'vat_rate' => 0.19,
+    ])->refresh();
+
+    expect($expense->deductibleVat)->toBe($expense->vat);
+});
+
 it('calculates gross, net and vat amounts based on price, quantity and vat rate', function () {
     $expense = Expense::factory()->create([
         'price' => 100,
@@ -201,7 +225,7 @@ it('sums net and vat of a single expense category within a time range', function
         ->and($vat)->toBe(0.0);
 });
 
-it('sums the deductible net amount honoring taxable_ratio within a time range', function () {
+it('sums the deductible net and vat amounts honoring taxable_ratio within a time range', function () {
     $month = Carbon::parse('2026-03-15');
 
     Expense::factory()->create([
@@ -214,7 +238,8 @@ it('sums the deductible net amount honoring taxable_ratio within a time range', 
         'category' => ExpenseCategory::Good,
     ]);
 
-    [$net] = Expense::ofTime($month, TimeUnit::MONTH, ExpenseCategory::Good);
+    [$net, $vat] = Expense::ofTime($month, TimeUnit::MONTH, ExpenseCategory::Good);
 
-    expect($net)->toBe(42.02);
+    expect($net)->toBe(42.02)
+        ->and($vat)->toBe(7.99);
 });
