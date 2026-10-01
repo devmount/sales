@@ -130,6 +130,29 @@ class TaxReturnFormInputTest extends TestCase
     }
 
     #[Test]
+    public function it_pro_rates_expense_vat_by_taxable_ratio(): void
+    {
+        $year = now()->year - 1;
+
+        Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::Good,
+            'price' => 100,
+            'quantity' => 1,
+            'taxable' => true,
+            'vat_rate' => 0.19,
+            'taxable_ratio' => 0.5,
+        ]);
+
+        $widget = new TaxReturnFormInput();
+        $widget->filter = $year;
+        $records = $widget->getTableRecords()->keyBy('__key');
+
+        $this->assertSame(7.99, $records[11]['value']); // rsc57 - vat expended, pro-rated by taxable_ratio
+        $this->assertSame(-7.99, $records[14]['value']); // vr118 - vat payable, must reflect the pro-rated vat
+    }
+
+    #[Test]
     public function it_rounds_the_final_profit_line_to_cents_despite_floating_point_noise(): void
     {
         $year = now()->year - 1;

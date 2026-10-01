@@ -128,6 +128,26 @@ class MinorAssetsListTest extends TestCase
     }
 
     #[Test]
+    public function it_shows_the_pro_rated_vat_in_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $year = now()->year - 1;
+        $expense = Expense::factory()->create([
+            'expended_at' => "$year-06-01",
+            'category' => ExpenseCategory::MinorAssets,
+            'price' => 500,
+            'quantity' => 1,
+            'taxable' => true,
+            'vat_rate' => 0.19,
+            'taxable_ratio' => 0.5,
+        ]);
+
+        Livewire::test(MinorAssetsList::class)
+            ->loadTable()
+            ->assertTableColumnStateSet('vat', round($expense->vat * 0.5, 2), $expense);
+    }
+
+    #[Test]
     public function it_hides_the_bill_download_until_a_document_exists(): void
     {
         $this->actingAs(User::factory()->create());

@@ -50,6 +50,23 @@ class ExpenseResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_shows_the_pro_rated_vat_in_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $expense = Expense::factory()->create([
+            'price' => 100,
+            'quantity' => 1,
+            'taxable' => true,
+            'vat_rate' => 0.19,
+            'taxable_ratio' => 0.5,
+        ]);
+
+        Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
+            ->loadTable()
+            ->assertTableColumnStateSet('vat', 7.99, $expense);
+    }
+
+    #[Test]
     public function it_creates_an_expense(): void
     {
         $this->actingAs(User::factory()->create());
