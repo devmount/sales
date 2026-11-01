@@ -1,7 +1,7 @@
 name: Validate
 
 concurrency:
-  group: validate
+  group: validate-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -13,13 +13,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Only run this again if a PHP file changed or this workflow file
+  # Only run this again if a PHP file, the test setup or this workflow file changed
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
       validate-app: ${{ steps.check.outputs.validate-app }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: dorny/paths-filter@v4
       id: check
@@ -27,6 +27,8 @@ jobs:
         filters: |
           validate-app:
             - '**/*.php'
+            - 'composer.lock'
+            - 'phpunit.xml'
             - '.github/workflows/validate.yml'
 
   validate-app:
@@ -35,7 +37,7 @@ jobs:
     if: needs.detect-changes.outputs.validate-app == 'true'
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup DDEV
         uses: ddev/github-action-setup-ddev@v1

@@ -12,9 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Push project files to testing environment
-      uses: burnett01/rsync-deployments@v8
+      uses: burnett01/rsync-deployments@v9
       with:
         switches: -avzr --exclude '.git*' --exclude '.ddev' --exclude 'node_modules' --exclude '.editorconfig' --exclude '.env.*' --exclude 'vendor' --exclude 'storage'
         path: ./
@@ -33,9 +33,9 @@ jobs:
         key: ${{ secrets.DEPLOY_SSH_KEY }}
         passphrase: ${{ secrets.DEPLOY_SSH_PHRASE }}
         script: |
+          set -e
           cd ${{ secrets.DEPLOY_PATH_STAGE }}
-          php8.5 -f /usr/bin/composer update -qn
-          php8.5 -f /usr/bin/composer install -qno --no-ansi --no-scripts --no-progress
+          php8.5 -f /usr/bin/composer install -qno --no-dev --no-ansi --no-progress
           php8.5 artisan migrate --force
           php8.5 artisan config:clear
           php8.5 artisan config:cache
