@@ -19,7 +19,7 @@ jobs:
     outputs:
       validate-app: ${{ steps.check.outputs.validate-app }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - uses: dorny/paths-filter@v4
       id: check
@@ -35,7 +35,7 @@ jobs:
     if: needs.detect-changes.outputs.validate-app == 'true'
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup DDEV
         uses: ddev/github-action-setup-ddev@v1
