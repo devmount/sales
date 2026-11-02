@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\OfftimeCategory;
 use App\Filament\Resources\OfftimeResource\Pages\ListOfftimes;
 use App\Models\Offtime;
+use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -18,6 +19,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\Width;
@@ -133,12 +136,19 @@ class OfftimeResource extends Resource
                 ->weekStartsOnMonday()
                 ->suffixIcon('tabler-calendar-dot')
                 ->columnSpan($columns / 2)
-                ->required(),
+                ->required()
+                ->live()
+                ->afterStateUpdated(function (?string $state, Get $get, Set $set) {
+                    if ($state && $get('end')) {
+                        $set('end', Carbon::parse($state)->addDay()->toDateString());
+                    }
+                }),
             DatePicker::make('end')
                 ->label(__('finished'))
                 ->weekStartsOnMonday()
                 ->columnSpan($columns / 2)
-                ->suffixIcon('tabler-calendar-pause'),
+                ->suffixIcon('tabler-calendar-pause')
+                ->after('start'),
             Select::make('category')
                 ->label(__('category'))
                 ->columnSpanFull()
