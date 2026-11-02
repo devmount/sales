@@ -26,7 +26,7 @@ class OfftimeFactory extends Factory
     public function definition(): array
     {
         $start = fake()->dateTimeBetween('-1 year', '+1 year');
-        $end = fake()->dateTimeBetween($start, (clone $start)->modify('+5 days'));
+        $end = fake()->dateTimeBetween((clone $start)->modify('+1 day'), (clone $start)->modify('+5 days'));
 
         return [
             'start' => $start->format('Y-m-d'),
