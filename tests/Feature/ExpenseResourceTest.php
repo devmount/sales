@@ -13,9 +13,11 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Infolists\Components\TextEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -239,6 +241,32 @@ class ExpenseResourceTest extends TestCase
         Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
             ->mountAction(TestAction::make(EditAction::class)->table($expense))
             ->assertActionDataSet(['bill_original_name' => 'receipt.pdf']);
+    }
+
+    #[Test]
+    public function it_shows_the_calculated_net_and_vat_when_entering_a_price(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
+            ->mountAction(CreateAction::class)
+            ->fillForm(['price' => 1.19, 'quantity' => 1, 'taxable' => true, 'vat_rate' => 0.19])
+            ->assertSchemaComponentExists('net_preview', checkComponentUsing: fn(TextEntry $entry): bool =>
+                $entry->getState() === Number::currency(1, 'eur') . ' + ' . Number::currency(0.19, 'eur') . ' (' . __('vat') . ')'
+            );
+    }
+
+    #[Test]
+    public function it_shows_only_the_net_when_entering_a_non_taxable_price(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
+            ->mountAction(CreateAction::class)
+            ->fillForm(['price' => 1.19, 'quantity' => 1, 'taxable' => false])
+            ->assertSchemaComponentExists('net_preview', checkComponentUsing: fn(TextEntry $entry): bool =>
+                $entry->getState() === Number::currency(1.19, 'eur')
+            );
     }
 
     #[Test]
