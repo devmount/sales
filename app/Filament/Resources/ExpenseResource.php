@@ -257,14 +257,20 @@ class ExpenseResource extends Resource
                 ->live(),
             TextEntry::make('net_preview')
                 ->label(__('priceNet'))
-                ->state(function (Get $get): float {
+                ->state(function (Get $get): string {
                     $quantity = (float) ($get('quantity') ?: 0);
                     $rate = $get('taxable') ? (float) ($get('vat_rate') ?: 0) : 0;
                     $gross = round((float) ($get('price') ?: 0) * $quantity, 2);
+                    $net = round($gross / (1 + $rate), 2);
+                    $netFormatted = Number::currency($net, 'eur');
+                    $vatFormatted = Number::currency($gross - $net, 'eur');
 
-                    return round($gross / (1 + $rate), 2);
+                    if (!$get('taxable')) {
+                        return $netFormatted;
+                    }
+
+                    return $netFormatted . ' + ' . $vatFormatted . ' (' . __('vat') . ')';
                 })
-                ->money('eur')
                 ->columnSpan($columns / 2),
             TextInput::make('taxable_ratio')
                 ->label(__('taxableRatio'))
