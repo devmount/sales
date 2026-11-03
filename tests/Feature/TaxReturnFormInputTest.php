@@ -119,6 +119,15 @@ class TaxReturnFormInputTest extends TestCase
             'taxable' => false,
         ]);
 
+        // VAT refunded by the tax office, recorded as negative vat expense: income (rsc18), not a reduction of rsc58.
+        Expense::factory()->create([
+            'expended_at' => "$year-09-01",
+            'category' => ExpenseCategory::Vat,
+            'price' => -30,
+            'quantity' => 1,
+            'taxable' => false,
+        ]);
+
         $widget = new TaxReturnFormInput();
         $widget->filter = $year;
         $records = $widget->getTableRecords()->keyBy('__key');
@@ -126,17 +135,18 @@ class TaxReturnFormInputTest extends TestCase
         $this->assertSame(1000.0, $records[2]['value']); // rsc14 - net earned
         $this->assertSame(0, $records[3]['value']); // rsc16 - net untaxable earned
         $this->assertSame(190.0, $records[4]['value']); // rsc17 - vat earned
-        $this->assertSame(84.03, $records[5]['value']); // rsc27 - net goods/services expended
-        $this->assertSame(500.0, $records[7]['value']); // rsc36 - net minor assets expended
-        $this->assertSame(80.0, $records[8]['value']); // rsc50 - net edv expended
-        $this->assertSame(60.0, $records[9]['value']); // rsc51 - net work equipment expended
-        $this->assertSame(40.0, $records[10]['value']); // rsc54 - net advertising expended
-        $this->assertSame(20.76, $records[11]['value']); // rsc57 - vat expended, must include the taxable utility expense's vat
-        $this->assertSame(120.0, $records[12]['value']); // rsc58 - vat paid to the tax office
-        $this->assertSame(50.0, $records[13]['value']); // rsc65a - rent expended
-        $this->assertSame(25.21, $records[14]['value']); // rsc65b - utility costs expended
-        $this->assertSame(169.24, $records[15]['value']); // vr118 - vat payable, must reflect the utility expense's vat too
-        $this->assertSame(210.0, $records[16]['value']); // rsc97 - final profit, must include the vat paid to the tax office
+        $this->assertSame(30.0, $records[5]['value']); // rsc18 - vat refunded by the tax office
+        $this->assertSame(84.03, $records[6]['value']); // rsc27 - net goods/services expended
+        $this->assertSame(500.0, $records[8]['value']); // rsc36 - net minor assets expended
+        $this->assertSame(80.0, $records[9]['value']); // rsc50 - net edv expended
+        $this->assertSame(60.0, $records[10]['value']); // rsc51 - net work equipment expended
+        $this->assertSame(40.0, $records[11]['value']); // rsc54 - net advertising expended
+        $this->assertSame(20.76, $records[12]['value']); // rsc57 - vat expended, must include the taxable utility expense's vat
+        $this->assertSame(120.0, $records[13]['value']); // rsc58 - vat paid to the tax office
+        $this->assertSame(50.0, $records[14]['value']); // rsc65a - rent expended
+        $this->assertSame(25.21, $records[15]['value']); // rsc65b - utility costs expended
+        $this->assertSame(169.24, $records[16]['value']); // vr118 - vat payable, must reflect the utility expense's vat too
+        $this->assertSame(240.0, $records[17]['value']); // rsc97 - final profit, must include the vat paid to and refunded by the tax office
         $this->assertSame(161.0, $records[1]['value']); // itr1 - taxable profit, rounded to whole euros for Elster (raw value is 160.76)
     }
 
@@ -159,8 +169,8 @@ class TaxReturnFormInputTest extends TestCase
         $widget->filter = $year;
         $records = $widget->getTableRecords()->keyBy('__key');
 
-        $this->assertSame(7.99, $records[11]['value']); // rsc57 - vat expended, pro-rated by taxable_ratio
-        $this->assertSame(-7.99, $records[15]['value']); // vr118 - vat payable, must reflect the pro-rated vat
+        $this->assertSame(7.99, $records[12]['value']); // rsc57 - vat expended, pro-rated by taxable_ratio
+        $this->assertSame(-7.99, $records[16]['value']); // vr118 - vat payable, must reflect the pro-rated vat
     }
 
     #[Test]
@@ -197,6 +207,6 @@ class TaxReturnFormInputTest extends TestCase
         $widget->filter = $year;
         $records = $widget->getTableRecords()->keyBy('__key');
 
-        $this->assertSame(-864.55, $records[16]['value']); // rsc97 - final profit, must be exactly 2 decimals
+        $this->assertSame(-864.55, $records[17]['value']); // rsc97 - final profit, must be exactly 2 decimals
     }
 }
