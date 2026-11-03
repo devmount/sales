@@ -73,6 +73,7 @@ class TaxReturnFormInput extends TableWidget
         [$netEdvExpended, $vatEdvExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Edv);
         [$netWorkEquipmentExpended, $vatWorkEquipmentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::WorkEquipment);
         [$netAdvertisingExpended, $vatAdvertisingExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Advertising);
+        [$vatPaid] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Vat);
 
         $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended
             + $netMinorAssetsExpended + $netEdvExpended + $netWorkEquipmentExpended + $netAdvertisingExpended;
@@ -184,13 +185,22 @@ class TaxReturnFormInput extends TableWidget
                 '__key' => 12,
                 'itr' => null,
                 'vr' => null,
+                'rsc' => '58',
+                'value' => $vatPaid,
+                'help' => __('formLabels')['rsc58'],
+                'color' => 'danger',
+            ],
+            [
+                '__key' => 13,
+                'itr' => null,
+                'vr' => null,
                 'rsc' => '65',
                 'value' => $rentExpended,
                 'help' => __('formLabels')['rsc65a'],
                 'color' => 'danger',
             ],
             [
-                '__key' => 13,
+                '__key' => 14,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '65',
@@ -199,7 +209,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 14,
+                '__key' => 15,
                 'itr' => null,
                 'vr' => '118',
                 'rsc' => null,
@@ -208,11 +218,11 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 15,
+                '__key' => 16,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
-                'value' => round($netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended, 2),
+                'value' => round($netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended - $vatPaid, 2),
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
             ],
