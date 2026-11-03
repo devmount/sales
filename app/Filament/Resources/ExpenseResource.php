@@ -95,6 +95,7 @@ class ExpenseResource extends Resource
                 TextColumn::make('category')
                     ->label(__('category'))
                     ->badge()
+                    ->tooltip(fn(Expense $record): ?string => $record->category?->getDescription())
                     ->sortable(),
                 TextColumn::make('description')
                     ->label(__('description'))
@@ -217,6 +218,8 @@ class ExpenseResource extends Resource
             Select::make('category')
                 ->label(__('category'))
                 ->options(ExpenseCategory::class)
+                ->live()
+                ->helperText(fn(Get $get): ?string => $get('category')?->getDescription())
                 ->required()
                 ->default(ExpenseCategory::Good)
                 ->suffixIcon('tabler-tag')

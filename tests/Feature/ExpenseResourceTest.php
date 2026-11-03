@@ -8,12 +8,15 @@ use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
 use App\Models\Document;
 use App\Models\Expense;
 use App\Models\User;
+use Closure;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -66,6 +69,37 @@ class ExpenseResourceTest extends TestCase
         Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
             ->loadTable()
             ->assertTableColumnStateSet('vat', 7.99, $expense);
+    }
+
+    #[Test]
+    public function it_shows_the_category_description_as_tooltip_in_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $expense = Expense::factory()->create(['category' => ExpenseCategory::Good]);
+
+        Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
+            ->loadTable()
+            ->assertTableColumnExists(
+                'category',
+                fn(TextColumn $column): bool => $column->getTooltip() === ExpenseCategory::Good->getDescription(),
+                $expense,
+            );
+    }
+
+    #[Test]
+    public function it_shows_the_selected_category_description_below_the_form_select(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $helperTextIs = fn(ExpenseCategory $category): Closure => fn(Select $field): bool
+            => $field->getChildSchema(Select::BELOW_CONTENT_SCHEMA_KEY)?->getComponents()[0]?->getContent()
+                === $category->getDescription();
+
+        Livewire::test(ListExpenses::class)
+            ->mountAction(CreateAction::class)
+            ->assertFormFieldExists('category', $helperTextIs(ExpenseCategory::Good))
+            ->fillForm(['category' => ExpenseCategory::Advertising->value])
+            ->assertFormFieldExists('category', $helperTextIs(ExpenseCategory::Advertising));
     }
 
     #[Test]
