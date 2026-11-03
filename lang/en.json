@@ -250,7 +250,7 @@
     "validityText": "This quote remains valid until :Date.",
     "value": "Value",
     "vat": "VAT",
-    "vatDescription": "VAT paid to the tax office (observe the 10-day rule of § 11 (2) sentence 2 EStG). Record refunds as a negative amount.",
+    "vatDescription": "VAT paid to the tax office (10-day rule). Record refunds as a negative amount.",
     "vatExpenseCreated": "VAT expense created",
     "vatExpenses": "VAT expenses",
     "vatId": "VAT Id",
