@@ -285,8 +285,10 @@ class ExpenseResourceTest extends TestCase
         Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
             ->mountAction(CreateAction::class)
             ->fillForm(['price' => 1.19, 'quantity' => 1, 'taxable' => true, 'vat_rate' => 0.19])
-            ->assertSchemaComponentExists('net_preview', checkComponentUsing: fn(TextEntry $entry): bool =>
-                $entry->getState() === Number::currency(1, 'eur') . ' + ' . Number::currency(0.19, 'eur') . ' (' . __('vat') . ')'
+            ->assertSchemaComponentExists(
+                'net_preview',
+                checkComponentUsing: fn(TextEntry $entry): bool
+                => $entry->getState() === Number::currency(1, 'eur') . ' + ' . Number::currency(0.19, 'eur') . ' (' . __('vat') . ')',
             );
     }
 
@@ -298,8 +300,10 @@ class ExpenseResourceTest extends TestCase
         Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
             ->mountAction(CreateAction::class)
             ->fillForm(['price' => 1.19, 'quantity' => 1, 'taxable' => false])
-            ->assertSchemaComponentExists('net_preview', checkComponentUsing: fn(TextEntry $entry): bool =>
-                $entry->getState() === Number::currency(1.19, 'eur')
+            ->assertSchemaComponentExists(
+                'net_preview',
+                checkComponentUsing: fn(TextEntry $entry): bool
+                => $entry->getState() === Number::currency(1.19, 'eur'),
             );
     }
 
