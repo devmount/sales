@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\ExpenseCategory;
 use App\Models\Client;
 use App\Models\Estimate;
 use App\Models\Expense;
@@ -97,7 +96,7 @@ class AnonymizePersonalData extends Command
             $bar->advance();
         }
         foreach ($expenses as $obj) {
-            if (!in_array($obj->category, ExpenseCategory::taxCategories())) {
+            if (!$obj->category->isTax()) {
                 $obj->description = fake()->sentence();
                 $obj->save();
                 $bar->advance();
