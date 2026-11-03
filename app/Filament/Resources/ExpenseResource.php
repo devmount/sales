@@ -219,6 +219,11 @@ class ExpenseResource extends Resource
                 ->label(__('category'))
                 ->options(ExpenseCategory::class)
                 ->live()
+                ->afterStateUpdated(function (Get $get, Set $set) {
+                    if ($get('category')?->isTax()) {
+                        $set('taxable', false);
+                    }
+                })
                 ->helperText(fn(Get $get): ?string => $get('category')?->getDescription())
                 ->required()
                 ->default(ExpenseCategory::Good)
@@ -290,7 +295,11 @@ class ExpenseResource extends Resource
                 ->inline(false)
                 ->columnSpan($columns / 2)
                 ->default(true)
-                ->live(),
+                ->live()
+                // Tax payments and refunds never contain vat themselves
+                ->disabled(fn(Get $get): bool => (bool) $get('category')?->isTax())
+                ->dehydrated()
+                ->dehydrateStateUsing(fn(?bool $state, Get $get): bool => $get('category')?->isTax() ? false : (bool) $state),
             TextInput::make('vat_rate')
                 ->label(__('vatRate'))
                 ->numeric()

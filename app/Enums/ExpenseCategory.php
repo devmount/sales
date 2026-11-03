@@ -89,6 +89,11 @@ enum ExpenseCategory: string implements HasLabel, HasColor, HasDescription
         ];
     }
 
+    public function isTax(): bool
+    {
+        return in_array($this, self::taxCategories(), true);
+    }
+
     public static function options(): array
     {
         return [

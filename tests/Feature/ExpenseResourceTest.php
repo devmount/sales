@@ -103,6 +103,43 @@ class ExpenseResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_disables_the_taxable_toggle_for_tax_categories(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->mountAction(CreateAction::class)
+            ->assertFormFieldEnabled('taxable')
+            ->fillForm(['category' => ExpenseCategory::Vat->value])
+            ->assertFormFieldDisabled('taxable')
+            ->assertFormSet(['taxable' => false])
+            ->fillForm(['category' => ExpenseCategory::Good->value])
+            ->assertFormFieldEnabled('taxable');
+    }
+
+    #[Test]
+    public function it_never_stores_a_tax_category_expense_as_taxable(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->callAction(CreateAction::class, data: [
+                'expended_at' => '2026-01-15',
+                'category' => ExpenseCategory::Vat->value,
+                'price' => 100,
+                'quantity' => 1,
+                'taxable' => true,
+                'vat_rate' => 0.19,
+            ])
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('expenses', [
+            'category' => ExpenseCategory::Vat->value,
+            'taxable' => false,
+        ]);
+    }
+
+    #[Test]
     public function it_creates_an_expense(): void
     {
         $this->actingAs(User::factory()->create());
