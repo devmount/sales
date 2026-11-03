@@ -8,12 +8,15 @@ use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
 use App\Models\Document;
 use App\Models\Expense;
 use App\Models\User;
+use Closure;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -66,6 +69,74 @@ class ExpenseResourceTest extends TestCase
         Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
             ->loadTable()
             ->assertTableColumnStateSet('vat', 7.99, $expense);
+    }
+
+    #[Test]
+    public function it_shows_the_category_description_as_tooltip_in_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $expense = Expense::factory()->create(['category' => ExpenseCategory::Good]);
+
+        Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
+            ->loadTable()
+            ->assertTableColumnExists(
+                'category',
+                fn(TextColumn $column): bool => $column->getTooltip() === ExpenseCategory::Good->getDescription(),
+                $expense,
+            );
+    }
+
+    #[Test]
+    public function it_shows_the_selected_category_description_below_the_form_select(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $helperTextIs = fn(ExpenseCategory $category): Closure => fn(Select $field): bool
+            => $field->getChildSchema(Select::BELOW_CONTENT_SCHEMA_KEY)?->getComponents()[0]?->getContent()
+                === $category->getDescription();
+
+        Livewire::test(ListExpenses::class)
+            ->mountAction(CreateAction::class)
+            ->assertFormFieldExists('category', $helperTextIs(ExpenseCategory::Good))
+            ->fillForm(['category' => ExpenseCategory::Advertising->value])
+            ->assertFormFieldExists('category', $helperTextIs(ExpenseCategory::Advertising));
+    }
+
+    #[Test]
+    public function it_disables_the_taxable_toggle_for_tax_categories(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->mountAction(CreateAction::class)
+            ->assertFormFieldEnabled('taxable')
+            ->fillForm(['category' => ExpenseCategory::Vat->value])
+            ->assertFormFieldDisabled('taxable')
+            ->assertFormSet(['taxable' => false])
+            ->fillForm(['category' => ExpenseCategory::Good->value])
+            ->assertFormFieldEnabled('taxable');
+    }
+
+    #[Test]
+    public function it_never_stores_a_tax_category_expense_as_taxable(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(ListExpenses::class)
+            ->callAction(CreateAction::class, data: [
+                'expended_at' => '2026-01-15',
+                'category' => ExpenseCategory::Vat->value,
+                'price' => 100,
+                'quantity' => 1,
+                'taxable' => true,
+                'vat_rate' => 0.19,
+            ])
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('expenses', [
+            'category' => ExpenseCategory::Vat->value,
+            'taxable' => false,
+        ]);
     }
 
     #[Test]
@@ -251,8 +322,10 @@ class ExpenseResourceTest extends TestCase
         Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
             ->mountAction(CreateAction::class)
             ->fillForm(['price' => 1.19, 'quantity' => 1, 'taxable' => true, 'vat_rate' => 0.19])
-            ->assertSchemaComponentExists('net_preview', checkComponentUsing: fn(TextEntry $entry): bool =>
-                $entry->getState() === Number::currency(1, 'eur') . ' + ' . Number::currency(0.19, 'eur') . ' (' . __('vat') . ')'
+            ->assertSchemaComponentExists(
+                'net_preview',
+                checkComponentUsing: fn(TextEntry $entry): bool
+                => $entry->getState() === Number::currency(1, 'eur') . ' + ' . Number::currency(0.19, 'eur') . ' (' . __('vat') . ')',
             );
     }
 
@@ -264,8 +337,10 @@ class ExpenseResourceTest extends TestCase
         Livewire::test(ListExpenses::class, ['activeTab' => 'all'])
             ->mountAction(CreateAction::class)
             ->fillForm(['price' => 1.19, 'quantity' => 1, 'taxable' => false])
-            ->assertSchemaComponentExists('net_preview', checkComponentUsing: fn(TextEntry $entry): bool =>
-                $entry->getState() === Number::currency(1.19, 'eur')
+            ->assertSchemaComponentExists(
+                'net_preview',
+                checkComponentUsing: fn(TextEntry $entry): bool
+                => $entry->getState() === Number::currency(1.19, 'eur'),
             );
     }
 

@@ -25,18 +25,6 @@ class Setting extends Model
     }
 
     /**
-     * Delete the old file from disk when an image setting's value is replaced or cleared
-     */
-    protected static function booted(): void
-    {
-        static::updating(function (self $setting) {
-            if ($setting->type === 'image' && $setting->isDirty('value') && $setting->getOriginal('value')) {
-                Storage::disk('local')->delete($setting->getOriginal('value'));
-            }
-        });
-    }
-
-    /**
      * Address field
      */
     public static function address()
@@ -46,6 +34,18 @@ class Setting extends Model
         $zip = self::get('zip');
         $city = self::get('city');
         return "$name, $street, $zip $city";
+    }
+
+    /**
+     * Delete the old file from disk when an image setting's value is replaced or cleared
+     */
+    protected static function booted(): void
+    {
+        static::updating(function (self $setting) {
+            if ($setting->type === 'image' && $setting->isDirty('value') && $setting->getOriginal('value')) {
+                Storage::disk('local')->delete($setting->getOriginal('value'));
+            }
+        });
     }
 
     protected function casts(): array

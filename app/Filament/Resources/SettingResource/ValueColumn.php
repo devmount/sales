@@ -19,13 +19,6 @@ class ValueColumn extends TextInputColumn
 {
     protected ?Action $imageAction = null;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->disabledClick(fn(): bool => ! $this->isImageSetting());
-    }
-
     public function imageAction(Action $action): static
     {
         $this->imageAction = $action;
@@ -60,6 +53,13 @@ class ValueColumn extends TextInputColumn
                     $content
                 </div>
             HTML;
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->disabledClick(fn(): bool => ! $this->isImageSetting());
     }
 
     protected function isImageSetting(): bool

@@ -73,6 +73,13 @@ class TaxReturnFormInput extends TableWidget
         [$netEdvExpended, $vatEdvExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Edv);
         [$netWorkEquipmentExpended, $vatWorkEquipmentExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::WorkEquipment);
         [$netAdvertisingExpended, $vatAdvertisingExpended] = Expense::ofTime($dt, TimeUnit::YEAR, ExpenseCategory::Advertising);
+        // Vat expenses are transfers to (positive) or refunds from (negative) the tax office
+        $vatTransfers = Expense::whereYear('expended_at', $this->filter)
+            ->where('category', ExpenseCategory::Vat)
+            ->get()
+            ->map(fn(Expense $expense) => $expense->deductibleNet);
+        $vatPaid = $vatTransfers->filter(fn(float $value) => $value > 0)->sum();
+        $vatRefunded = -$vatTransfers->filter(fn(float $value) => $value < 0)->sum();
 
         $netExpended = $netGoodExpended + $netServiceExpended + $rentExpended + $utilityCostsExpended
             + $netMinorAssetsExpended + $netEdvExpended + $netWorkEquipmentExpended + $netAdvertisingExpended;
@@ -121,13 +128,22 @@ class TaxReturnFormInput extends TableWidget
                 '__key' => 5,
                 'itr' => null,
                 'vr' => null,
+                'rsc' => '18',
+                'value' => $vatRefunded,
+                'help' => __('formLabels')['rsc18'],
+                'color' => 'primary',
+            ],
+            [
+                '__key' => 6,
+                'itr' => null,
+                'vr' => null,
                 'rsc' => '27',
                 'value' => $netGoodExpended,
                 'help' => __('formLabels')['rsc27'],
                 'color' => 'danger',
             ],
             [
-                '__key' => 6,
+                '__key' => 7,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '29',
@@ -136,7 +152,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 7,
+                '__key' => 8,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '36',
@@ -145,7 +161,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 8,
+                '__key' => 9,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '50',
@@ -154,7 +170,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 9,
+                '__key' => 10,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '51',
@@ -163,7 +179,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 10,
+                '__key' => 11,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '54',
@@ -172,7 +188,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 11,
+                '__key' => 12,
                 'itr' => null,
                 'vr' => '79',
                 'rsc' => '57',
@@ -181,7 +197,16 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 12,
+                '__key' => 13,
+                'itr' => null,
+                'vr' => null,
+                'rsc' => '58',
+                'value' => $vatPaid,
+                'help' => __('formLabels')['rsc58'],
+                'color' => 'danger',
+            ],
+            [
+                '__key' => 14,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '65',
@@ -190,7 +215,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 13,
+                '__key' => 15,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '65',
@@ -199,7 +224,7 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 14,
+                '__key' => 16,
                 'itr' => null,
                 'vr' => '118',
                 'rsc' => null,
@@ -208,11 +233,11 @@ class TaxReturnFormInput extends TableWidget
                 'color' => 'danger',
             ],
             [
-                '__key' => 15,
+                '__key' => 17,
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
-                'value' => round($netEarned + $vatEarned + $netUntaxableEarned - $netExpended - $vatExpended, 2),
+                'value' => round($netEarned + $vatEarned + $vatRefunded + $netUntaxableEarned - $netExpended - $vatExpended - $vatPaid, 2),
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
             ],

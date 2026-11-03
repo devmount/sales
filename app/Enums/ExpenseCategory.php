@@ -4,8 +4,9 @@ namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 
-enum ExpenseCategory: string implements HasLabel, HasColor
+enum ExpenseCategory: string implements HasLabel, HasColor, HasDescription
 {
     case Vat = 'vat';
     case Good = 'good';
@@ -31,6 +32,22 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Edv => __('edv'),
             self::WorkEquipment => __('workEquipment'),
             self::Advertising => __('advertising'),
+        };
+    }
+
+    public function getDescription(): ?string
+    {
+        return match ($this) {
+            self::Vat => __('vatDescription'),
+            self::Good => __('goodDescription'),
+            self::MinorAssets => __('minorAssetsDescription', ['max' => config('business.minor_assets.max_net')]),
+            self::Service => __('serviceDescription'),
+            self::Tax => __('incomeTaxDescription'),
+            self::Rent => __('rentDescription'),
+            self::Utility => __('utilityCostsDescription'),
+            self::Edv => __('edvDescription'),
+            self::WorkEquipment => __('workEquipmentDescription'),
+            self::Advertising => __('advertisingDescription'),
         };
     }
 
@@ -70,6 +87,11 @@ enum ExpenseCategory: string implements HasLabel, HasColor
             self::Vat,
             self::Tax,
         ];
+    }
+
+    public function isTax(): bool
+    {
+        return in_array($this, self::taxCategories(), true);
     }
 
     public static function options(): array
