@@ -250,7 +250,7 @@
     "validityText": "Dieses Angebot behält bis zum :Date seine Gültigkeit.",
     "value": "Wert",
     "vat": "USt.",
-    "vatDescription": "An das Finanzamt gezahlte und ggf. verrechnete Umsatzsteuer (10-Tage-Regel)",
+    "vatDescription": "An das Finanzamt gezahlte und ggf. verrechnete Umsatzsteuer (10-Tage-Regel). Erstattungen als negativen Betrag erfassen.",
     "vatExpenseCreated": "Ust. Ausgabe gespeichert",
     "vatExpenses": "USt. Ausgaben",
     "vatId": "USt-IdNr.",
