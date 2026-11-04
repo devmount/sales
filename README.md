@@ -4,7 +4,7 @@ A service sales manager especially for freelancers. Built in German, available i
 
 ## Features
 
-- A dashboard showing current trends and tax data
+- A dashboard showing current trends and tax data, including a yearly overview of daily earnings, expenses, taxes and times off
 - Keep track of clients
 - Create projects for clients and provide estimations
 - Create invoices and fill them with descriptive positions
@@ -19,16 +19,16 @@ A service sales manager especially for freelancers. Built in German, available i
 
 There are two ways to get Sales up and running.
 
-### 1. Install using DDEV with Docker
+### 1. Install using DDEV with Docker (recommended)
 
 ```bash
 git clone https://github.com/devmount/sales # get files
-cd sales                       # switch to app directory
-cp .env.example .env           # init environment configuration
-ddev start                     # Create docker containers and start them
-ddev artisan migrate            # create database structure
-ddev artisan key:generate       # build a secure key for the app
-ddev artisan db:seed            # create initial admin user
+cd sales                  # switch to app directory
+cp .env.example .env      # init environment configuration
+ddev start                # Create docker containers and start them
+ddev artisan migrate      # create database structure
+ddev artisan key:generate # build a secure key for the app
+ddev artisan db:seed      # create initial admin user
 ```
 
 You can now login at <https://sales.ddev.site/>.
@@ -37,7 +37,7 @@ You can now login at <https://sales.ddev.site/>.
 
 Prerequisites:
 
-- PHP 8.4+
+- PHP 8.5+
 - PHP extensions: mbstring, zip, xml, curl, dom, intl, mysql
 - Composer 2.5+
 
@@ -100,9 +100,11 @@ composer install --optimize-autoloader --no-dev
 php artisan config:cache # combine all configuration files into a single, cached file
 php artisan route:cache  # reduce all route registrations into a single method call within a cached file
 php artisan view:cache   # precompile all blade views
-php artisan icons:cache  # precompile all icons
+php artisan filament:optimize # cache Filament components and precompile all icons
 pnpm build
 ```
+
+Don't run `filament:optimize` in development, since new resources, pages or widgets won't be discovered until the cache is cleared again with `php artisan filament:optimize-clear`.
 
 In `.env` set `APP_DEBUG` to false and `APP_URL` to your production url. Change more values if needed.
 
