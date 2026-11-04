@@ -19,7 +19,7 @@
             </div>
         </x-slot>
 
-        <div class="event-matrix">
+        <div class="event-matrix mode-{{ $mode }}">
             @for ($i = 0; $i < $offset; $i++)
                 <span class="empty"></span>
             @endfor

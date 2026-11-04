@@ -160,5 +160,19 @@ class EventMatrixTest extends TestCase
 
         $this->assertStringContainsString('Tooltip project', $tooltip);
         $this->assertStringContainsString('#abcdef', $tooltip);
+        $this->assertStringNotContainsString(__('total'), $tooltip);
+    }
+
+    #[Test]
+    public function it_adds_a_total_line_to_tooltips_with_multiple_entries(): void
+    {
+        $date = now()->subDays(3)->format('Y-m-d');
+        $this->createPosition($date);
+        $this->createPosition($date);
+
+        $tooltip = $this->getDays()[$date]['tooltip'];
+
+        $this->assertStringContainsString(__('total'), $tooltip);
+        $this->assertStringContainsString('var(--gray-400)', $tooltip);
     }
 }

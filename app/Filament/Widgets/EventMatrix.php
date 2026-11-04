@@ -40,6 +40,7 @@ class EventMatrix extends Widget
                 'negative' => false,
                 'offtime' => null,
                 'events' => [],
+                'amounts' => 0,
             ];
         }
 
@@ -52,6 +53,7 @@ class EventMatrix extends Widget
             foreach ($positions as $p) {
                 $key = $p->started_at->format('Y-m-d');
                 $days[$key]['value'] += $p->net;
+                $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(
                     $p->invoice->project->client->color,
                     $p->invoice->project->title,
@@ -69,8 +71,9 @@ class EventMatrix extends Widget
                 }
                 $key = $e->expended_at->format('Y-m-d');
                 $days[$key]['value'] += $this->mode === 'total' ? -$e->net : $e->net;
+                $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(
-                    'var(--gray-400)',
+                    $e->category->isTax() ? '#f97316' : '#f43f5e',
                     $e->category->getLabel() . ($e->description ? ': ' . $e->description : ''),
                     -$e->net,
                 );
@@ -107,11 +110,15 @@ class EventMatrix extends Widget
             $days[$key]['value'] = round($d['value'], 2);
             $days[$key]['level'] = (int) ceil(abs($d['value']) / $max * 4);
             $days[$key]['negative'] = $d['value'] < 0;
+            if ($d['amounts'] > 1) {
+                $sum = in_array($this->mode, ['expenses', 'taxes']) ? -$d['value'] : $d['value'];
+                $d['events'][] = $this->eventLine('var(--gray-400)', __('total'), $sum);
+            }
             $days[$key]['tooltip'] = implode('<br>', [
                 '<b>' . $d['date']->isoFormat('dd, D. MMM YYYY') . '</b>',
                 ...$d['events'],
             ]);
-            unset($days[$key]['events']);
+            unset($days[$key]['events'], $days[$key]['amounts']);
         }
 
         return $days;

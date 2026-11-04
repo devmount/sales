@@ -142,6 +142,13 @@ textarea.position-limit {
     padding: 2px;
     overflow-x: auto;
 
+    &.mode-expenses {
+        --cell-color: #f43f5e;
+    }
+    &.mode-taxes {
+        --cell-color: #f97316;
+    }
+
     span {
         border-radius: 2px;
         background: color-mix(in oklab, var(--cell-color) var(--level-percent, 0%), var(--gray-100));
@@ -150,7 +157,7 @@ textarea.position-limit {
             background: transparent;
         }
         &.negative {
-            --cell-color: #ff2056;
+            --cell-color: #f43f5e;
         }
         &.offtime {
             outline: 2px solid var(--offtime);
@@ -166,5 +173,9 @@ textarea.position-limit {
         &[data-level="2"] { --level-percent: 50%; }
         &[data-level="3"] { --level-percent: 75%; }
         &[data-level="4"] { --level-percent: 100%; }
+    }
+
+    &.mode-offtimes span.offtime {
+        background: color-mix(in oklab, var(--offtime) 20%, transparent);
     }
 }
