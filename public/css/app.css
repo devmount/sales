@@ -126,6 +126,11 @@ textarea.position-limit {
     }
 }
 
+/* Stretch sections of widgets sharing a row to the same height */
+.fi-wi-widget:has(.event-matrix, .project-progress) > .fi-section {
+    height: 100%;
+}
+
 /* Custom event matrix (GitHub contributions style) */
 .event-matrix-controls {
     display: flex;
@@ -141,7 +146,7 @@ textarea.position-limit {
     justify-content: start;
     gap: 3px;
     padding: 2px;
-    overflow-x: auto;
+    overflow: auto hidden;
 
     &.mode-expenses {
         --cell-color: #f43f5e;
@@ -182,6 +187,22 @@ textarea.position-limit {
         &[data-level="2"] { --level-percent: 50%; }
         &[data-level="3"] { --level-percent: 75%; }
         &[data-level="4"] { --level-percent: 100%; }
+    }
+
+    .legend {
+        display: flex;
+        justify-content: end;
+        align-items: center;
+        gap: 3px;
+        margin-top: 1rem;
+
+        span {
+            width: .875rem;
+            height: .875rem;
+        }
+        small {
+            padding-inline: .25rem;
+        }
     }
 
     &.mode-offtimes span.offtime {

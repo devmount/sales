@@ -38,6 +38,20 @@
                     x-tooltip="{ content: @js($day['tooltip']), theme: $store.theme, allowHTML: true }"
                 ></span>
             @endforeach
+            @if ($mode !== 'offtimes')
+                <div class="legend" style="grid-area: 9 / 2 / auto / {{ $lastCol + 1 }}">
+                    <small>{{ __('less') }}</small>
+                    @if ($mode === 'total')
+                        @foreach (range(4, 1) as $level)
+                            <span class="negative" data-level="{{ $level }}"></span>
+                        @endforeach
+                    @endif
+                    @foreach (range(0, 4) as $level)
+                        <span data-level="{{ $level }}"></span>
+                    @endforeach
+                    <small>{{ __('more') }}</small>
+                </div>
+            @endif
         </div>
     </x-filament::section>
 </x-filament-widgets::widget>

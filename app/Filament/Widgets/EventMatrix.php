@@ -169,6 +169,7 @@ class EventMatrix extends Widget
             'description' => __('eventMatrixDescription'),
             'days' => $days,
             'months' => $this->getMonths($days),
+            'lastCol' => end($days)['col'],
             'weekdays' => collect([1, 3, 5])->mapWithKeys(fn($d) => [$d + 1 => rtrim(now()->isoWeekday($d)->isoFormat('ddd'), '.')]),
             'modes' => [
                 'total' => __('total'),
