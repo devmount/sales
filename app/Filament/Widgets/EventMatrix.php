@@ -19,7 +19,10 @@ class EventMatrix extends Widget
 
     protected string $view = 'filament.widgets.event-matrix-widget';
 
-    protected int|string|array $columnSpan = 12;
+    protected int|string|array $columnSpan = [
+        'sm' => 12,
+        'xl' => 8,
+    ];
 
     /**
      * Events and values per day for the selected time range and mode, keyed by date

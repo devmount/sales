@@ -158,6 +158,10 @@ textarea.position-limit {
         white-space: nowrap;
         align-self: center;
         padding-right: .5rem;
+
+        &.month {
+            padding-bottom: 4px;
+        }
     }
 
     span {

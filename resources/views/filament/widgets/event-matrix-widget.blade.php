@@ -21,7 +21,7 @@
 
         <div class="event-matrix mode-{{ $mode }}">
             @foreach ($months as $col => $label)
-                <small style="grid-area: 1 / {{ $col }}">{{ $label }}</small>
+                <small class="month" style="grid-area: 1 / {{ $col }}">{{ $label }}</small>
             @endforeach
             @foreach ($weekdays as $row => $label)
                 <small style="grid-area: {{ $row }} / 1">{{ $label }}</small>
