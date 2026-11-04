@@ -21,7 +21,7 @@ class Dashboard extends BaseDashboard
     {
         return [
             Widgets\StatsOverview::class,
-            RecentPositionsChart::class,
+            Widgets\EventMatrix::class,
             CurrentProjects::class,
             HeadingWidget::make(['heading' => __('sales')]),
             Widgets\SalesChart::class,

@@ -13,7 +13,7 @@ class CurrentProjects extends Widget
 
     protected int|string|array $columnSpan = [
         'sm' => 12,
-        'xl' => 6,
+        'xl' => 4,
     ];
 
     protected function getViewData(): array

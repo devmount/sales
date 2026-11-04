@@ -125,3 +125,87 @@ textarea.position-limit {
         }
     }
 }
+
+/* Stretch sections of widgets sharing a row to the same height */
+.fi-wi-widget:has(.event-matrix, .project-progress) > .fi-section {
+    height: 100%;
+}
+
+/* Custom event matrix (GitHub contributions style) */
+.event-matrix-controls {
+    display: flex;
+    gap: .5rem;
+}
+.event-matrix {
+    --cell-color: var(--primary-500);
+
+    display: grid;
+    grid-template-rows: auto repeat(7, .875rem);
+    grid-template-columns: auto;
+    grid-auto-columns: .875rem;
+    justify-content: start;
+    gap: 3px;
+    padding: 2px;
+    overflow: auto hidden;
+
+    &.mode-expenses {
+        --cell-color: #f43f5e;
+    }
+    &.mode-taxes {
+        --cell-color: #f97316;
+    }
+
+    /* Month and weekday labels */
+    small {
+        font-size: .875rem;
+        line-height: 1;
+        color: var(--gray-500);
+        white-space: nowrap;
+        align-self: center;
+        padding-right: .5rem;
+
+        &.month {
+            padding-bottom: 4px;
+        }
+    }
+
+    span {
+        border-radius: 2px;
+        background: color-mix(in oklab, var(--cell-color) var(--level-percent, 0%), var(--gray-100));
+
+        &.negative {
+            --cell-color: #f43f5e;
+        }
+        &.offtime {
+            outline: 2px solid var(--offtime);
+            outline-offset: -2px;
+        }
+        &:where(.dark, .dark *) {
+            background: color-mix(in oklab, var(--cell-color) var(--level-percent, 0%), var(--gray-800));
+        }
+        &[data-level="1"] { --level-percent: 25%; }
+        &[data-level="2"] { --level-percent: 50%; }
+        &[data-level="3"] { --level-percent: 75%; }
+        &[data-level="4"] { --level-percent: 100%; }
+    }
+
+    .legend {
+        display: flex;
+        justify-content: end;
+        align-items: center;
+        gap: 3px;
+        margin-top: 1rem;
+
+        span {
+            width: .875rem;
+            height: .875rem;
+        }
+        small {
+            padding-inline: .25rem;
+        }
+    }
+
+    &.mode-offtimes span.offtime {
+        background: color-mix(in oklab, var(--offtime) 20%, transparent);
+    }
+}
