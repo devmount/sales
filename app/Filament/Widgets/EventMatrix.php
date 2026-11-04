@@ -30,11 +30,15 @@ class EventMatrix extends Widget
         $end = $this->year ? $start->copy()->endOfYear() : now()->endOfDay();
         $period = CarbonPeriod::create($start, $end);
 
-        // Initialize all days of the range
+        // Initialize all days of the range, placed in grid columns per week (after the weekday labels)
+        // and rows per weekday (after the month labels)
         $days = [];
-        foreach ($period as $date) {
+        $offset = $start->isoWeekday() - 1;
+        foreach ($period as $i => $date) {
             $days[$date->format('Y-m-d')] = [
                 'date' => $date->copy(),
+                'col' => intdiv($offset + $i, 7) + 2,
+                'row' => $date->isoWeekday() + 1,
                 'value' => 0.0,
                 'level' => 0,
                 'negative' => false,
@@ -136,6 +140,21 @@ class EventMatrix extends Widget
         return $line;
     }
 
+    /**
+     * Month labels keyed by the grid column of the week the month starts in
+     */
+    protected function getMonths(array $days): array
+    {
+        $months = [];
+        foreach ($days as $i => $d) {
+            // Also label a partial first month, if there is enough room before the next one
+            if ($d['date']->day === 1 || ($i === array_key_first($days) && $d['date']->day <= 14)) {
+                $months[$d['col']] = $d['date']->isoFormat('MMM');
+            }
+        }
+        return $months;
+    }
+
     protected function getViewData(): array
     {
         $days = $this->getDays();
@@ -146,7 +165,8 @@ class EventMatrix extends Widget
             'heading' => __('eventMatrix'),
             'description' => __('eventMatrixDescription'),
             'days' => $days,
-            'offset' => reset($days)['date']->isoWeekday() - 1,
+            'months' => $this->getMonths($days),
+            'weekdays' => collect([1, 3, 5])->mapWithKeys(fn($d) => [$d + 1 => rtrim(now()->isoWeekday($d)->isoFormat('ddd'), '.')]),
             'modes' => [
                 'total' => __('total'),
                 'earnings' => __('earnings'),

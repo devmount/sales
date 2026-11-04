@@ -151,6 +151,26 @@ class EventMatrixTest extends TestCase
     }
 
     #[Test]
+    public function it_places_days_in_weekday_rows_and_week_columns_with_month_labels(): void
+    {
+        $widget = new EventMatrix();
+        $widget->year = '2025';
+        $days = (new ReflectionMethod($widget, 'getDays'))->invoke($widget);
+        $months = (new ReflectionMethod($widget, 'getMonths'))->invoke($widget, $days);
+
+        // 2025-01-01 is a Wednesday: first week column, third weekday row (after month row)
+        $this->assertSame(2, $days['2025-01-01']['col']);
+        $this->assertSame(4, $days['2025-01-01']['row']);
+        // 2025-01-06 is the following Monday
+        $this->assertSame(3, $days['2025-01-06']['col']);
+        $this->assertSame(2, $days['2025-01-06']['row']);
+
+        $this->assertCount(12, $months);
+        $this->assertSame($days['2025-01-01']['date']->isoFormat('MMM'), $months[2]);
+        $this->assertSame($days['2025-02-01']['date']->isoFormat('MMM'), $months[$days['2025-02-01']['col']]);
+    }
+
+    #[Test]
     public function it_lists_position_with_client_color_in_tooltip(): void
     {
         $date = now()->subDays(3)->format('Y-m-d');

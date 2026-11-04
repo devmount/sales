@@ -20,15 +20,21 @@
         </x-slot>
 
         <div class="event-matrix mode-{{ $mode }}">
-            @for ($i = 0; $i < $offset; $i++)
-                <span class="empty"></span>
-            @endfor
+            @foreach ($months as $col => $label)
+                <small style="grid-area: 1 / {{ $col }}">{{ $label }}</small>
+            @endforeach
+            @foreach ($weekdays as $row => $label)
+                <small style="grid-area: {{ $row }} / 1">{{ $label }}</small>
+            @endforeach
             @foreach ($days as $day)
                 <span
                     wire:key="{{ $mode }}-{{ $day['date']->format('Y-m-d') }}"
                     data-level="{{ $day['level'] }}"
                     @class(['negative' => $day['negative'], 'offtime' => $day['offtime']])
-                    @if ($day['offtime']) style="--offtime: {{ $day['offtime']->hexColor() }}" @endif
+                    @style([
+                        "grid-area: {$day['row']} / {$day['col']}",
+                        "--offtime: {$day['offtime']?->hexColor()}" => $day['offtime'],
+                    ])
                     x-tooltip="{ content: @js($day['tooltip']), theme: $store.theme, allowHTML: true }"
                 ></span>
             @endforeach
