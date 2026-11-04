@@ -6,6 +6,7 @@ use App\Enums\ExpenseCategory;
 use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
 use App\Models\Expense;
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
@@ -53,6 +54,8 @@ class ExpenseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // Eager load relations needed for the record actions
+            ->modifyQueryUsing(fn(Builder $query) => $query->with('documents'))
             ->columns([
                 TextColumn::make('expended_at')
                     ->label(__('expendedAt'))
@@ -121,7 +124,7 @@ class ExpenseResource extends Resource
                     ->label('')
                     ->tooltip(__('bill'))
                     ->icon('tabler-receipt')
-                    ->hidden(fn(Expense $record) => !$record->documents()->exists())
+                    ->hidden(fn(Expense $record) => $record->documents->isEmpty())
                     ->action(function (Expense $record) {
                         $document = $record->documents()->latest()->firstOrFail();
                         return Storage::disk($document->disk)->download($document->path, $document->filename);

@@ -33,6 +33,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Builder;
 
 class ClientResource extends Resource
 {
@@ -63,6 +64,8 @@ class ClientResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // Eager load relations needed for the computed columns
+            ->modifyQueryUsing(fn(Builder $query) => $query->with('projects.invoices.positions'))
             ->columns([
                 ColorColumn::make('color')
                     ->label(''),

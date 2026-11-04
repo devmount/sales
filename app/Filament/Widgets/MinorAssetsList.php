@@ -30,7 +30,7 @@ class MinorAssetsList extends TableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn() => Expense::query()->where('category', ExpenseCategory::MinorAssets))
+            ->query(fn() => Expense::with('documents')->where('category', ExpenseCategory::MinorAssets))
             ->header(view('filament.widgets.table-header', [
                 'heading' => __('minorAssetsRegister'),
                 'description' => __('minorAssetsRegisterDescription', [
@@ -91,7 +91,7 @@ class MinorAssetsList extends TableWidget
                     ->label('')
                     ->tooltip(__('bill'))
                     ->icon('tabler-receipt')
-                    ->hidden(fn(Expense $record) => !$record->documents()->exists())
+                    ->hidden(fn(Expense $record) => $record->documents->isEmpty())
                     ->action(function (Expense $record) {
                         $document = $record->documents()->latest()->firstOrFail();
                         return Storage::disk($document->disk)->download($document->path, $document->filename);

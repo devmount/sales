@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
@@ -30,7 +29,8 @@ class HourlyRateChart extends ChartWidget
 
     protected function getData(): array
     {
-        $invoices = Invoice::whereNotNull('paid_at')
+        $invoices = Invoice::with('positions')
+            ->whereNotNull('paid_at')
             ->where('transitory', 0)
             ->oldest('paid_at')
             ->get();
@@ -40,15 +40,11 @@ class HourlyRateChart extends ChartWidget
         $period = $period->toArray();
         $count = array_fill(0, count($period) - 1, 0);
         $rates = array_fill(0, count($period) - 1, 0);
-        foreach ($period as $i => $date) {
-            if ($i == count($period) - 1) {
-                break;
-            }
-            foreach ($invoices as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->paid_at)) {
-                    $rates[$i] += $obj->net;
-                    $count[$i] += $obj->hours;
-                }
+        foreach ($invoices as $obj) {
+            $i = $obj->paid_at->year - $period[0]->year;
+            if (isset($rates[$i])) {
+                $rates[$i] += $obj->net;
+                $count[$i] += $obj->hours;
             }
         }
         foreach ($rates as $i => $rate) {

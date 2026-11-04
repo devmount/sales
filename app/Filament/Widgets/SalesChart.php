@@ -3,15 +3,17 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\ExpenseCategory;
+use App\Filament\Widgets\Concerns\GroupsByPeriod;
 use App\Models\Expense;
 use App\Models\Invoice;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
 class SalesChart extends ChartWidget
 {
+    use GroupsByPeriod;
+
     public ?string $filter = 'y';
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
@@ -33,7 +35,8 @@ class SalesChart extends ChartWidget
 
     protected function getData(): array
     {
-        $invoices = Invoice::whereNotNull('paid_at')
+        $invoices = Invoice::with('positions')
+            ->whereNotNull('paid_at')
             ->where('transitory', 0)
             ->oldest('paid_at')
             ->get();
@@ -60,24 +63,20 @@ class SalesChart extends ChartWidget
         $invoiceData = array_fill(0, count($period) - 1, 0);
         $expenseData = array_fill(0, count($period) - 1, 0);
         $taxData = array_fill(0, count($period) - 1, 0);
-        foreach ($period as $i => $date) {
-            if ($i == count($period) - 1) {
-                break;
+        $index = $this->periodIndex(array_slice($period, 0, -1));
+        foreach ($invoices as $obj) {
+            if (isset($index[$key = $this->periodKey($obj->paid_at)])) {
+                $invoiceData[$index[$key]] += $obj->net;
             }
-            foreach ($invoices as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->excludeEndDate()->contains($obj->paid_at)) {
-                    $invoiceData[$i] += $obj->net;
-                }
+        }
+        foreach ($expenses as $obj) {
+            if (isset($index[$key = $this->periodKey($obj->expended_at)])) {
+                $expenseData[$index[$key]] += $obj->deductibleNet;
             }
-            foreach ($expenses as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->excludeEndDate()->contains($obj->expended_at)) {
-                    $expenseData[$i] += $obj->deductibleNet;
-                }
-            }
-            foreach ($taxes as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->excludeEndDate()->contains($obj->expended_at)) {
-                    $taxData[$i] += $obj->net;
-                }
+        }
+        foreach ($taxes as $obj) {
+            if (isset($index[$key = $this->periodKey($obj->expended_at)])) {
+                $taxData[$index[$key]] += $obj->net;
             }
         }
 

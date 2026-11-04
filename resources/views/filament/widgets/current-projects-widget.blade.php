@@ -3,7 +3,7 @@
         <div class="project-progress">
             @foreach ($projects as $p)
                 <a
-                    href="/invoices/{{ $p->invoices()->latest()?->first()?->id }}/edit"
+                    href="/invoices/{{ $p->invoices->sortByDesc('created_at')->first()?->id }}/edit"
                     data-percent="{{ $p->progress_percent }}"
                 >
                     <progress

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Client;
 use App\Models\Invoice;
 use Carbon\Carbon;
 use Filament\Support\RawJs;
@@ -30,10 +29,12 @@ class ClientHoursChart extends ChartWidget
 
     protected function getData(): array
     {
-        $invoices = Invoice::whereNotNull('paid_at')
+        $invoices = Invoice::with(['positions', 'project.client'])
+            ->whereNotNull('paid_at')
             ->where('transitory', 0)
             ->oldest('paid_at')
             ->get();
+        $clients = $invoices->pluck('project.client')->keyBy('id');
         $startYear = Carbon::parse($invoices->first()?->paid_at)->year;
         $labels = range($startYear, now()->year);
 
@@ -46,7 +47,7 @@ class ClientHoursChart extends ChartWidget
 
         $datasets = [];
         foreach ($hours as $clientId => $yearly) {
-            $client = Client::find($clientId);
+            $client = $clients[$clientId];
             $datasets[] = [
                 'label' => $client->name,
                 'data' => array_map(fn($i) => $yearly[$i] ?? 0, array_keys($labels)),

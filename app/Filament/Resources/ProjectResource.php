@@ -35,6 +35,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProjectResource extends Resource
 {
@@ -60,6 +61,8 @@ class ProjectResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // Eager load relations needed for the computed columns
+            ->modifyQueryUsing(fn(Builder $query) => $query->with(['invoices.positions', 'documents']))
             ->columns([
                 ColorColumn::make('client.color')
                     ->label(''),
@@ -108,7 +111,7 @@ class ProjectResource extends Resource
                     ->label('')
                     ->tooltip(__('downloadFiletype', ['type' => 'pdf']))
                     ->icon('tabler-file-type-pdf')
-                    ->hidden(fn(Project $record) => !$record->documents()->exists())
+                    ->hidden(fn(Project $record) => $record->documents->isEmpty())
                     ->action(function (Project $record) {
                         $document = $record->documents()->latest()->firstOrFail();
                         return Storage::disk($document->disk)->download($document->path, $document->filename);

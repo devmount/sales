@@ -89,10 +89,7 @@ class EventMatrix extends Widget
 
         // Times off
         if (in_array($this->mode, ['total', 'offtimes'])) {
-            $offtimes = Offtime::where('start', '<=', $end->toDateString())
-                ->where(fn($q) => $q->where('end', '>=', $start->toDateString())
-                    ->orWhere(fn($q) => $q->whereNull('end')->where('start', '>=', $start->toDateString())))
-                ->get();
+            $offtimes = Offtime::overlapping($start, $end)->get();
             foreach ($offtimes as $o) {
                 foreach (CarbonPeriod::create($o->start, $o->end ?? $o->start) as $date) {
                     $key = $date->format('Y-m-d');

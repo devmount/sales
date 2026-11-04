@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Position;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
@@ -37,17 +36,16 @@ class WeeklyHoursChart extends ChartWidget
         $period = $period->toArray();
         $countWeeks = array_fill(0, count($period) - 1, 0);
         $avgWeeklyHours = array_fill(0, count($period) - 1, 0);
+        $positionsByYear = $positions->groupBy(fn(Position $obj) => $obj->started_at->year);
         foreach ($period as $i => $date) {
             if ($i == count($period) - 1) {
                 break;
             }
             $weeks = [];
             $hours = 0;
-            foreach ($positions as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->started_at)) {
-                    $weeks[Carbon::parse($obj->started_at)->isoWeek()] = 1;
-                    $hours += $obj->duration;
-                }
+            foreach ($positionsByYear[$date->year] ?? [] as $obj) {
+                $weeks[$obj->started_at->isoWeek()] = 1;
+                $hours += $obj->duration;
             }
             $countWeeks[$i] = count($weeks);
             $avgWeeklyHours[$i] = count($weeks) != 0 ? round($hours / count($weeks)) : 0;

@@ -43,5 +43,5 @@ jobs:
           php8.5 artisan route:cache
           php8.5 artisan view:clear
           php8.5 artisan view:cache
-          php8.5 artisan icons:cache
+          php8.5 artisan filament:optimize
           rm -rf node_modules .git* .editorconfig .env.* *.config.js .ddev

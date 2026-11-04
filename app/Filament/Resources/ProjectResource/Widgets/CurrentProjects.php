@@ -22,6 +22,7 @@ class CurrentProjects extends Widget
             'heading' => __('currentProjectState'),
             'description' => __('clickForLatestInvoice'),
             'projects' => Project::active()
+                ->with(['client', 'invoices.positions'])
                 ->withMax('invoices', 'created_at')
                 ->orderByDesc('invoices_max_created_at')
                 ->get(),

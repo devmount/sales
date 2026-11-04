@@ -34,33 +34,35 @@ class RecentPositionsChart extends ChartWidget
         $labels = [];
         $datasets = [];
         $period = CarbonPeriod::create(Carbon::now()->subDays((int) $this->filter), '1 day', 'now');
+        $start = $period->getStartDate()->copy()->startOfDay();
+        $end = now()->endOfDay();
+        $positionsByDay = Position::with('invoice.project.client')
+            ->whereBetween('started_at', [$start, $end])
+            ->get()
+            ->groupBy(fn(Position $p) => $p->started_at->format('Y-m-d'));
+        $offtimes = Offtime::overlapping($start, $end)->get();
         foreach ($period as $i => $date) {
             // X-Axis labels
             $labels[] = $date->isoFormat('dd, D. MMM');
 
             // Positions per project
-            $positions = Position::where('started_at', 'like', $date->format('Y-m-d') . '%')->get();
-            foreach ($positions as $p) {
+            foreach ($positionsByDay[$date->format('Y-m-d')] ?? [] as $p) {
                 $project = $p->invoice->project;
-                if (isset($datasets[$project->id])) {
-                    if (isset($datasets[$project->id][$i])) {
-                        $datasets[$project->id]['data'][$i] += $p->duration;
-                    } else {
-                        $datasets[$project->id]['data'][$i] = $p->duration;
-                    }
-                } else {
-                    $datasets[$project->id] = [
-                        'label' => $project->title,
-                        'data' =>  array_fill(0, count($period), 0),
-                        'backgroundColor' => $project->client->color,
-                        'barPercentage' => 0.75,
-                    ];
-                    $datasets[$project->id]['data'][$i] = $p->duration;
-                }
+                $datasets[$project->id] ??= [
+                    'label' => $project->title,
+                    'data' => array_fill(0, count($period), 0),
+                    'backgroundColor' => $project->client->color,
+                    'barPercentage' => 0.75,
+                ];
+                $datasets[$project->id]['data'][$i] += $p->duration;
             }
 
             // Also show times off
-            if ($offtime = Offtime::byDate($date)) {
+            $day = $date->format('Y-m-d');
+            $offtime = $offtimes->first(
+                fn(Offtime $o) => $o->start->format('Y-m-d') <= $day && ($o->end ?? $o->start)->format('Y-m-d') >= $day,
+            );
+            if ($offtime) {
                 if (isset($datasets[$offtime->category->value])) {
                     $datasets[$offtime->category->value]['data'][$i] = 8;
                 } else {

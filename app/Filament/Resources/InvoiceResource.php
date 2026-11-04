@@ -41,6 +41,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
+use Illuminate\Database\Eloquent\Builder;
 
 class InvoiceResource extends Resource
 {
@@ -94,6 +95,8 @@ class InvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // Eager load relations needed for the computed columns
+            ->modifyQueryUsing(fn(Builder $query) => $query->with(['positions', 'documents']))
             ->columns([
                 ColorColumn::make('project.client.color')
                     ->label(''),
@@ -152,7 +155,7 @@ class InvoiceResource extends Resource
                     ->label('')
                     ->tooltip(__('downloadFiletype', ['type' => 'pdf']))
                     ->icon('tabler-file-type-pdf')
-                    ->hidden(fn(Invoice $record) => !$record->documents()->exists())
+                    ->hidden(fn(Invoice $record) => $record->documents->isEmpty())
                     ->action(function (Invoice $record) {
                         $document = $record->documents()->latest()->firstOrFail();
                         return Storage::disk($document->disk)->download($document->path, $document->filename);
@@ -161,7 +164,7 @@ class InvoiceResource extends Resource
                     ->label('')
                     ->tooltip(__('downloadFiletype', ['type' => 'xml']))
                     ->icon('tabler-file-type-xml')
-                    ->hidden(fn(Invoice $record) => !$record->documents()->whereNotNull('attachment_path')->exists())
+                    ->hidden(fn(Invoice $record) => $record->documents->whereNotNull('attachment_path')->isEmpty())
                     ->action(function (Invoice $record) {
                         $document = $record->documents()->whereNotNull('attachment_path')->latest()->firstOrFail();
                         return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
