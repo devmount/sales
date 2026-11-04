@@ -140,10 +140,7 @@ textarea.position-limit {
     --cell-color: var(--primary-500);
 
     display: grid;
-    grid-template-rows: auto repeat(7, .875rem);
-    grid-template-columns: auto;
-    grid-auto-columns: .875rem;
-    justify-content: start;
+    grid-template-columns: auto repeat(var(--weeks), minmax(.5rem, 1fr));
     gap: 3px;
     padding: 2px;
     overflow: auto hidden;
@@ -167,9 +164,14 @@ textarea.position-limit {
         &.month {
             padding-bottom: 4px;
         }
+        /* Don't let labels stretch rows when cells are smaller than the text */
+        &.weekday {
+            line-height: 0;
+        }
     }
 
     span {
+        aspect-ratio: 1;
         border-radius: 2px;
         background: color-mix(in oklab, var(--cell-color) var(--level-percent, 0%), var(--gray-100));
 

@@ -3,7 +3,6 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
-use App\Filament\Resources\PositionResource\Widgets\RecentPositionsChart;
 use App\Filament\Resources\ProjectResource\Widgets\CurrentProjects;
 use App\Filament\Widgets;
 use App\Livewire\HeadingWidget;
