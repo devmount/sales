@@ -45,10 +45,11 @@ class Invoice extends Model
 
     /**
      * The positions of this invoice.
+     * Chaperoned, so each position's invoice relation is set to this invoice without querying it again.
      */
     public function positions(): HasMany
     {
-        return $this->hasMany(Position::class);
+        return $this->hasMany(Position::class)->chaperone();
     }
 
     /**
@@ -95,7 +96,7 @@ class Invoice extends Model
             TimeUnit::QUARTER => $d->endOfQuarter()->toDateString(),
             TimeUnit::YEAR => $d->endOfYear()->toDateString(),
         };
-        $records = self::where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->where('transitory', 0)->get();
+        $records = self::with('positions')->where('paid_at', '>=', $start)->where('paid_at', '<=', $end)->where('transitory', 0)->get();
         $netTaxable = $records->filter(fn(self $r) => $r->taxable)->map(fn(self $r) => $r->net)->sum();
         $netUntaxable = $records->filter(fn(self $r) => !$r->taxable)->map(fn(self $r) => $r->net)->sum();
         $vat = $records->map(fn(self $r) => $r->vat)->sum();

@@ -17,10 +17,10 @@ class ListInvoices extends ListRecords
 
     public function getTabs(): array
     {
-        $active = Invoice::active();
+        $active = Invoice::with('positions')->active();
         $activeNet = $active->get()->reduce(fn($p, $c) => $p + $c->net, 0);
         $activeCount = $active->count();
-        $waiting = Invoice::waiting();
+        $waiting = Invoice::with('positions')->waiting();
         $waitingCount = $waiting->count();
         $waitingNet = $waiting->get()->reduce(fn($p, $c) => $p + $c->net, 0);
         $finishedCount = Invoice::finished()->count();

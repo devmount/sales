@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Widgets\Concerns\HasEmptyStateChart;
-use App\Models\Client;
 use App\Models\Invoice;
 use Carbon\Carbon;
 use Filament\Support\RawJs;
@@ -37,9 +36,11 @@ class ClientProfitDistributionChart extends ChartWidget
         $year = $this->filter ? (int) $this->filter : now()->year;
         $from = Carbon::create($year, 1, 31, 12, 0, 0)->startOfYear();
         $to = Carbon::create($year, 1, 31, 12, 0, 0)->endOfYear();
-        $invoices = Invoice::whereBetween('paid_at', [$from, $to])
+        $invoices = Invoice::with(['positions', 'project.client'])
+            ->whereBetween('paid_at', [$from, $to])
             ->where('transitory', 0)
             ->get();
+        $clients = $invoices->pluck('project.client')->keyBy('id');
         $profit = [];
         foreach ($invoices as $obj) {
             $id = $obj->project->client->id;
@@ -48,8 +49,8 @@ class ClientProfitDistributionChart extends ChartWidget
                 : $obj->net;
         }
         $sum = array_sum($profit);
-        $labels = array_map(fn($id, $p) => '(' . round($p / $sum * 100, 1) . '%) ' . Client::find($id)->name, array_keys($profit), $profit);
-        $colors = array_map(fn($id) => Client::find($id)->color, array_keys($profit));
+        $labels = array_map(fn($id, $p) => '(' . round($p / $sum * 100, 1) . '%) ' . $clients[$id]->name, array_keys($profit), $profit);
+        $colors = array_map(fn($id) => $clients[$id]->color, array_keys($profit));
 
         return [
             'datasets' => [

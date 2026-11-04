@@ -2,14 +2,16 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\GroupsByPeriod;
 use App\Models\Position;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
 class SumProductiveHoursChart extends ChartWidget
 {
+    use GroupsByPeriod;
+
     public ?string $filter = 'y';
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
@@ -46,14 +48,10 @@ class SumProductiveHoursChart extends ChartWidget
         array_pop($labels);
         $period = $period->toArray();
         $hours = array_fill(0, count($period) - 1, 0);
-        foreach ($period as $i => $date) {
-            if ($i == count($period) - 1) {
-                break;
-            }
-            foreach ($positions as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->started_at)) {
-                    $hours[$i] += $obj->duration;
-                }
+        $index = $this->periodIndex(array_slice($period, 0, -1));
+        foreach ($positions as $obj) {
+            if (isset($index[$key = $this->periodKey($obj->started_at)])) {
+                $hours[$index[$key]] += $obj->duration;
             }
         }
 

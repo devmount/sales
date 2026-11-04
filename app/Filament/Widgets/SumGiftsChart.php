@@ -2,15 +2,16 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\GroupsByPeriod;
 use App\Filament\Widgets\Concerns\HasEmptyStateChart;
 use App\Models\Gift;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
 class SumGiftsChart extends ChartWidget
 {
+    use GroupsByPeriod;
     use HasEmptyStateChart;
     public ?string $filter = 'y';
 
@@ -49,14 +50,10 @@ class SumGiftsChart extends ChartWidget
         array_pop($labels);
         $period = $period->toArray();
         $amounts = array_fill(0, count($period) - 1, 0);
-        foreach ($period as $i => $date) {
-            if ($i == count($period) - 1) {
-                break;
-            }
-            foreach ($gifts as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->received_at)) {
-                    $amounts[$i] += $obj->amount;
-                }
+        $index = $this->periodIndex(array_slice($period, 0, -1));
+        foreach ($gifts as $obj) {
+            if (isset($index[$key = $this->periodKey($obj->received_at)])) {
+                $amounts[$index[$key]] += $obj->amount;
             }
         }
 

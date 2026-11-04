@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\OfftimeCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -32,6 +33,17 @@ class Offtime extends Model
                 $query->where('start', '<', $date)->where('end', '>', $date);
             })
             ->first();
+    }
+
+    /**
+     * Scope a query to only include times off overlapping the given date range.
+     */
+    #[Scope]
+    protected function overlapping(Builder $query, Carbon $start, Carbon $end): void
+    {
+        $query->where('start', '<=', $end->toDateString())
+            ->where(fn(Builder $q) => $q->where('end', '>=', $start->toDateString())
+                ->orWhere(fn(Builder $q) => $q->whereNull('end')->where('start', '>=', $start->toDateString())));
     }
 
     /**

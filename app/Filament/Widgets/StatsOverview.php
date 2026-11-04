@@ -58,7 +58,7 @@ class StatsOverview extends BaseWidget
 
     protected function getData(): array
     {
-        $positions = Position::where('started_at', '>', now()->subWeeks(7)->startOfWeek(Carbon::MONDAY))->get();
+        $positions = Position::with('invoice.positions')->where('started_at', '>', now()->subWeeks(7)->startOfWeek(Carbon::MONDAY))->get();
         $period = now()->subWeeks(8)->startOfWeek()->weeksUntil(now()->addWeek()->endOfWeek(Carbon::SUNDAY))->toArray();
         $revenue = array_fill(0, count($period) - 1, 0);
         $hours = array_fill(0, count($period) - 1, 0);
