@@ -19,12 +19,12 @@
             </div>
         </x-slot>
 
-        <div class="event-matrix mode-{{ $mode }}">
+        <div class="event-matrix mode-{{ $mode }}" style="--weeks: {{ $lastCol - 1 }}">
             @foreach ($months as $col => $label)
                 <small class="month" style="grid-area: 1 / {{ $col }}">{{ $label }}</small>
             @endforeach
             @foreach ($weekdays as $row => $label)
-                <small style="grid-area: {{ $row }} / 1">{{ $label }}</small>
+                <small class="weekday" style="grid-area: {{ $row }} / 1">{{ $label }}</small>
             @endforeach
             @foreach ($days as $day)
                 <span
