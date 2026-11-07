@@ -8,12 +8,15 @@ use App\Filament\Resources\ClientResource\Pages\EditClient;
 use App\Filament\Resources\ClientResource\Pages\ListClients;
 use App\Mail\ContactClient;
 use App\Models\Client;
+use App\Models\Invoice;
+use App\Models\Project;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Number;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -21,6 +24,42 @@ use Tests\TestCase;
 class ClientResourceTest extends TestCase
 {
     use RefreshDatabase;
+
+    #[Test]
+    public function it_shows_the_number_of_projects_and_invoices_on_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $projects = Project::factory()->count(2)->create(['client_id' => $client->id]);
+        Invoice::factory()->count(5)->create(['project_id' => $projects->first()->id]);
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->assertSeeHtmlInOrder([
+                'fi-wi-stats-overview-stat-label', '2 ' . trans_choice('project', 2),
+                'fi-wi-stats-overview-stat-value', '5 ' . trans_choice('invoice', 5),
+            ]);
+    }
+
+    #[Test]
+    public function it_shows_the_net_income_on_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $project = Project::factory()->create(['client_id' => $client->id]);
+        Invoice::factory()->finished()->project()->create([
+            'project_id' => $project->id,
+            'price' => 1234.5,
+            'discount' => 0,
+            'transitory' => false,
+        ]);
+        Invoice::factory()->waiting()->create(['project_id' => $project->id]);
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->assertSeeHtmlInOrder([
+                'fi-wi-stats-overview-stat-label', __('netIncome'),
+                'fi-wi-stats-overview-stat-value', e(Number::currency(1234.5, 'eur')),
+            ]);
+    }
 
     #[Test]
     public function it_redirects_guests_away_from_the_client_list(): void

@@ -34,6 +34,7 @@ use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -55,7 +56,23 @@ class ProjectResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components(self::formFields());
+        return $schema
+            ->columns(10)
+            ->components([
+                Section::make()
+                    ->columnSpan(['lg' => 8])
+                    ->schema(self::formFields(12, false)),
+                Grid::make()
+                    ->hidden(fn(?Project $record) => !$record)
+                    ->columns(1)
+                    ->columnSpan(['lg' => 2])
+                    ->schema(fn(?Project $record) => [
+                        Stat::make('progress', '...')
+                            ->label(__('progress'))
+                            ->value($record?->progress_percent ?? '-')
+                            ->description($record?->hours . ' / ' . $record?->scope_with_label),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -199,6 +216,7 @@ class ProjectResource extends Resource
      */
     public static function formFields(int $columns = 12, bool $useSection = true): array
     {
+        $half = intval($columns / ($columns > 6 ? 2 : 1));
         $fields = [
             Select::make('client_id')
                 ->label(trans_choice('client', 1))
@@ -206,32 +224,28 @@ class ProjectResource extends Resource
                 ->searchable()
                 ->preload()
                 ->suffixIcon('tabler-users')
-                ->columnSpan($columns > 6 ? 9 : 6)
+                ->columnSpan($half)
                 ->required(),
-            Toggle::make('aborted')
-                ->label(__('aborted'))
-                ->inline(false)
-                ->columnSpan($columns > 6 ? 3 : 6),
-            TextInput::make('title')
-                ->label(__('title'))
-                ->columnSpanFull()
-                ->required(),
-            Textarea::make('description')
-                ->label(__('description'))
-                ->autosize()
-                ->maxLength(65535)
-                ->columnSpanFull(),
             DatePicker::make('start_at')
                 ->label(__('startAt'))
                 ->weekStartsOnMonday()
                 ->suffixIcon('tabler-calendar-plus')
                 ->required()
-                ->columnSpan($columns / 2),
+                ->columnSpan($half / 2),
             DatePicker::make('due_at')
                 ->label(__('dueAt'))
                 ->weekStartsOnMonday()
                 ->suffixIcon('tabler-calendar-check')
-                ->columnSpan($columns / 2),
+                ->columnSpan($half / 2),
+            TextInput::make('title')
+                ->label(__('title'))
+                ->columnSpan($half)
+                ->required(),
+            Textarea::make('description')
+                ->label(__('description'))
+                ->autosize()
+                ->maxLength(65535)
+                ->columnSpan($half),
             TextInput::make('scope')
                 ->label(__('scope'))
                 ->numeric()
@@ -240,22 +254,26 @@ class ProjectResource extends Resource
                 ->suffix('h')
                 ->suffixIcon('tabler-clock-exclamation')
                 ->required()
-                ->columnSpan($columns / 3),
+                ->columnSpan($half / 2),
             TextInput::make('price')
                 ->label(__('price'))
                 ->numeric()
                 ->step(0.01)
                 ->minValue(0.01)
                 ->suffixIcon('tabler-currency-euro')
-                ->columnSpan($columns / 3)
+                ->columnSpan($half / 2)
                 ->required(),
             Select::make('pricing_unit')
                 ->label(__('pricingUnit'))
                 ->options(PricingUnit::class)
                 ->suffixIcon('tabler-clock-2')
-                ->columnSpan($columns / 3)
+                ->columnSpan($half / 2)
                 ->placeholder('')
                 ->required(),
+            Toggle::make('aborted')
+                ->label(__('aborted'))
+                ->inline(false)
+                ->columnSpan($half / 2),
         ];
 
         return $useSection

@@ -32,7 +32,9 @@ use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Number;
 use Illuminate\Database\Eloquent\Builder;
 
 class ClientResource extends Resource
@@ -58,7 +60,25 @@ class ClientResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components(self::formFields());
+        return $schema
+            ->columns(10)
+            ->components([
+                Section::make()
+                    ->columnSpan(['lg' => 8])
+                    ->schema(self::formFields(12, false)),
+                Grid::make()
+                    ->hidden(fn(?Client $record) => !$record)
+                    ->columns(1)
+                    ->columnSpan(['lg' => 2])
+                    ->schema(fn(?Client $record) => [
+                        Stat::make('invoices', '...')
+                            ->label(fn() => ($count = $record?->projects()->count() ?? 0) . ' ' . trans_choice('project', $count))
+                            ->value(fn() => ($count = $record?->invoices()->count() ?? 0) . ' ' . trans_choice('invoice', $count)),
+                        Stat::make('net', '...')
+                            ->label(__('netIncome'))
+                            ->value(Number::currency($record?->net ?? 0, 'eur')),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -217,34 +237,34 @@ class ClientResource extends Resource
                 ->columnSpan(6),
             Select::make('language')
                 ->label(__('language'))
-                ->columnSpan(6)
+                ->columnSpan(3)
                 ->suffixIcon('tabler-language')
                 ->options(LanguageCode::class)
                 ->required(),
-            TextInput::make('street')
-                ->label(__('street'))
-                ->columnSpan(6),
             TextInput::make('vat_id')
                 ->label(__('vatId'))
                 ->suffixIcon('tabler-tax-euro')
-                ->columnSpan(6),
+                ->columnSpan(3),
+            TextInput::make('street')
+                ->label(__('street'))
+                ->columnSpan(3),
             TextInput::make('zip')
                 ->label(__('zip'))
                 ->columnSpan(3),
             TextInput::make('city')
                 ->label(__('city'))
                 ->columnSpan(3),
-            TextInput::make('email')
-                ->label(__('email'))
-                ->columnSpan(6)
-                ->suffixIcon('tabler-mail')
-                ->email(),
             TextInput::make('country')
                 ->label(__('country'))
-                ->columnSpan(6),
+                ->columnSpan(3),
+            TextInput::make('email')
+                ->label(__('email'))
+                ->columnSpan(3)
+                ->suffixIcon('tabler-mail')
+                ->email(),
             TextInput::make('phone')
                 ->label(__('phone'))
-                ->columnSpan(6)
+                ->columnSpan(3)
                 ->suffixIcon('tabler-phone')
                 ->tel(),
         ];
