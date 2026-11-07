@@ -155,6 +155,28 @@ class ProjectResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_warns_about_related_records_when_deleting_project_from_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $project = Project::factory()->create();
+
+        Livewire::test(EditProject::class, ['record' => $project->getKey()])
+            ->mountAction(DeleteAction::class)
+            ->assertMountedActionModalSee(__('deleteProjectDescription'));
+    }
+
+    #[Test]
+    public function it_warns_about_related_records_when_deleting_project_from_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $project = Project::factory()->create();
+
+        Livewire::test(ListProjects::class, ['activeTab' => 'all'])
+            ->mountAction(TestAction::make(DeleteAction::class)->table($project))
+            ->assertMountedActionModalSee(__('deleteProjectDescription'));
+    }
+
+    #[Test]
     public function it_deletes_a_project_from_the_edit_page(): void
     {
         $this->actingAs(User::factory()->create());

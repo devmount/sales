@@ -8,6 +8,7 @@ use App\Models\Project;
 use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -86,6 +87,11 @@ class ProjectsRelationManager extends RelationManager
                         ->schema(ProjectResource::formFields(useSection: false))
                         ->slideOver()
                         ->modalWidth(Width::Large)
+                        ->after(fn() => $this->dispatch('refresh-page')),
+                    DeleteAction::make()
+                        ->icon('tabler-trash')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('deleteProjectDescription'))
                         ->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),

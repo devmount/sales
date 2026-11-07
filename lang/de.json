@@ -45,6 +45,8 @@
     "deductibleNet": "Abzugsfähig (netto)",
     "deduction": "Abzug",
     "definesEstimateSorting": "Definiert die Reihenfolge der Schätzungen",
+    "deleteInvoiceDescription": "Alle Leistungspositionen dieser Rechnung werden ebenfalls dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "deleteProjectDescription": "Alle Rechnungen, Leistungspositionen und Schätzungen dieses Projekts werden ebenfalls dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
     "deliverables": "Leistungen",
     "description": "Beschreibung",
     "disclaimer": "Haftungsausschluss",

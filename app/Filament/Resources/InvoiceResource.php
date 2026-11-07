@@ -229,7 +229,10 @@ class InvoiceResource extends Resource
                         ->url(fn(Invoice $record): string => 'mailto:' . $record->project?->client?->email
                             . '?subject=' . rawurlencode(__('paymentReminder') . ' ' . trans_choice('invoice', 1, [], $record->project?->client?->language->value)) . ' ' . $record->final_number
                             . '&body=' . rawurlencode(__('email.template.paymentReminder.body.url', ['number' => $record->final_number], $record->project?->client?->language->value))),
-                    DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
+                    DeleteAction::make()
+                        ->icon('tabler-trash')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('deleteInvoiceDescription')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])

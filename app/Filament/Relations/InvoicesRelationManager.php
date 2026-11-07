@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
@@ -28,7 +29,7 @@ class InvoicesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitle(trans_choice('position', 1))
+            ->recordTitle(trans_choice('invoice', 1))
             ->heading(trans_choice('invoice', 2))
             ->defaultSort('started_at', 'asc')
             ->columns([
@@ -88,6 +89,11 @@ class InvoicesRelationManager extends RelationManager
                         ->schema(InvoiceResource::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(Width::ExtraLarge)
+                        ->after(fn() => $this->dispatch('refresh-page')),
+                    DeleteAction::make()
+                        ->icon('tabler-trash')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('deleteInvoiceDescription'))
                         ->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),

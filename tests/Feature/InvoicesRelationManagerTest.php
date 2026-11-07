@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\User;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
@@ -222,6 +223,42 @@ class InvoicesRelationManagerTest extends TestCase
             ->assertDispatched('refresh-page');
 
         $this->assertModelMissing($invoice);
+    }
+
+    #[Test]
+    public function it_deletes_an_invoice(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $invoice = Invoice::factory()->for(Project::factory()->for($client))->create();
+
+        Livewire::test(InvoicesRelationManager::class, [
+            'ownerRecord' => $client,
+            'pageClass' => EditClient::class,
+        ])
+            ->callAction(TestAction::make(DeleteAction::class)->table($invoice))
+            ->assertDispatched('refresh-page');
+
+        $this->assertModelMissing($invoice);
+    }
+
+    #[Test]
+    public function it_names_the_invoice_and_warns_about_positions_when_deleting(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $invoice = Invoice::factory()->for(Project::factory()->for($client))->create();
+        $this->assertNotSame('deleteInvoiceDescription', __('deleteInvoiceDescription'));
+
+        Livewire::test(InvoicesRelationManager::class, [
+            'ownerRecord' => $client,
+            'pageClass' => EditClient::class,
+        ])
+            ->mountAction(TestAction::make(DeleteAction::class)->table($invoice))
+            ->assertMountedActionModalSee([
+                __('filament-actions::delete.single.modal.heading', ['label' => trans_choice('invoice', 1)]),
+                __('deleteInvoiceDescription'),
+            ]);
     }
 
     #[Test]
