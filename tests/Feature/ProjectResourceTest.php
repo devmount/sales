@@ -91,6 +91,18 @@ class ProjectResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_shows_the_project_progress_on_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $project = Project::factory()->create(['scope' => 40]);
+
+        Livewire::test(EditProject::class, ['record' => $project->getKey()])
+            ->assertSee(__('progress'))
+            ->assertSee($project->progress_percent)
+            ->assertSee($project->hours . ' / ' . $project->scope_with_label);
+    }
+
+    #[Test]
     public function it_requires_a_client_title_start_scope_price_and_pricing_unit_when_creating_a_project(): void
     {
         $this->actingAs(User::factory()->create());
