@@ -23,7 +23,6 @@ class Project extends Model
         'description',
         'start_at',
         'due_at',
-        'minimum',
         'scope',
         'price',
         'pricing_unit',
@@ -69,7 +68,6 @@ class Project extends Model
             'description' => 'string',
             'start_at' => 'date',
             'due_at' => 'date',
-            'minimum' => 'float',
             'scope' => 'float',
             'price' => 'float',
             'pricing_unit' => PricingUnit::class,
@@ -179,15 +177,11 @@ class Project extends Model
     }
 
     /**
-     * Show either scope or range from minimum to project limit in hours, formatted
+     * Show project limit in hours, formatted
      */
-    protected function scopeRange(): Attribute
+    protected function scopeWithLabel(): Attribute
     {
-        return Attribute::make(
-            fn(): string => $this->minimum != $this->scope
-                ? (int) $this->minimum . ' - ' . (int) $this->scope . ' ' . trans_choice('hour', 2)
-                : (int) $this->scope . ' ' . trans_choice('hour', (int) $this->scope),
-        );
+        return Attribute::make(fn(): string => (int) $this->scope . ' ' . trans_choice('hour', (int) $this->scope));
     }
 
     /**

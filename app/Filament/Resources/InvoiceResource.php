@@ -81,7 +81,7 @@ class InvoiceResource extends Resource
                         Stat::make('project', '...')
                             ->label(trans_choice('project', 1))
                             ->value($record->project?->progress_percent ?? '-')
-                            ->description($record->project?->hours . ' / ' . $record->project?->scope_range),
+                            ->description($record->project?->hours . ' / ' . $record->project?->scope_with_label),
                         Stat::make('invoice', '...')
                             ->label(trans_choice('invoice', 1))
                             ->value($record->hours_formatted)

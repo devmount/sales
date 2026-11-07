@@ -84,7 +84,7 @@ class ProjectResource extends Resource
                     ),
                 TextColumn::make('scope')
                     ->label(__('scope'))
-                    ->state(fn(Project $record): string => $record->scope_range)
+                    ->state(fn(Project $record): string => $record->scope_with_label)
                     ->description(fn(Project $record): string => $record->price_per_unit),
                 TextColumn::make('progress')
                     ->label(__('progress'))
@@ -232,14 +232,6 @@ class ProjectResource extends Resource
                 ->weekStartsOnMonday()
                 ->suffixIcon('tabler-calendar-check')
                 ->columnSpan($columns / 2),
-            TextInput::make('minimum')
-                ->label(__('minimum'))
-                ->numeric()
-                ->step(0.1)
-                ->minValue(0.1)
-                ->suffix('h')
-                ->suffixIcon('tabler-clock-check')
-                ->columnSpan($columns / 2),
             TextInput::make('scope')
                 ->label(__('scope'))
                 ->numeric()
@@ -248,20 +240,20 @@ class ProjectResource extends Resource
                 ->suffix('h')
                 ->suffixIcon('tabler-clock-exclamation')
                 ->required()
-                ->columnSpan($columns / 2),
+                ->columnSpan($columns / 3),
             TextInput::make('price')
                 ->label(__('price'))
                 ->numeric()
                 ->step(0.01)
                 ->minValue(0.01)
                 ->suffixIcon('tabler-currency-euro')
-                ->columnSpan($columns / 2)
+                ->columnSpan($columns / 3)
                 ->required(),
             Select::make('pricing_unit')
                 ->label(__('pricingUnit'))
                 ->options(PricingUnit::class)
                 ->suffixIcon('tabler-clock-2')
-                ->columnSpan($columns / 2)
+                ->columnSpan($columns / 3)
                 ->placeholder('')
                 ->required(),
         ];

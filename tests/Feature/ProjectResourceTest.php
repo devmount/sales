@@ -80,6 +80,17 @@ class ProjectResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_has_no_minimum_field_in_the_form(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $project = Project::factory()->create();
+
+        Livewire::test(EditProject::class, ['record' => $project->getKey()])
+            ->assertFormFieldExists('scope')
+            ->assertFormFieldDoesNotExist('minimum');
+    }
+
+    #[Test]
     public function it_requires_a_client_title_start_scope_price_and_pricing_unit_when_creating_a_project(): void
     {
         $this->actingAs(User::factory()->create());
