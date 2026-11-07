@@ -72,7 +72,8 @@ class InvoicesRelationManager extends RelationManager
                         }
                     })
                     ->slideOver()
-                    ->modalWidth(Width::ExtraLarge),
+                    ->modalWidth(Width::ExtraLarge)
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -80,18 +81,20 @@ class InvoicesRelationManager extends RelationManager
                         ->icon('tabler-edit')
                         ->schema(InvoiceResource::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(Width::ExtraLarge),
+                        ->modalWidth(Width::ExtraLarge)
+                        ->after(fn() => $this->dispatch('refresh-page')),
                     ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->schema(InvoiceResource::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(Width::ExtraLarge),
+                        ->modalWidth(Width::ExtraLarge)
+                        ->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                    DeleteBulkAction::make()->icon('tabler-trash')->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
@@ -108,7 +111,8 @@ class InvoicesRelationManager extends RelationManager
                         }
                     })
                     ->slideOver()
-                    ->modalWidth(Width::ExtraLarge),
+                    ->modalWidth(Width::ExtraLarge)
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')

@@ -46,7 +46,8 @@ class DocumentsRelationManager extends RelationManager
                 DeleteAction::make()
                     ->icon('tabler-trash')
                     ->label('')
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->paginated(false);
     }

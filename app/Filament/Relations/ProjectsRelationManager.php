@@ -70,7 +70,8 @@ class ProjectsRelationManager extends RelationManager
                         }
                     })
                     ->slideOver()
-                    ->modalWidth(Width::Large),
+                    ->modalWidth(Width::Large)
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -78,12 +79,14 @@ class ProjectsRelationManager extends RelationManager
                         ->icon('tabler-edit')
                         ->schema(ProjectResource::formFields(useSection: false))
                         ->slideOver()
-                        ->modalWidth(Width::Large),
+                        ->modalWidth(Width::Large)
+                        ->after(fn() => $this->dispatch('refresh-page')),
                     ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->schema(ProjectResource::formFields(useSection: false))
                         ->slideOver()
-                        ->modalWidth(Width::Large),
+                        ->modalWidth(Width::Large)
+                        ->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ]);
