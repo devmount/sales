@@ -9,7 +9,9 @@ use App\Models\Position;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -81,7 +83,8 @@ class PositionsRelationManagerTest extends TestCase
                 'finished_at' => '2026-03-15 17:00:00',
                 'description' => 'Worked on feature X',
             ])
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-page');
 
         $this->assertDatabaseHas('positions', [
             'invoice_id' => $invoice->getKey(),
@@ -122,7 +125,8 @@ class PositionsRelationManagerTest extends TestCase
             'pageClass' => EditInvoice::class,
         ])
             ->callAction(TestAction::make(EditAction::class)->table($position), data: ['description' => 'New description'])
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-page');
 
         $this->assertSame('New description', $position->refresh()->description);
     }
@@ -153,8 +157,45 @@ class PositionsRelationManagerTest extends TestCase
             'ownerRecord' => $invoice,
             'pageClass' => EditInvoice::class,
         ])
-            ->callAction(TestAction::make(DeleteAction::class)->table($position));
+            ->callAction(TestAction::make(DeleteAction::class)->table($position))
+            ->assertDispatched('refresh-page');
 
         $this->assertModelMissing($position);
+    }
+
+    #[Test]
+    public function it_replicates_a_position(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $position = Position::factory()->for($invoice)->create();
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->callAction(TestAction::make(ReplicateAction::class)->table($position))
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-page');
+
+        $this->assertDatabaseCount('positions', 2);
+    }
+
+    #[Test]
+    public function it_bulk_deletes_positions(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $positions = Position::factory()->count(2)->for($invoice)->create();
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->selectTableRecords($positions)
+            ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk())
+            ->assertDispatched('refresh-page');
+
+        $this->assertDatabaseCount('positions', 0);
     }
 }

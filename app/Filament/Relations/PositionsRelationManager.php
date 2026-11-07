@@ -53,7 +53,8 @@ class PositionsRelationManager extends RelationManager
                         $schema->fillPartially(['invoice_id' => $this->getOwnerRecord()->getKey()], ['invoice_id']);
                     })
                     ->slideOver()
-                    ->modalWidth(Width::TwoExtraLarge),
+                    ->modalWidth(Width::TwoExtraLarge)
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->recordActions([
                 Action::make('copy')
@@ -71,26 +72,29 @@ class PositionsRelationManager extends RelationManager
                     ->label('')
                     ->schema(PositionResource::formFields(useSection: false))
                     ->slideOver()
-                    ->modalWidth(Width::TwoExtraLarge),
+                    ->modalWidth(Width::TwoExtraLarge)
+                    ->after(fn() => $this->dispatch('refresh-page')),
                 ReplicateAction::make()
                     ->icon('tabler-copy')
                     ->label('')
                     ->schema(PositionResource::formFields(useSection: false))
                     ->slideOver()
-                    ->modalWidth(Width::TwoExtraLarge),
+                    ->modalWidth(Width::TwoExtraLarge)
+                    ->after(fn() => $this->dispatch('refresh-page')),
                 DeleteAction::make()
                     ->icon('tabler-trash')
                     ->label('')
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                    DeleteBulkAction::make()->icon('tabler-trash')->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus'),
+                CreateAction::make()->icon('tabler-plus')->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->paginated(false);
     }
