@@ -71,12 +71,9 @@ class ClientResource extends Resource
                     ->columns(1)
                     ->columnSpan(['lg' => 2])
                     ->schema(fn(?Client $record) => [
-                        Stat::make('projects', '...')
-                            ->label(trans_choice('project', 2))
-                            ->value($record?->projects()->count()),
                         Stat::make('invoices', '...')
-                            ->label(trans_choice('invoice', 2))
-                            ->value($record?->invoices()->count()),
+                            ->label(fn() => ($count = $record?->projects()->count() ?? 0) . ' ' . trans_choice('project', $count))
+                            ->value(fn() => ($count = $record?->invoices()->count() ?? 0) . ' ' . trans_choice('invoice', $count)),
                         Stat::make('net', '...')
                             ->label(__('netIncome'))
                             ->value(Number::currency($record?->net ?? 0, 'eur')),

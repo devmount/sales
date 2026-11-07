@@ -35,10 +35,8 @@ class ClientResourceTest extends TestCase
 
         Livewire::test(EditClient::class, ['record' => $client->getKey()])
             ->assertSeeHtmlInOrder([
-                'fi-wi-stats-overview-stat-label', trans_choice('project', 2),
-                'fi-wi-stats-overview-stat-value', '2',
-                'fi-wi-stats-overview-stat-label', trans_choice('invoice', 2),
-                'fi-wi-stats-overview-stat-value', '5',
+                'fi-wi-stats-overview-stat-label', '2 ' . trans_choice('project', 2),
+                'fi-wi-stats-overview-stat-value', '5 ' . trans_choice('invoice', 5),
             ]);
     }
 
