@@ -35,7 +35,6 @@ class ProjectFactory extends Factory
             'client_id' => Client::factory(),
             'start_at' => $startAt,
             'due_at' => $dueAt,
-            'minimum' => fake()->optional(0.5)->randomFloat(2, 10, 100),
             'scope' => fake()->randomFloat(2, 20, 200),
             'price' => fake()->randomFloat(2, 50, 150),
             'pricing_unit' => PricingUnit::Hour,

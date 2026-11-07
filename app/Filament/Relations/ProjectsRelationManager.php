@@ -39,7 +39,7 @@ class ProjectsRelationManager extends RelationManager
                     ),
                 TextColumn::make('scope')
                     ->label(__('scope'))
-                    ->state(fn(Project $record): string => $record->scope_range),
+                    ->state(fn(Project $record): string => $record->scope_with_label),
                 TextColumn::make('price_per_unit')
                     ->label(__('price'))
                     ->state(fn(Project $record): string => $record->price_per_unit),

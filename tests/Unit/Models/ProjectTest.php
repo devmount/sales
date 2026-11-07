@@ -15,7 +15,6 @@ it('has expected fillable attributes', function () {
         'description',
         'start_at',
         'due_at',
-        'minimum',
         'scope',
         'price',
         'pricing_unit',
@@ -129,16 +128,10 @@ it('sums worked hours from its invoices', function () {
         ->and($project->hours_with_label)->toBe('5 ' . trans_choice('hour', 5));
 });
 
-it('formats the scope as a range when minimum differs from scope', function () {
-    $project = Project::factory()->create(['minimum' => 10.5, 'scope' => 50.5]);
+it('formats the scope with label', function () {
+    $project = Project::factory()->create(['scope' => 50.5]);
 
-    expect($project->scope_range)->toBe('10 - 50 ' . trans_choice('hour', 2));
-});
-
-it('formats the scope as a single value when minimum equals scope', function () {
-    $project = Project::factory()->create(['minimum' => 50, 'scope' => 50]);
-
-    expect($project->scope_range)->toBe('50 ' . trans_choice('hour', 50));
+    expect($project->scope_with_label)->toBe('50 ' . trans_choice('hour', 50));
 });
 
 it('formats the price per pricing unit', function () {

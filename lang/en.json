@@ -142,7 +142,6 @@
     "less": "Less",
     "lineN": "Line :n",
     "logo": "Logo",
-    "minimum": "Minimum",
     "minorAssets": "Minor assets",
     "minorAssetsDescription": "Expenses for low-value assets under § 6 (2) EStG (up to :max € net)",
     "minorAssetsNetLimitExceeded": "The net amount must not exceed :max € for minor assets.",
