@@ -322,3 +322,16 @@ it('sums taxable and untaxable net plus vat of invoices paid within a time range
         ->and($netUntaxable)->toBe(50.0)
         ->and($vat)->toBe(19.0);
 });
+
+it('returns recent distinct position descriptions of its client', function () {
+    $invoice = Invoice::factory()->create();
+    $sameClientInvoice = Invoice::factory()->for(Project::factory()->for($invoice->project->client))->create();
+    Position::factory()->for($sameClientInvoice)->create(['description' => 'Older', 'created_at' => '2026-01-01']);
+    Position::factory()->for($invoice)->create(['description' => 'Repeated', 'created_at' => '2026-01-02']);
+    Position::factory()->for($sameClientInvoice)->create(['description' => 'Repeated', 'created_at' => '2026-01-03']);
+    Position::factory()->for($invoice)->create(['description' => 'Newest', 'created_at' => '2026-01-04']);
+    Position::factory()->create(['description' => 'Other client']);
+
+    expect($invoice->recentPositionDescriptions())->toBe(['Newest', 'Repeated', 'Older'])
+        ->and($invoice->recentPositionDescriptions(2))->toBe(['Newest', 'Repeated']);
+});

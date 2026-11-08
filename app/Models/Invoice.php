@@ -61,6 +61,22 @@ class Invoice extends Model
     }
 
     /**
+     * Latest distinct position descriptions of this invoice's client
+     */
+    public function recentPositionDescriptions(int $limit = 20): array
+    {
+        return Position::query()
+            ->whereHas('invoice.project', fn(Builder $query) => $query->where('client_id', $this->project->client_id))
+            ->latest()
+            ->limit($limit * 5) // headroom for duplicates
+            ->pluck('description')
+            ->unique()
+            ->take($limit)
+            ->values()
+            ->all();
+    }
+
+    /**
      * Calculate array holding all years having paid invoices
      * sorted from current to past
      *

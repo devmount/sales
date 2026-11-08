@@ -11,10 +11,14 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -47,7 +51,7 @@ class PositionsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->icon('tabler-plus')
-                    ->schema(PositionResource::formFields(useSection: false))
+                    ->schema(fn() => [...PositionResource::formFields(useSection: false), $this->descriptionHistory()])
                     ->mountUsing(function (Schema $schema) {
                         $schema->fill();
                         $schema->fillPartially(['invoice_id' => $this->getOwnerRecord()->getKey()], ['invoice_id']);
@@ -102,5 +106,34 @@ class PositionsRelationManager extends RelationManager
     public static function getModelLabel(): string
     {
         return trans_choice('position', 1);
+    }
+
+    /**
+     * Section listing recent descriptions of the client, each can be used for the description field
+     */
+    private function descriptionHistory(): Section
+    {
+        $descriptions = $this->getOwnerRecord()->recentPositionDescriptions();
+
+        return Section::make(__('recentDescriptions'))
+            ->collapsed()
+            ->hidden(empty($descriptions))
+            ->schema(array_map(
+                fn(int $i, string $description) => TextEntry::make("history_$i")
+                    ->hiddenLabel()
+                    ->size(TextSize::ExtraSmall)
+                    ->state($description)
+                    ->formatStateUsing(fn(string $state): string => nl2br(e($state)))
+                    ->html()
+                    ->afterContent(
+                        Action::make('useDescription')
+                            ->icon('tabler-arrow-bar-to-up')
+                            ->iconButton()
+                            ->tooltip(__('useDescription'))
+                            ->action(fn(Set $set) => $set('description', $description)),
+                    ),
+                array_keys($descriptions),
+                $descriptions,
+            ));
     }
 }
