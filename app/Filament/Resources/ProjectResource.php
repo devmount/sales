@@ -152,7 +152,10 @@ class ProjectResource extends Resource
                             ProjectService::generateDocument($record);
                             Notification::make()->title(__('quoteGenerated'))->success()->send();
                         }),
-                    DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
+                    DeleteAction::make()
+                        ->icon('tabler-trash')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('deleteProjectDescription')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])

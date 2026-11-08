@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
@@ -28,7 +29,7 @@ class InvoicesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitle(trans_choice('position', 1))
+            ->recordTitle(trans_choice('invoice', 1))
             ->heading(trans_choice('invoice', 2))
             ->defaultSort('started_at', 'asc')
             ->columns([
@@ -72,7 +73,8 @@ class InvoicesRelationManager extends RelationManager
                         }
                     })
                     ->slideOver()
-                    ->modalWidth(Width::ExtraLarge),
+                    ->modalWidth(Width::ExtraLarge)
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -80,18 +82,25 @@ class InvoicesRelationManager extends RelationManager
                         ->icon('tabler-edit')
                         ->schema(InvoiceResource::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(Width::ExtraLarge),
+                        ->modalWidth(Width::ExtraLarge)
+                        ->after(fn() => $this->dispatch('refresh-page')),
                     ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->schema(InvoiceResource::formFields(6, false))
                         ->slideOver()
-                        ->modalWidth(Width::ExtraLarge),
+                        ->modalWidth(Width::ExtraLarge)
+                        ->after(fn() => $this->dispatch('refresh-page')),
+                    DeleteAction::make()
+                        ->icon('tabler-trash')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('deleteInvoiceDescription'))
+                        ->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->icon('tabler-trash'),
+                    DeleteBulkAction::make()->icon('tabler-trash')->after(fn() => $this->dispatch('refresh-page')),
                 ])
                 ->icon('tabler-dots-vertical'),
             ])
@@ -108,7 +117,8 @@ class InvoicesRelationManager extends RelationManager
                         }
                     })
                     ->slideOver()
-                    ->modalWidth(Width::ExtraLarge),
+                    ->modalWidth(Width::ExtraLarge)
+                    ->after(fn() => $this->dispatch('refresh-page')),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')

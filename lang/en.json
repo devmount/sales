@@ -45,6 +45,8 @@
     "deductibleNet": "Deductible (net)",
     "deduction": "Deduction",
     "definesEstimateSorting": "Defines order of estimate entries",
+    "deleteInvoiceDescription": "All positions of this invoice will be permanently deleted as well. This cannot be undone.",
+    "deleteProjectDescription": "All invoices, positions and estimates of this project will be permanently deleted as well. This cannot be undone.",
     "deliverables": "Deliverables",
     "description": "Description",
     "disclaimer": "Disclaimer",

@@ -49,7 +49,7 @@ class EditInvoice extends EditRecord
                     $document = $record->documents()->whereNotNull('attachment_path')->latest()->firstOrFail();
                     return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
                 }),
-            DeleteAction::make()->icon('tabler-trash')->requiresConfirmation(),
+            DeleteAction::make()->icon('tabler-trash')->requiresConfirmation()->modalDescription(__('deleteInvoiceDescription')),
         ];
     }
 

@@ -33,7 +33,7 @@ class EditProject extends EditRecord
                     $document = $record->documents()->latest()->firstOrFail();
                     return Storage::disk($document->disk)->download($document->path, $document->filename);
                 }),
-            DeleteAction::make()->icon('tabler-trash'),
+            DeleteAction::make()->icon('tabler-trash')->modalDescription(__('deleteProjectDescription')),
         ];
     }
 }

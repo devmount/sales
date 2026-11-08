@@ -128,6 +128,28 @@ class InvoiceResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_warns_about_related_records_when_deleting_invoice_from_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->mountAction(DeleteAction::class)
+            ->assertMountedActionModalSee(__('deleteInvoiceDescription'));
+    }
+
+    #[Test]
+    public function it_warns_about_related_records_when_deleting_invoice_from_the_table(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->mountAction(TestAction::make(DeleteAction::class)->table($invoice))
+            ->assertMountedActionModalSee(__('deleteInvoiceDescription'));
+    }
+
+    #[Test]
     public function it_deletes_an_invoice_from_the_edit_page(): void
     {
         $this->actingAs(User::factory()->create());

@@ -9,7 +9,9 @@ use App\Models\Client;
 use App\Models\Project;
 use App\Models\User;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -80,7 +82,8 @@ class ProjectsRelationManagerTest extends TestCase
                 'price' => 50,
                 'pricing_unit' => PricingUnit::Hour->value,
             ])
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-page');
 
         $this->assertDatabaseHas('projects', [
             'client_id' => $client->getKey(),
@@ -129,9 +132,61 @@ class ProjectsRelationManagerTest extends TestCase
             'pageClass' => EditClient::class,
         ])
             ->callAction(TestAction::make(EditAction::class)->table($project), data: ['title' => 'New title'])
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-page');
 
         $this->assertSame('New title', $project->refresh()->title);
+    }
+
+    #[Test]
+    public function it_deletes_a_project(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $project = Project::factory()->for($client)->create();
+
+        Livewire::test(ProjectsRelationManager::class, [
+            'ownerRecord' => $client,
+            'pageClass' => EditClient::class,
+        ])
+            ->callAction(TestAction::make(DeleteAction::class)->table($project))
+            ->assertDispatched('refresh-page');
+
+        $this->assertModelMissing($project);
+    }
+
+    #[Test]
+    public function it_warns_about_invoices_positions_and_estimates_when_deleting_a_project(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $project = Project::factory()->for($client)->create();
+        $this->assertNotSame('deleteProjectDescription', __('deleteProjectDescription'));
+
+        Livewire::test(ProjectsRelationManager::class, [
+            'ownerRecord' => $client,
+            'pageClass' => EditClient::class,
+        ])
+            ->mountAction(TestAction::make(DeleteAction::class)->table($project))
+            ->assertMountedActionModalSee(__('deleteProjectDescription'));
+    }
+
+    #[Test]
+    public function it_replicates_a_project(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $project = Project::factory()->for($client)->create();
+
+        Livewire::test(ProjectsRelationManager::class, [
+            'ownerRecord' => $client,
+            'pageClass' => EditClient::class,
+        ])
+            ->callAction(TestAction::make(ReplicateAction::class)->table($project))
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-page');
+
+        $this->assertDatabaseCount('projects', 2);
     }
 
     #[Test]
