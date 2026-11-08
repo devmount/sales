@@ -6,6 +6,7 @@ use App\Filament\Relations\PositionsRelationManager;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Models\Invoice;
 use App\Models\Position;
+use App\Models\Project;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -13,6 +14,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Infolists\Components\TextEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -90,6 +92,43 @@ class PositionsRelationManagerTest extends TestCase
             'invoice_id' => $invoice->getKey(),
             'description' => 'Worked on feature X',
         ]);
+    }
+
+    #[Test]
+    public function it_shows_recent_descriptions_of_the_same_client_when_creating_a_position(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $sameClientInvoice = Invoice::factory()->for(Project::factory()->for($invoice->project->client))->create();
+        Position::factory()->for($sameClientInvoice)->create(['description' => 'Same client work']);
+        Position::factory()->create(['description' => 'Other client work']);
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->mountAction(TestAction::make(CreateAction::class)->table(true))
+            ->assertSchemaComponentExists(
+                'history_0',
+                checkComponentUsing: fn(TextEntry $entry): bool => $entry->getState() === 'Same client work',
+            )
+            ->assertSchemaComponentDoesNotExist('history_1');
+    }
+
+    #[Test]
+    public function it_fills_the_description_from_history(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        Position::factory()->for($invoice)->create(['description' => 'Reused description']);
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->mountAction(TestAction::make(CreateAction::class)->table(true))
+            ->callAction(TestAction::make('useDescription')->schemaComponent('history_0'))
+            ->assertActionDataSet(['description' => 'Reused description']);
     }
 
     #[Test]
