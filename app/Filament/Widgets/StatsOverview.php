@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Position;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Composer\InstalledVersions;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -58,11 +57,11 @@ class StatsOverview extends BaseWidget
 
     protected function getData(): array
     {
+        $period = now()->subWeeks(8)->startOfWeek(Carbon::MONDAY)->weeksUntil(now()->addWeek()->endOfWeek(Carbon::SUNDAY))->toArray();
         $positions = Position::with('invoice.positions')
             ->whereRelation('invoice', 'transitory', false)
-            ->where('started_at', '>', now()->subWeeks(7)->startOfWeek(Carbon::MONDAY))
+            ->where('started_at', '>=', $period[0])
             ->get();
-        $period = now()->subWeeks(8)->startOfWeek()->weeksUntil(now()->addWeek()->endOfWeek(Carbon::SUNDAY))->toArray();
         $revenue = array_fill(0, count($period) - 1, 0);
         $hours = array_fill(0, count($period) - 1, 0);
         foreach ($period as $i => $date) {
@@ -70,7 +69,8 @@ class StatsOverview extends BaseWidget
                 break;
             }
             foreach ($positions as $obj) {
-                if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->started_at)) {
+                // Weeks include their start but not the start of the next week
+                if ($obj->started_at->gte($date) && $obj->started_at->lt($period[$i + 1])) {
                     $revenue[$i] += $obj->discounted_net;
                     $hours[$i] += $obj->duration;
                 }
