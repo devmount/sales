@@ -323,6 +323,14 @@ it('sums taxable and untaxable net plus vat of invoices paid within a time range
         ->and($vat)->toBe(19.0);
 });
 
+it('does not modify the date passed to ofTime', function () {
+    $date = Carbon::parse('2026-03-15 12:00:00');
+
+    Invoice::ofTime($date, TimeUnit::MONTH);
+
+    expect($date->toDateTimeString())->toBe('2026-03-15 12:00:00');
+});
+
 it('returns recent distinct position descriptions of its client', function () {
     $invoice = Invoice::factory()->create();
     $sameClientInvoice = Invoice::factory()->for(Project::factory()->for($invoice->project->client))->create();
