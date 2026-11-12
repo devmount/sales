@@ -85,6 +85,8 @@ class TaxReturnFormInput extends TableWidget
             + $netMinorAssetsExpended + $netEdvExpended + $netWorkEquipmentExpended + $netAdvertisingExpended;
         $vatExpended = $vatGoodExpended + $vatServiceExpended + $vatMinorAssetsExpended + $vatEdvExpended
             + $vatWorkEquipmentExpended + $vatAdvertisingExpended + $vatRentExpended + $vatUtilityExpended;
+        // EÜR profit, incl. vat collected, refunded, paid as input tax and transferred to the tax office
+        $profit = round($netEarned + $vatEarned + $vatRefunded + $netUntaxableEarned - $netExpended - $vatExpended - $vatPaid, 2);
 
         return collect([
             [
@@ -93,7 +95,7 @@ class TaxReturnFormInput extends TableWidget
                 'vr' => null,
                 'rsc' => null,
                 // Elster requires the income tax return's profit line (Zeile 1 ESt Anlage S) in whole euros
-                'value' => round($netEarned + $netUntaxableEarned - $netExpended, 0),
+                'value' => round($profit, 0),
                 'help' => __('formLabels')['itr1'],
                 'color' => 'primary',
             ],
@@ -237,7 +239,7 @@ class TaxReturnFormInput extends TableWidget
                 'itr' => null,
                 'vr' => null,
                 'rsc' => '97',
-                'value' => round($netEarned + $vatEarned + $vatRefunded + $netUntaxableEarned - $netExpended - $vatExpended - $vatPaid, 2),
+                'value' => $profit,
                 'help' => __('formLabels')['rsc97'],
                 'color' => 'gray',
             ],
