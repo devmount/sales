@@ -23,11 +23,12 @@ class EventMatrixTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function getDays(string $mode = 'total', string $year = ''): array
+    private function getDays(string $mode = 'total', string $year = '', bool $offtimes = true): array
     {
         $widget = new EventMatrix();
         $widget->mode = $mode;
         $widget->year = $year;
+        $widget->offtimes = $offtimes;
         return (new ReflectionMethod($widget, 'getDays'))->invoke($widget);
     }
 
@@ -54,13 +55,16 @@ class EventMatrixTest extends TestCase
 
         Livewire::test(EventMatrix::class)
             ->assertSuccessful()
-            ->set('mode', 'offtimes')
+            ->set('offtimes', false)
             ->set('year', (string) now()->year)
             ->assertSuccessful()
             ->set('mode', 'hours')
             ->assertSuccessful()
             ->assertSee(__('profit'))
-            ->assertSee(trans_choice('hour', 2));
+            ->assertSee(trans_choice('hour', 2))
+            ->assertSee(trans_choice('offtime', 2))
+            ->assertDontSeeHtml('<option value="offtimes">')
+            ->assertSeeHtml('role="switch"');
     }
 
     #[Test]
@@ -140,7 +144,7 @@ class EventMatrixTest extends TestCase
     }
 
     #[Test]
-    public function it_marks_every_day_of_a_multiday_offtime(): void
+    public function it_marks_every_day_of_a_multiday_offtime_in_any_mode(): void
     {
         $start = now()->subDays(20);
 
@@ -150,18 +154,33 @@ class EventMatrixTest extends TestCase
             'category' => OfftimeCategory::Sick,
         ]);
 
-        $offtimes = $this->getDays('offtimes');
-        $total = $this->getDays('total');
-
-        foreach ([0, 1, 2] as $offset) {
-            $key = $start->copy()->addDays($offset)->format('Y-m-d');
-            $this->assertSame(1.0, $offtimes[$key]['value']);
-            $this->assertSame(OfftimeCategory::Sick, $total[$key]['offtime']);
+        foreach (['total', 'earnings', 'hours', 'expenses', 'taxes'] as $mode) {
+            $days = $this->getDays($mode);
+            foreach ([0, 1, 2] as $offset) {
+                $key = $start->copy()->addDays($offset)->format('Y-m-d');
+                $this->assertSame(OfftimeCategory::Sick, $days[$key]['offtime']);
+                $this->assertSame(0.0, $days[$key]['value']);
+            }
+            $this->assertNull($days[$start->copy()->addDays(3)->format('Y-m-d')]['offtime']);
         }
+    }
 
-        $after = $start->copy()->addDays(3)->format('Y-m-d');
-        $this->assertSame(0.0, $offtimes[$after]['value']);
-        $this->assertNull($total[$after]['offtime']);
+    #[Test]
+    public function it_hides_offtimes_when_toggled_off(): void
+    {
+        $date = now()->subDays(20)->format('Y-m-d');
+
+        Offtime::factory()->create([
+            'start' => $date,
+            'end' => $date,
+            'category' => OfftimeCategory::Sick,
+            'description' => 'Hidden offtime',
+        ]);
+
+        $day = $this->getDays('total', '', false)[$date];
+
+        $this->assertNull($day['offtime']);
+        $this->assertStringNotContainsString('Hidden offtime', $day['tooltip']);
     }
 
     #[Test]

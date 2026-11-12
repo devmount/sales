@@ -134,7 +134,17 @@ textarea.position-limit {
 /* Custom event matrix (GitHub contributions style) */
 .event-matrix-controls {
     display: flex;
+    align-items: center;
     gap: .5rem;
+
+    label {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin-right: .5rem;
+        font-size: .875rem;
+        white-space: nowrap;
+    }
 }
 .event-matrix {
     --cell-color: var(--primary-500);

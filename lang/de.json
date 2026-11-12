@@ -69,7 +69,7 @@
     "estimate": "Schätzung|Schätzungen",
     "estimatedHours": "Geschätzte Stundenanzahl",
     "eventMatrix": "Ereignisse",
-    "eventMatrixDescription": "Einnahmen, Ausgaben, Arbeitsstunden und Abwesenheiten pro Tag",
+    "eventMatrixDescription": "Einnahmen, Ausgaben und Arbeitsstunden pro Tag",
     "expectedFormat": "Erwartetes Format: :format",
     "expendedAt": "Ausgegeben",
     "expense": "Ausgabe|Ausgaben",

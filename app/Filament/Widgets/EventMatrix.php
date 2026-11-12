@@ -14,6 +14,7 @@ class EventMatrix extends Widget
 {
     public string $year = '';
     public string $mode = 'total';
+    public bool $offtimes = true;
 
     protected ?string $pollingInterval = null;
 
@@ -89,7 +90,7 @@ class EventMatrix extends Widget
         }
 
         // Times off
-        if (in_array($this->mode, ['total', 'offtimes'])) {
+        if ($this->offtimes) {
             $offtimes = Offtime::overlapping($start, $end)->get();
             foreach ($offtimes as $o) {
                 foreach (CarbonPeriod::create($o->start, $o->end ?? $o->start) as $date) {
@@ -98,9 +99,6 @@ class EventMatrix extends Widget
                         continue;
                     }
                     $days[$key]['offtime'] = $o->category;
-                    if ($this->mode === 'offtimes') {
-                        $days[$key]['value'] = 1.0;
-                    }
                     $days[$key]['events'][] = $this->eventLine(
                         $o->category->hexColor(),
                         $o->category->getLabel() . ($o->description ? ': ' . $o->description : ''),
@@ -178,7 +176,6 @@ class EventMatrix extends Widget
                 'hours' => trans_choice('hour', 2),
                 'expenses' => trans_choice('expense', 2),
                 'taxes' => __('taxes'),
-                'offtimes' => trans_choice('offtime', 2),
             ],
             'years' => ['' => __('last365Days')] + array_combine(
                 range(now()->year, $firstYear),
