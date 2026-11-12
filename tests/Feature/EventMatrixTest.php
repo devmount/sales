@@ -164,6 +164,28 @@ class EventMatrixTest extends TestCase
     }
 
     #[Test]
+    public function it_uses_the_deductible_net_of_expenses(): void
+    {
+        $date = now()->subDays(10)->format('Y-m-d');
+        $this->createPosition($date);
+
+        Expense::factory()->notTaxable()->create([
+            'expended_at' => $date,
+            'price' => 100,
+            'quantity' => 1,
+            'category' => ExpenseCategory::Good,
+            'taxable_ratio' => 0.5,
+        ]);
+
+        $this->assertSame(450.0, $this->getDays('profit')[$date]['value']);
+        $this->assertSame(50.0, $this->getDays('expenses')[$date]['value']);
+        $this->assertStringContainsString(
+            Number::currency(-50, 'EUR', locale: app()->getLocale()),
+            $this->getDays('expenses')[$date]['tooltip'],
+        );
+    }
+
+    #[Test]
     public function it_only_includes_tax_expenses_in_taxes_mode(): void
     {
         $date = now()->subDays(5)->format('Y-m-d');

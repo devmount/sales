@@ -80,12 +80,12 @@ class EventMatrix extends Widget
                     continue;
                 }
                 $key = $e->expended_at->format('Y-m-d');
-                $days[$key]['value'] += $this->mode === 'profit' ? -$e->net : $e->net;
+                $days[$key]['value'] += $this->mode === 'profit' ? -$e->deductible_net : $e->deductible_net;
                 $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(
                     $e->category->isTax() ? '#f97316' : '#f43f5e',
                     $e->category->getLabel() . ($e->description ? ': ' . $e->description : ''),
-                    -$e->net,
+                    -$e->deductible_net,
                 );
             }
         }
