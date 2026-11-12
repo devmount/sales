@@ -29,7 +29,7 @@ class WeeklyHoursChart extends ChartWidget
 
     protected function getData(): array
     {
-        $positions = Position::oldest('started_at')->get();
+        $positions = Position::whereRelation('invoice', 'transitory', false)->oldest('started_at')->get();
         $period = Carbon::parse($positions->first()?->started_at)->startOfYear()->yearsUntil(now()->addYear());
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);

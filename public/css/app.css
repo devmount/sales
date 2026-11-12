@@ -228,8 +228,4 @@ textarea.position-limit {
             }
         }
     }
-
-    &.mode-offtimes span.offtime {
-        background: color-mix(in oklab, var(--offtime) 20%, transparent);
-    }
 }

@@ -64,11 +64,28 @@ class Position extends Model
 
         $net = 0;
         if ($this->invoice->pricing_unit === PricingUnit::Project) {
-            $net = $this->invoice->net / $this->invoice->hours * $this->duration;
+            // Without any hours there is no share of the invoice net to distribute
+            if ($this->invoice->hours) {
+                $net = $this->invoice->net / $this->invoice->hours * $this->duration;
+            }
         } else {
             $net += $this->duration * $this->invoice->price / $this->invoice->pricing_hours;
         }
         return Attribute::make(fn(): float => round($net, 2));
+    }
+
+    /**
+     * Net of the position reduced by its share of the invoice discount
+     */
+    protected function discountedNet(): Attribute
+    {
+        // Project positions are derived from the invoice net, which already includes the discount
+        if (!$this->invoice || $this->invoice->pricing_unit === PricingUnit::Project || !$this->invoice->real_net) {
+            return Attribute::make(fn(): float => $this->net);
+        }
+
+        $discount = $this->invoice->discount * $this->net / $this->invoice->real_net;
+        return Attribute::make(fn(): float => round($this->net - $discount, 2));
     }
 
     /**

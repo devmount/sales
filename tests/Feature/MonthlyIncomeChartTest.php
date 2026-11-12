@@ -46,6 +46,34 @@ class MonthlyIncomeChartTest extends TestCase
     }
 
     #[Test]
+    public function it_subtracts_deductible_operating_expenses_from_income_only(): void
+    {
+        $year = now()->year - 1;
+        Invoice::factory()
+            ->for(Project::factory())
+            ->create(['paid_at' => "$year-06-01", 'transitory' => false, 'pricing_unit' => PricingUnit::Project, 'price' => 1200, 'discount' => null, 'taxable' => false]);
+        Expense::factory()->notTaxable()->create([
+            'expended_at' => "$year-07-01",
+            'category' => ExpenseCategory::Good,
+            'price' => 240,
+            'quantity' => 1,
+            'taxable_ratio' => 0.5,
+        ]);
+
+        $widget = new MonthlyIncomeChart();
+        $yearIndex = fn(array $data) => array_search((string) $year, $data['labels'], true);
+
+        $widget->filter = 'net';
+        $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
+        // (1200 - 240 * 0.5) / 12
+        $this->assertSame(90.0, $data['datasets'][0]['data'][$yearIndex($data)]);
+
+        $widget->filter = 'gross';
+        $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
+        $this->assertSame(100.0, $data['datasets'][0]['data'][$yearIndex($data)]);
+    }
+
+    #[Test]
     public function it_averages_gross_income_per_month_for_the_year(): void
     {
         $year = now()->year - 1;

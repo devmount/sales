@@ -41,6 +41,9 @@ class MonthlyIncomeChart extends ChartWidget
             ->where('category', ExpenseCategory::Tax)
             ->oldest('expended_at')
             ->get();
+        $expenses = Expense::whereNotNull('expended_at')
+            ->whereIn('category', ExpenseCategory::deliverableCategories())
+            ->get();
         $period = Carbon::parse($invoices->first()?->paid_at)->startOfYear()->yearsUntil(now()->addYear());
         $labels = iterator_to_array($period->map(fn(Carbon $date) => $date->format('Y')));
         array_pop($labels);
@@ -48,6 +51,7 @@ class MonthlyIncomeChart extends ChartWidget
         $invoiceData = array_fill(0, count($period) - 1, 0);
         $invoicesByYear = $invoices->groupBy(fn(Invoice $obj) => $obj->paid_at->year);
         $taxesByYear = $taxes->groupBy(fn(Expense $obj) => $obj->expended_at->year);
+        $expensesByYear = $expenses->groupBy(fn(Expense $obj) => $obj->expended_at->year);
         foreach ($period as $i => $date) {
             if ($i == count($period) - 1) {
                 break;
@@ -59,6 +63,10 @@ class MonthlyIncomeChart extends ChartWidget
                 };
             }
             if ($this->filter === 'net') {
+                // Income is profit (revenue minus operating expenses) minus income taxes
+                foreach ($expensesByYear[$date->year] ?? [] as $obj) {
+                    $invoiceData[$i] -= $obj->deductible_net;
+                }
                 foreach ($taxesByYear[$date->year] ?? [] as $obj) {
                     // Shift yearly income taxes post pays to the year before
                     // TODO: Make it more obvious in the UI that this happens
@@ -77,8 +85,8 @@ class MonthlyIncomeChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => match ($this->filter) {
-                        'net' => __('netIncome'),
-                        'gross' => __('grossIncome'),
+                        'net' => __('income'),
+                        'gross' => __('grossRevenue'),
                     },
                     'data' => $invoiceData,
                     'fill' => 'start',
@@ -98,8 +106,8 @@ class MonthlyIncomeChart extends ChartWidget
     protected function getFilters(): ?array
     {
         return [
-            'net' => __('net'),
-            'gross' => __('gross'),
+            'net' => __('income'),
+            'gross' => __('grossRevenue'),
         ];
     }
 

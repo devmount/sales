@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
-class ClientProfitDistributionChart extends ChartWidget
+class ClientRevenueDistributionChart extends ChartWidget
 {
     use HasEmptyStateChart;
     public ?string $filter = '';
@@ -23,7 +23,7 @@ class ClientProfitDistributionChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('clientsProfitDistribution');
+        return __('clientsRevenueDistribution');
     }
 
     public function getDescription(): string
@@ -41,21 +41,21 @@ class ClientProfitDistributionChart extends ChartWidget
             ->where('transitory', 0)
             ->get();
         $clients = $invoices->pluck('project.client')->keyBy('id');
-        $profit = [];
+        $revenue = [];
         foreach ($invoices as $obj) {
             $id = $obj->project->client->id;
-            $profit[$id] = array_key_exists($id, $profit)
-                ? $profit[$id] + $obj->net
+            $revenue[$id] = array_key_exists($id, $revenue)
+                ? $revenue[$id] + $obj->net
                 : $obj->net;
         }
-        $sum = array_sum($profit);
-        $labels = array_map(fn($id, $p) => '(' . round($p / $sum * 100, 1) . '%) ' . $clients[$id]->name, array_keys($profit), $profit);
-        $colors = array_map(fn($id) => $clients[$id]->color, array_keys($profit));
+        $sum = array_sum($revenue);
+        $labels = array_map(fn($id, $p) => '(' . round($p / $sum * 100, 1) . '%) ' . $clients[$id]->name, array_keys($revenue), $revenue);
+        $colors = array_map(fn($id) => $clients[$id]->color, array_keys($revenue));
 
         return [
             'datasets' => [
                 [
-                    'data' => array_values($profit),
+                    'data' => array_values($revenue),
                     'borderColor' => $colors,
                     'backgroundColor' => $colors,
                     'hoverOffset' => 4,

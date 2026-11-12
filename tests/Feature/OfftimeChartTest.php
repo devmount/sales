@@ -42,9 +42,16 @@ class OfftimeChartTest extends TestCase
             'category' => OfftimeCategory::Vacation,
         ]);
 
-        Position::factory()->create([
+        Position::factory()->for(Invoice::factory()->create(['transitory' => false]))->create([
             'started_at' => "$year-04-11 09:00:00",
             'finished_at' => "$year-04-11 14:00:00",
+            'pause_duration' => 0,
+        ]);
+
+        // transitory work must not count as a working day
+        Position::factory()->for(Invoice::factory()->create(['transitory' => true]))->create([
+            'started_at' => "$year-04-14 09:00:00",
+            'finished_at' => "$year-04-14 14:00:00",
             'pause_duration' => 0,
         ]);
 

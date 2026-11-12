@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\PricingUnit;
 use App\Filament\Widgets\StatsOverview;
+use App\Models\Invoice;
 use App\Models\Position;
 use App\Models\User;
 use Carbon\Carbon;
@@ -29,7 +31,7 @@ class StatsOverviewTest extends TestCase
     {
         $mondayThisWeek = now()->startOfWeek(Carbon::MONDAY);
 
-        Position::factory()->create([
+        Position::factory()->for(Invoice::factory()->create(['discount' => null, 'transitory' => false]))->create([
             'started_at' => $mondayThisWeek->copy()->addHours(9),
             'finished_at' => $mondayThisWeek->copy()->addHours(14),
             'pause_duration' => 0,
@@ -40,5 +42,72 @@ class StatsOverviewTest extends TestCase
 
         $this->assertSame(5.0, end($hours));
         $this->assertGreaterThan(0, end($revenue));
+    }
+
+    #[Test]
+    public function it_applies_discounts_and_excludes_transitory_invoices(): void
+    {
+        $mondayThisWeek = now()->startOfWeek(Carbon::MONDAY);
+        $attributes = [
+            'started_at' => $mondayThisWeek->copy()->addHours(9),
+            'finished_at' => $mondayThisWeek->copy()->addHours(14),
+            'pause_duration' => 0,
+        ];
+        $discounted = Invoice::factory()->create([
+            'pricing_unit' => PricingUnit::Hour,
+            'price' => 100,
+            'discount' => 50,
+            'transitory' => false,
+        ]);
+        $transitory = Invoice::factory()->create([
+            'pricing_unit' => PricingUnit::Hour,
+            'price' => 100,
+            'discount' => null,
+            'transitory' => true,
+        ]);
+        Position::factory()->for($discounted)->create($attributes);
+        Position::factory()->for($transitory)->create($attributes);
+
+        $widget = new StatsOverview();
+        [$revenue, $hours] = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
+
+        $this->assertSame(450.0, end($revenue));
+        $this->assertSame(5.0, end($hours));
+    }
+
+    #[Test]
+    public function it_counts_positions_of_the_oldest_week(): void
+    {
+        $oldestMonday = now()->subWeeks(8)->startOfWeek(Carbon::MONDAY);
+
+        Position::factory()->for(Invoice::factory()->create(['discount' => null, 'transitory' => false]))->create([
+            'started_at' => $oldestMonday->copy()->addHours(9),
+            'finished_at' => $oldestMonday->copy()->addHours(14),
+            'pause_duration' => 0,
+        ]);
+
+        $widget = new StatsOverview();
+        [, $hours] = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
+
+        $this->assertCount(9, $hours);
+        $this->assertSame(5.0, $hours[0]);
+    }
+
+    #[Test]
+    public function it_counts_a_position_starting_exactly_at_the_week_boundary_only_once(): void
+    {
+        $mondayThisWeek = now()->startOfWeek(Carbon::MONDAY);
+
+        Position::factory()->for(Invoice::factory()->create(['discount' => null, 'transitory' => false]))->create([
+            'started_at' => $mondayThisWeek->copy(),
+            'finished_at' => $mondayThisWeek->copy()->addHours(5),
+            'pause_duration' => 0,
+        ]);
+
+        $widget = new StatsOverview();
+        [, $hours] = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
+
+        $this->assertSame(5.0, end($hours));
+        $this->assertSame(0, prev($hours));
     }
 }

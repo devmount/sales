@@ -45,7 +45,7 @@
             <div class="legend" style="grid-area: 9 / 2 / auto / {{ $lastCol + 1 }}">
                 <small class="sum">{{ __('total') }}: <code>{{ $sum }}</code></small>
                 <small>{{ __('less') }}</small>
-                @if ($mode === 'total')
+                @if ($mode === 'profit')
                     @foreach (range(4, 1) as $level)
                         <span class="negative" data-level="{{ $level }}"></span>
                     @endforeach

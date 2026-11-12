@@ -13,7 +13,7 @@ use Illuminate\Support\Number;
 class EventMatrix extends Widget
 {
     public string $year = '';
-    public string $mode = 'total';
+    public string $mode = 'profit';
     public bool $offtimes = true;
 
     protected ?string $pollingInterval = null;
@@ -53,14 +53,15 @@ class EventMatrix extends Widget
         }
 
         // Positions
-        if (in_array($this->mode, ['total', 'earnings', 'hours'])) {
-            $positions = Position::with('invoice.project.client')
+        if (in_array($this->mode, ['profit', 'revenue', 'hours'])) {
+            $positions = Position::with('invoice.project.client', 'invoice.positions')
+                ->whereRelation('invoice', 'transitory', false)
                 ->whereBetween('started_at', [$start, $end])
                 ->oldest('started_at')
                 ->get();
             foreach ($positions as $p) {
                 $key = $p->started_at->format('Y-m-d');
-                $value = $this->mode === 'hours' ? $p->duration : $p->net;
+                $value = $this->mode === 'hours' ? $p->duration : $p->discounted_net;
                 $days[$key]['value'] += $value;
                 $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(
@@ -72,19 +73,19 @@ class EventMatrix extends Widget
         }
 
         // Expenses
-        if (in_array($this->mode, ['total', 'expenses', 'taxes'])) {
+        if (in_array($this->mode, ['profit', 'expenses', 'taxes'])) {
             $expenses = Expense::whereBetween('expended_at', [$start->toDateString(), $end->toDateString()])->get();
             foreach ($expenses as $e) {
                 if ($e->category->isTax() !== ($this->mode === 'taxes')) {
                     continue;
                 }
                 $key = $e->expended_at->format('Y-m-d');
-                $days[$key]['value'] += $this->mode === 'total' ? -$e->net : $e->net;
+                $days[$key]['value'] += $this->mode === 'profit' ? -$e->deductible_net : $e->deductible_net;
                 $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(
                     $e->category->isTax() ? '#f97316' : '#f43f5e',
                     $e->category->getLabel() . ($e->description ? ': ' . $e->description : ''),
-                    -$e->net,
+                    -$e->deductible_net,
                 );
             }
         }
@@ -188,8 +189,8 @@ class EventMatrix extends Widget
             'lastCol' => end($days)['col'],
             'weekdays' => collect([1, 3, 5])->mapWithKeys(fn($d) => [$d + 1 => rtrim(now()->isoWeekday($d)->isoFormat('ddd'), '.')]),
             'modes' => [
-                'total' => __('profit'),
-                'earnings' => __('earnings'),
+                'profit' => __('profit'),
+                'revenue' => __('revenue'),
                 'hours' => trans_choice('hour', 2),
                 'expenses' => trans_choice('expense', 2),
                 'taxes' => __('taxes'),

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Widgets\SumProductiveHoursChart;
+use App\Models\Invoice;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,8 +28,11 @@ class SumProductiveHoursChartTest extends TestCase
     public function it_sums_worked_hours_per_year(): void
     {
         $year = now()->year - 1;
-        Position::factory()->create(['started_at' => "$year-02-01 09:00:00", 'finished_at' => "$year-02-01 14:00:00", 'pause_duration' => 0]);
-        Position::factory()->create(['started_at' => "$year-11-01 09:00:00", 'finished_at' => "$year-11-01 12:00:00", 'pause_duration' => 0]);
+        $invoice = Invoice::factory()->create(['transitory' => false]);
+        Position::factory()->for($invoice)->create(['started_at' => "$year-02-01 09:00:00", 'finished_at' => "$year-02-01 14:00:00", 'pause_duration' => 0]);
+        Position::factory()->for($invoice)->create(['started_at' => "$year-11-01 09:00:00", 'finished_at' => "$year-11-01 12:00:00", 'pause_duration' => 0]);
+        // transitory work must be excluded
+        Position::factory()->for(Invoice::factory()->create(['transitory' => true]))->create(['started_at' => "$year-06-01 09:00:00", 'finished_at' => "$year-06-01 14:00:00", 'pause_duration' => 0]);
 
         $widget = new SumProductiveHoursChart();
         $widget->filter = 'y';

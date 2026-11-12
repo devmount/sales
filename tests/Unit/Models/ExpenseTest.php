@@ -243,3 +243,11 @@ it('sums the deductible net and vat amounts honoring taxable_ratio within a time
     expect($net)->toBe(42.02)
         ->and($vat)->toBe(7.99);
 });
+
+it('does not modify the date passed to ofTime', function () {
+    $date = Carbon::parse('2026-03-15 12:00:00');
+
+    Expense::ofTime($date, TimeUnit::YEAR);
+
+    expect($date->toDateTimeString())->toBe('2026-03-15 12:00:00');
+});

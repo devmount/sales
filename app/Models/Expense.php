@@ -60,6 +60,8 @@ class Expense extends Model
      */
     public static function ofTime(Carbon $d, TimeUnit $u, ?ExpenseCategory $category = null): array
     {
+        // Work on a copy, start and end modifiers would change the given date otherwise
+        $d = $d->copy();
         $start = match ($u) {
             TimeUnit::MONTH => $d->startOfMonth()->toDateString(),
             TimeUnit::QUARTER => $d->startOfQuarter()->toDateString(),

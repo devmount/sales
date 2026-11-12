@@ -24,7 +24,7 @@ class EventMatrixTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function getDays(string $mode = 'total', string $year = '', bool $offtimes = true): array
+    private function getDays(string $mode = 'profit', string $year = '', bool $offtimes = true): array
     {
         $widget = new EventMatrix();
         $widget->mode = $mode;
@@ -40,6 +40,8 @@ class EventMatrixTest extends TestCase
         $invoice = Invoice::factory()->for($project)->create([
             'price' => 100,
             'pricing_unit' => PricingUnit::Hour,
+            'discount' => null,
+            'transitory' => false,
         ]);
 
         return Position::factory()->for($invoice)->create([
@@ -62,6 +64,7 @@ class EventMatrixTest extends TestCase
             ->set('mode', 'hours')
             ->assertSuccessful()
             ->assertSee(__('profit'))
+            ->assertSee(__('revenue'))
             ->assertSee(trans_choice('hour', 2))
             ->assertSee(trans_choice('offtime', 2))
             ->assertDontSeeHtml('<option value="offtimes">')
@@ -69,7 +72,7 @@ class EventMatrixTest extends TestCase
     }
 
     #[Test]
-    public function it_sums_earnings_minus_expenses_per_day(): void
+    public function it_sums_revenue_minus_expenses_per_day(): void
     {
         $date = now()->subDays(10)->format('Y-m-d');
         $this->createPosition($date);
@@ -87,12 +90,12 @@ class EventMatrixTest extends TestCase
             'category' => ExpenseCategory::Vat,
         ]);
 
-        $days = $this->getDays('total');
+        $days = $this->getDays('profit');
 
         $this->assertSame(400.0, $days[$date]['value']);
         $this->assertFalse($days[$date]['negative']);
         $this->assertSame(4, $days[$date]['level']);
-        $this->assertSame(500.0, $this->getDays('earnings')[$date]['value']);
+        $this->assertSame(500.0, $this->getDays('revenue')[$date]['value']);
         $this->assertSame(100.0, $this->getDays('expenses')[$date]['value']);
     }
 
@@ -143,9 +146,43 @@ class EventMatrixTest extends TestCase
         };
 
         $this->assertSame('10 ' . trans_choice('hour', 10), $sum('hours'));
-        $this->assertSame(Number::currency(1000, 'EUR', locale: app()->getLocale()), $sum('earnings'));
-        $this->assertSame(Number::currency(900, 'EUR', locale: app()->getLocale()), $sum('total'));
+        $this->assertSame(Number::currency(1000, 'EUR', locale: app()->getLocale()), $sum('revenue'));
+        $this->assertSame(Number::currency(900, 'EUR', locale: app()->getLocale()), $sum('profit'));
         $this->assertSame(Number::currency(-100, 'EUR', locale: app()->getLocale()), $sum('expenses'));
+    }
+
+    #[Test]
+    public function it_applies_discounts_and_excludes_transitory_invoices(): void
+    {
+        $date = now()->subDays(10)->format('Y-m-d');
+        $this->createPosition($date)->invoice->update(['discount' => 50]);
+        $this->createPosition($date)->invoice->update(['transitory' => true]);
+
+        $this->assertSame(450.0, $this->getDays('revenue')[$date]['value']);
+        $this->assertSame(450.0, $this->getDays('profit')[$date]['value']);
+        $this->assertSame(5.0, $this->getDays('hours')[$date]['value']);
+    }
+
+    #[Test]
+    public function it_uses_the_deductible_net_of_expenses(): void
+    {
+        $date = now()->subDays(10)->format('Y-m-d');
+        $this->createPosition($date);
+
+        Expense::factory()->notTaxable()->create([
+            'expended_at' => $date,
+            'price' => 100,
+            'quantity' => 1,
+            'category' => ExpenseCategory::Good,
+            'taxable_ratio' => 0.5,
+        ]);
+
+        $this->assertSame(450.0, $this->getDays('profit')[$date]['value']);
+        $this->assertSame(50.0, $this->getDays('expenses')[$date]['value']);
+        $this->assertStringContainsString(
+            Number::currency(-50, 'EUR', locale: app()->getLocale()),
+            $this->getDays('expenses')[$date]['tooltip'],
+        );
     }
 
     #[Test]
@@ -167,8 +204,8 @@ class EventMatrixTest extends TestCase
         ]);
 
         $this->assertSame(300.0, $this->getDays('taxes')[$date]['value']);
-        $this->assertSame(-50.0, $this->getDays('total')[$date]['value']);
-        $this->assertTrue($this->getDays('total')[$date]['negative']);
+        $this->assertSame(-50.0, $this->getDays('profit')[$date]['value']);
+        $this->assertTrue($this->getDays('profit')[$date]['negative']);
     }
 
     #[Test]
@@ -182,7 +219,7 @@ class EventMatrixTest extends TestCase
             'category' => OfftimeCategory::Sick,
         ]);
 
-        foreach (['total', 'earnings', 'hours', 'expenses', 'taxes'] as $mode) {
+        foreach (['profit', 'revenue', 'hours', 'expenses', 'taxes'] as $mode) {
             $days = $this->getDays($mode);
             foreach ([0, 1, 2] as $offset) {
                 $key = $start->copy()->addDays($offset)->format('Y-m-d');
@@ -205,7 +242,7 @@ class EventMatrixTest extends TestCase
             'description' => 'Hidden offtime',
         ]);
 
-        $day = $this->getDays('total', '', false)[$date];
+        $day = $this->getDays('profit', '', false)[$date];
 
         $this->assertNull($day['offtime']);
         $this->assertStringNotContainsString('Hidden offtime', $day['tooltip']);
@@ -219,7 +256,7 @@ class EventMatrixTest extends TestCase
         $this->assertCount(365, $days);
         $this->assertSame(now()->format('Y-m-d'), array_key_last($days));
 
-        $days = $this->getDays('total', '2024');
+        $days = $this->getDays('profit', '2024');
 
         $this->assertCount(366, $days);
         $this->assertSame('2024-01-01', array_key_first($days));
