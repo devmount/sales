@@ -105,6 +105,22 @@ it('calculates net for a project-priced invoice proportional to its share of hou
         ->and($longer->net)->toBe(2000.0);
 });
 
+it('calculates zero net for a project-priced invoice without any hours', function () {
+    $invoice = Invoice::factory()->create([
+        'pricing_unit' => PricingUnit::Project,
+        'price' => 3000,
+        'discount' => null,
+    ]);
+    $position = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-01 09:00:00',
+        'finished_at' => '2026-03-01 09:00:00',
+        'pause_duration' => 0,
+    ]);
+
+    expect($position->net)->toBe(0.0);
+});
+
 it('distributes the invoice discount across positions by their share of the net', function () {
     $invoice = Invoice::factory()->create([
         'pricing_unit' => PricingUnit::Hour,

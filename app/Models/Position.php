@@ -64,7 +64,10 @@ class Position extends Model
 
         $net = 0;
         if ($this->invoice->pricing_unit === PricingUnit::Project) {
-            $net = $this->invoice->net / $this->invoice->hours * $this->duration;
+            // Without any hours there is no share of the invoice net to distribute
+            if ($this->invoice->hours) {
+                $net = $this->invoice->net / $this->invoice->hours * $this->duration;
+            }
         } else {
             $net += $this->duration * $this->invoice->price / $this->invoice->pricing_hours;
         }
