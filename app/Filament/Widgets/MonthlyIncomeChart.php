@@ -77,8 +77,8 @@ class MonthlyIncomeChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => match ($this->filter) {
-                        'net' => __('netIncome'),
-                        'gross' => __('grossIncome'),
+                        'net' => __('income'),
+                        'gross' => __('grossRevenue'),
                     },
                     'data' => $invoiceData,
                     'fill' => 'start',
@@ -98,8 +98,8 @@ class MonthlyIncomeChart extends ChartWidget
     protected function getFilters(): ?array
     {
         return [
-            'net' => __('net'),
-            'gross' => __('gross'),
+            'net' => __('income'),
+            'gross' => __('grossRevenue'),
         ];
     }
 

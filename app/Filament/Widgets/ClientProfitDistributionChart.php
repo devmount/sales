@@ -23,7 +23,7 @@ class ClientProfitDistributionChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('clientsProfitDistribution');
+        return __('clientsRevenueDistribution');
     }
 
     public function getDescription(): string

@@ -189,7 +189,7 @@ class EventMatrix extends Widget
             'weekdays' => collect([1, 3, 5])->mapWithKeys(fn($d) => [$d + 1 => rtrim(now()->isoWeekday($d)->isoFormat('ddd'), '.')]),
             'modes' => [
                 'total' => __('profit'),
-                'earnings' => __('earnings'),
+                'earnings' => __('revenue'),
                 'hours' => trans_choice('hour', 2),
                 'expenses' => trans_choice('expense', 2),
                 'taxes' => __('taxes'),

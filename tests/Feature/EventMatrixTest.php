@@ -62,6 +62,7 @@ class EventMatrixTest extends TestCase
             ->set('mode', 'hours')
             ->assertSuccessful()
             ->assertSee(__('profit'))
+            ->assertSee(__('revenue'))
             ->assertSee(trans_choice('hour', 2))
             ->assertSee(trans_choice('offtime', 2))
             ->assertDontSeeHtml('<option value="offtimes">')

@@ -56,7 +56,7 @@ class ClientResourceTest extends TestCase
 
         Livewire::test(EditClient::class, ['record' => $client->getKey()])
             ->assertSeeHtmlInOrder([
-                'fi-wi-stats-overview-stat-label', __('netIncome'),
+                'fi-wi-stats-overview-stat-label', __('netRevenue'),
                 'fi-wi-stats-overview-stat-value', e(Number::currency(1234.5, 'eur')),
             ]);
     }

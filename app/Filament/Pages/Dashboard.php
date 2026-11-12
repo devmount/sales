@@ -22,7 +22,7 @@ class Dashboard extends BaseDashboard
             Widgets\StatsOverview::class,
             Widgets\EventMatrix::class,
             CurrentProjects::class,
-            HeadingWidget::make(['heading' => __('sales')]),
+            HeadingWidget::make(['heading' => __('finances')]),
             Widgets\SalesChart::class,
             Widgets\MonthlyIncomeChart::class,
             Widgets\HourlyRateChart::class,

@@ -25,12 +25,12 @@ class SalesChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('incomeAndExpenses');
+        return __('revenueAndExpenses');
     }
 
     public function getDescription(): string
     {
-        return __('netIncomeExpensesAndTaxes');
+        return __('revenueExpensesAndTaxesNet');
     }
 
     protected function getData(): array
@@ -83,7 +83,7 @@ class SalesChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => __('income'),
+                    'label' => __('revenue'),
                     'data' => $invoiceData,
                     'fill' => 'start',
                     'backgroundColor' => '#3b82f622',

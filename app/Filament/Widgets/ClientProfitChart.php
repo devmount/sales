@@ -19,7 +19,7 @@ class ClientProfitChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('clientsProfit');
+        return __('clientsRevenue');
     }
 
     public function getDescription(): string

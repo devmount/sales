@@ -66,7 +66,7 @@ class SalesChartTest extends TestCase
         $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
 
         $yearIndex = array_search((string) $year, $data['labels'], true);
-        $income = collect($data['datasets'])->firstWhere('label', __('income'));
+        $income = collect($data['datasets'])->firstWhere('label', __('revenue'));
         $expense = collect($data['datasets'])->firstWhere('label', trans_choice('expense', 2));
         $taxes = collect($data['datasets'])->firstWhere('label', __('taxes'));
 
@@ -97,7 +97,7 @@ class SalesChartTest extends TestCase
         $widget->filter = 'y';
         $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
 
-        $income = collect($data['datasets'])->firstWhere('label', __('income'));
+        $income = collect($data['datasets'])->firstWhere('label', __('revenue'));
         $previousYearIndex = array_search((string) ($boundaryYear - 1), $data['labels'], true);
         $boundaryYearIndex = array_search((string) $boundaryYear, $data['labels'], true);
 

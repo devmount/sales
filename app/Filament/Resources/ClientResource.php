@@ -75,7 +75,7 @@ class ClientResource extends Resource
                             ->label(fn() => ($count = $record?->projects()->count() ?? 0) . ' ' . trans_choice('project', $count))
                             ->value(fn() => ($count = $record?->invoices()->count() ?? 0) . ' ' . trans_choice('invoice', $count)),
                         Stat::make('net', '...')
-                            ->label(__('netIncome'))
+                            ->label(__('netRevenue'))
                             ->value(Number::currency($record?->net ?? 0, 'eur')),
                     ]),
             ]);
