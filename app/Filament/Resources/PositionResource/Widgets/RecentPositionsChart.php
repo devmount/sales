@@ -37,6 +37,7 @@ class RecentPositionsChart extends ChartWidget
         $start = $period->getStartDate()->copy()->startOfDay();
         $end = now()->endOfDay();
         $positionsByDay = Position::with('invoice.project.client')
+            ->whereRelation('invoice', 'transitory', false)
             ->whereBetween('started_at', [$start, $end])
             ->get()
             ->groupBy(fn(Position $p) => $p->started_at->format('Y-m-d'));

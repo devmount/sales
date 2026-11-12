@@ -53,7 +53,8 @@ class OfftimeChart extends ChartWidget
             $plannedData[$i] = $p;
             $unplannedData[$i] = $u;
             $totalData[$i] = $t;
-            $workedData[$i] = Position::whereBetween('started_at', [$date, $period[$i + 1]])
+            $workedData[$i] = Position::whereRelation('invoice', 'transitory', false)
+                ->whereBetween('started_at', [$date, $period[$i + 1]])
                 ->get(['started_at'])
                 ->map(fn($obj) => $obj->started_at->format('Y-m-d'))
                 ->unique()

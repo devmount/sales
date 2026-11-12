@@ -31,12 +31,19 @@ class RecentPositionsChartTest extends TestCase
     {
         $client = Client::factory()->create(['color' => '#123456']);
         $project = Project::factory()->for($client)->create(['title' => 'Recent project']);
-        $invoice = Invoice::factory()->for($project)->create();
+        $invoice = Invoice::factory()->for($project)->create(['transitory' => false]);
 
         $today = now();
         Position::factory()->for($invoice)->create([
             'started_at' => $today->copy()->setTime(9, 0),
             'finished_at' => $today->copy()->setTime(14, 0),
+            'pause_duration' => 0,
+        ]);
+
+        // transitory work must be excluded
+        Position::factory()->for(Invoice::factory()->for($project)->create(['transitory' => true]))->create([
+            'started_at' => $today->copy()->setTime(15, 0),
+            'finished_at' => $today->copy()->setTime(17, 0),
             'pause_duration' => 0,
         ]);
 
@@ -57,7 +64,7 @@ class RecentPositionsChartTest extends TestCase
     public function it_sums_multiple_positions_of_a_project_on_the_same_day(): void
     {
         $project = Project::factory()->create(['title' => 'Busy project']);
-        $invoice = Invoice::factory()->for($project)->create();
+        $invoice = Invoice::factory()->for($project)->create(['transitory' => false]);
 
         $today = now();
         Position::factory()->for($invoice)->create([
