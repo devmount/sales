@@ -2,6 +2,10 @@
     <x-filament::section class="fi-section" :description="$description" :heading="$heading">
         <x-slot name="afterHeader">
             <div class="event-matrix-controls">
+                <label>
+                    <x-filament::toggle state="$wire.$entangle('offtimes', true)" />
+                    {{ trans_choice('offtime', 2) }}
+                </label>
                 <x-filament::input.wrapper>
                     <x-filament::input.select wire:model.live="mode">
                         @foreach ($modes as $value => $label)
@@ -38,20 +42,19 @@
                     x-tooltip="{ content: @js($day['tooltip']), theme: $store.theme, allowHTML: true }"
                 ></span>
             @endforeach
-            @if ($mode !== 'offtimes')
-                <div class="legend" style="grid-area: 9 / 2 / auto / {{ $lastCol + 1 }}">
-                    <small>{{ __('less') }}</small>
-                    @if ($mode === 'total')
-                        @foreach (range(4, 1) as $level)
-                            <span class="negative" data-level="{{ $level }}"></span>
-                        @endforeach
-                    @endif
-                    @foreach (range(0, 4) as $level)
-                        <span data-level="{{ $level }}"></span>
+            <div class="legend" style="grid-area: 9 / 2 / auto / {{ $lastCol + 1 }}">
+                <small class="sum">{{ __('total') }}: <code>{{ $sum }}</code></small>
+                <small>{{ __('less') }}</small>
+                @if ($mode === 'total')
+                    @foreach (range(4, 1) as $level)
+                        <span class="negative" data-level="{{ $level }}"></span>
                     @endforeach
-                    <small>{{ __('more') }}</small>
-                </div>
-            @endif
+                @endif
+                @foreach (range(0, 4) as $level)
+                    <span data-level="{{ $level }}"></span>
+                @endforeach
+                <small>{{ __('more') }}</small>
+            </div>
         </div>
     </x-filament::section>
 </x-filament-widgets::widget>

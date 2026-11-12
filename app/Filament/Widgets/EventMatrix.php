@@ -14,6 +14,7 @@ class EventMatrix extends Widget
 {
     public string $year = '';
     public string $mode = 'total';
+    public bool $offtimes = true;
 
     protected ?string $pollingInterval = null;
 
@@ -52,19 +53,20 @@ class EventMatrix extends Widget
         }
 
         // Positions
-        if (in_array($this->mode, ['total', 'earnings'])) {
+        if (in_array($this->mode, ['total', 'earnings', 'hours'])) {
             $positions = Position::with('invoice.project.client')
                 ->whereBetween('started_at', [$start, $end])
                 ->oldest('started_at')
                 ->get();
             foreach ($positions as $p) {
                 $key = $p->started_at->format('Y-m-d');
-                $days[$key]['value'] += $p->net;
+                $value = $this->mode === 'hours' ? $p->duration : $p->net;
+                $days[$key]['value'] += $value;
                 $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(
                     $p->invoice->project->client->color,
                     $p->invoice->project->title,
-                    $p->net,
+                    $value,
                 );
             }
         }
@@ -88,7 +90,7 @@ class EventMatrix extends Widget
         }
 
         // Times off
-        if (in_array($this->mode, ['total', 'offtimes'])) {
+        if ($this->offtimes) {
             $offtimes = Offtime::overlapping($start, $end)->get();
             foreach ($offtimes as $o) {
                 foreach (CarbonPeriod::create($o->start, $o->end ?? $o->start) as $date) {
@@ -97,9 +99,6 @@ class EventMatrix extends Widget
                         continue;
                     }
                     $days[$key]['offtime'] = $o->category;
-                    if ($this->mode === 'offtimes') {
-                        $days[$key]['value'] = 1.0;
-                    }
                     $days[$key]['events'][] = $this->eventLine(
                         $o->category->hexColor(),
                         $o->category->getLabel() . ($o->description ? ': ' . $o->description : ''),
@@ -135,9 +134,28 @@ class EventMatrix extends Widget
     {
         $line = '<span style="color:' . e($color) . '">●</span> ' . e($label);
         if ($amount !== null) {
-            $line .= ' (' . Number::currency($amount, 'EUR', locale: app()->getLocale()) . ')';
+            $line .= ' (' . $this->formatValue($amount) . ')';
         }
         return $line;
+    }
+
+    /**
+     * Value formatted as hours in hours mode, as currency otherwise
+     */
+    private function formatValue(float $value): string
+    {
+        return $this->mode === 'hours'
+            ? Number::format($value, maxPrecision: 2, locale: app()->getLocale()) . ' ' . trans_choice('hour', $value)
+            : Number::currency($value, 'EUR', locale: app()->getLocale());
+    }
+
+    /**
+     * Sum of all day values in the current view, signed like the tooltip totals
+     */
+    protected function getSum(array $days): string
+    {
+        $sum = round(array_sum(array_column($days, 'value')), 2);
+        return $this->formatValue(in_array($this->mode, ['expenses', 'taxes']) ? -$sum : $sum);
     }
 
     /**
@@ -166,14 +184,15 @@ class EventMatrix extends Widget
             'description' => __('eventMatrixDescription'),
             'days' => $days,
             'months' => $this->getMonths($days),
+            'sum' => $this->getSum($days),
             'lastCol' => end($days)['col'],
             'weekdays' => collect([1, 3, 5])->mapWithKeys(fn($d) => [$d + 1 => rtrim(now()->isoWeekday($d)->isoFormat('ddd'), '.')]),
             'modes' => [
-                'total' => __('total'),
+                'total' => __('profit'),
                 'earnings' => __('earnings'),
+                'hours' => trans_choice('hour', 2),
                 'expenses' => trans_choice('expense', 2),
                 'taxes' => __('taxes'),
-                'offtimes' => trans_choice('offtime', 2),
             ],
             'years' => ['' => __('last365Days')] + array_combine(
                 range(now()->year, $firstYear),
