@@ -43,6 +43,7 @@
                 ></span>
             @endforeach
             <div class="legend" style="grid-area: 9 / 2 / auto / {{ $lastCol + 1 }}">
+                <small class="sum">{{ __('total') }}: <code>{{ $sum }}</code></small>
                 <small>{{ __('less') }}</small>
                 @if ($mode === 'total')
                     @foreach (range(4, 1) as $level)

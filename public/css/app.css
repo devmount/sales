@@ -55,7 +55,7 @@ textarea.position-limit {
 }
 
 .fi-wi-stats-overview-stat.font-mono .fi-wi-stats-overview-stat-value {
-    font-family: var(--mono-font-family), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family: var(--font-mono);
 }
 
 /* Prevent widget headings and descriptions from wrapping */
@@ -217,6 +217,15 @@ textarea.position-limit {
         }
         small {
             padding-inline: .25rem;
+
+            &.sum {
+                margin-right: auto;
+                padding-left: 0;
+
+                code {
+                    font-family: var(--font-mono);
+                }
+            }
         }
     }
 

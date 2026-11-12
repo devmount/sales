@@ -128,18 +128,34 @@ class EventMatrix extends Widget
     }
 
     /**
-     * Single tooltip line for an event with colored dot, label and optional amount (hours in hours mode)
+     * Single tooltip line for an event with colored dot, label and optional amount
      */
     private function eventLine(string $color, string $label, ?float $amount = null): string
     {
         $line = '<span style="color:' . e($color) . '">●</span> ' . e($label);
         if ($amount !== null) {
-            $line .= ' (' . ($this->mode === 'hours'
-                ? Number::format($amount, maxPrecision: 2, locale: app()->getLocale()) . ' ' . trans_choice('hour', $amount)
-                : Number::currency($amount, 'EUR', locale: app()->getLocale())
-            ) . ')';
+            $line .= ' (' . $this->formatValue($amount) . ')';
         }
         return $line;
+    }
+
+    /**
+     * Value formatted as hours in hours mode, as currency otherwise
+     */
+    private function formatValue(float $value): string
+    {
+        return $this->mode === 'hours'
+            ? Number::format($value, maxPrecision: 2, locale: app()->getLocale()) . ' ' . trans_choice('hour', $value)
+            : Number::currency($value, 'EUR', locale: app()->getLocale());
+    }
+
+    /**
+     * Sum of all day values in the current view, signed like the tooltip totals
+     */
+    protected function getSum(array $days): string
+    {
+        $sum = round(array_sum(array_column($days, 'value')), 2);
+        return $this->formatValue(in_array($this->mode, ['expenses', 'taxes']) ? -$sum : $sum);
     }
 
     /**
@@ -168,6 +184,7 @@ class EventMatrix extends Widget
             'description' => __('eventMatrixDescription'),
             'days' => $days,
             'months' => $this->getMonths($days),
+            'sum' => $this->getSum($days),
             'lastCol' => end($days)['col'],
             'weekdays' => collect([1, 3, 5])->mapWithKeys(fn($d) => [$d + 1 => rtrim(now()->isoWeekday($d)->isoFormat('ddd'), '.')]),
             'modes' => [
