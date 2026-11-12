@@ -40,6 +40,8 @@ class EventMatrixTest extends TestCase
         $invoice = Invoice::factory()->for($project)->create([
             'price' => 100,
             'pricing_unit' => PricingUnit::Hour,
+            'discount' => null,
+            'transitory' => false,
         ]);
 
         return Position::factory()->for($invoice)->create([
@@ -147,6 +149,18 @@ class EventMatrixTest extends TestCase
         $this->assertSame(Number::currency(1000, 'EUR', locale: app()->getLocale()), $sum('revenue'));
         $this->assertSame(Number::currency(900, 'EUR', locale: app()->getLocale()), $sum('profit'));
         $this->assertSame(Number::currency(-100, 'EUR', locale: app()->getLocale()), $sum('expenses'));
+    }
+
+    #[Test]
+    public function it_applies_discounts_and_excludes_transitory_invoices(): void
+    {
+        $date = now()->subDays(10)->format('Y-m-d');
+        $this->createPosition($date)->invoice->update(['discount' => 50]);
+        $this->createPosition($date)->invoice->update(['transitory' => true]);
+
+        $this->assertSame(450.0, $this->getDays('revenue')[$date]['value']);
+        $this->assertSame(450.0, $this->getDays('profit')[$date]['value']);
+        $this->assertSame(5.0, $this->getDays('hours')[$date]['value']);
     }
 
     #[Test]

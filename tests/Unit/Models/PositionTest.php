@@ -105,6 +105,65 @@ it('calculates net for a project-priced invoice proportional to its share of hou
         ->and($longer->net)->toBe(2000.0);
 });
 
+it('distributes the invoice discount across positions by their share of the net', function () {
+    $invoice = Invoice::factory()->create([
+        'pricing_unit' => PricingUnit::Hour,
+        'price' => 100,
+        'discount' => 300,
+    ]);
+    $shorter = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-01 09:00:00',
+        'finished_at' => '2026-03-01 19:00:00',
+        'pause_duration' => 0,
+    ]);
+    $longer = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-02 09:00:00',
+        'finished_at' => '2026-03-03 05:00:00',
+        'pause_duration' => 0,
+    ]);
+
+    // invoice net: 3000 - 300 discount, split 1000 : 2000
+    expect($shorter->discounted_net)->toBe(900.0)
+        ->and($longer->discounted_net)->toBe(1800.0)
+        ->and($shorter->net)->toBe(1000.0);
+});
+
+it('uses the net as discounted net for a project-priced invoice', function () {
+    $invoice = Invoice::factory()->create([
+        'pricing_unit' => PricingUnit::Project,
+        'price' => 3000,
+        'discount' => 300,
+    ]);
+    $position = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-01 09:00:00',
+        'finished_at' => '2026-03-01 19:00:00',
+        'pause_duration' => 0,
+    ]);
+
+    // project net already includes the discount
+    expect($position->discounted_net)->toBe(2700.0)
+        ->and($position->discounted_net)->toBe($position->net);
+});
+
+it('falls back to the net when the invoice has nothing to discount', function () {
+    $invoice = Invoice::factory()->create([
+        'pricing_unit' => PricingUnit::Hour,
+        'price' => 0,
+        'discount' => 50,
+    ]);
+    $position = Position::factory()->create([
+        'invoice_id' => $invoice->id,
+        'started_at' => '2026-03-01 09:00:00',
+        'finished_at' => '2026-03-01 14:00:00',
+        'pause_duration' => 0,
+    ]);
+
+    expect($position->discounted_net)->toBe(0.0);
+});
+
 it('formats the time range using the start and finish timestamps', function () {
     $position = Position::factory()->create([
         'started_at' => '2026-03-01 09:00:00',

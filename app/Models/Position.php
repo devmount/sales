@@ -72,6 +72,20 @@ class Position extends Model
     }
 
     /**
+     * Net of the position reduced by its share of the invoice discount
+     */
+    protected function discountedNet(): Attribute
+    {
+        // Project positions are derived from the invoice net, which already includes the discount
+        if (!$this->invoice || $this->invoice->pricing_unit === PricingUnit::Project || !$this->invoice->real_net) {
+            return Attribute::make(fn(): float => $this->net);
+        }
+
+        $discount = $this->invoice->discount * $this->net / $this->invoice->real_net;
+        return Attribute::make(fn(): float => round($this->net - $discount, 2));
+    }
+
+    /**
      * Human readable time range
      */
     protected function timeRange(): Attribute

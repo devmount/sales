@@ -54,13 +54,14 @@ class EventMatrix extends Widget
 
         // Positions
         if (in_array($this->mode, ['profit', 'revenue', 'hours'])) {
-            $positions = Position::with('invoice.project.client')
+            $positions = Position::with('invoice.project.client', 'invoice.positions')
+                ->whereRelation('invoice', 'transitory', false)
                 ->whereBetween('started_at', [$start, $end])
                 ->oldest('started_at')
                 ->get();
             foreach ($positions as $p) {
                 $key = $p->started_at->format('Y-m-d');
-                $value = $this->mode === 'hours' ? $p->duration : $p->net;
+                $value = $this->mode === 'hours' ? $p->duration : $p->discounted_net;
                 $days[$key]['value'] += $value;
                 $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(

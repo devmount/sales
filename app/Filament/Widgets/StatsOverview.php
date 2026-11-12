@@ -58,7 +58,10 @@ class StatsOverview extends BaseWidget
 
     protected function getData(): array
     {
-        $positions = Position::with('invoice.positions')->where('started_at', '>', now()->subWeeks(7)->startOfWeek(Carbon::MONDAY))->get();
+        $positions = Position::with('invoice.positions')
+            ->whereRelation('invoice', 'transitory', false)
+            ->where('started_at', '>', now()->subWeeks(7)->startOfWeek(Carbon::MONDAY))
+            ->get();
         $period = now()->subWeeks(8)->startOfWeek()->weeksUntil(now()->addWeek()->endOfWeek(Carbon::SUNDAY))->toArray();
         $revenue = array_fill(0, count($period) - 1, 0);
         $hours = array_fill(0, count($period) - 1, 0);
@@ -68,7 +71,7 @@ class StatsOverview extends BaseWidget
             }
             foreach ($positions as $obj) {
                 if (CarbonPeriod::create($date, $period[$i + 1])->contains($obj->started_at)) {
-                    $revenue[$i] += $obj->net;
+                    $revenue[$i] += $obj->discounted_net;
                     $hours[$i] += $obj->duration;
                 }
             }
