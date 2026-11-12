@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
-class ClientProfitChart extends ChartWidget
+class ClientRevenueChart extends ChartWidget
 {
     protected ?string $maxHeight = '180px';
     protected ?string $pollingInterval = null;
@@ -38,15 +38,15 @@ class ClientProfitChart extends ChartWidget
         $startYear = Carbon::parse($invoices->first()?->paid_at)->year;
         $labels = range($startYear, now()->year);
 
-        $profits = [];
+        $revenues = [];
         foreach ($invoices as $obj) {
             $clientId = $obj->project->client->id;
             $index = $obj->paid_at->year - $startYear;
-            $profits[$clientId][$index] = ($profits[$clientId][$index] ?? 0) + $obj->net;
+            $revenues[$clientId][$index] = ($revenues[$clientId][$index] ?? 0) + $obj->net;
         }
 
         $datasets = [];
-        foreach ($profits as $clientId => $yearly) {
+        foreach ($revenues as $clientId => $yearly) {
             $client = $clients[$clientId];
             $datasets[] = [
                 'label' => $client->name,

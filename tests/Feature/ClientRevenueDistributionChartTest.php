@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\PricingUnit;
-use App\Filament\Widgets\ClientProfitDistributionChart;
+use App\Filament\Widgets\ClientRevenueDistributionChart;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Position;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use Tests\TestCase;
 
-class ClientProfitDistributionChartTest extends TestCase
+class ClientRevenueDistributionChartTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -24,11 +24,11 @@ class ClientProfitDistributionChartTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ClientProfitDistributionChart::class)->assertSuccessful();
+        Livewire::test(ClientRevenueDistributionChart::class)->assertSuccessful();
     }
 
     #[Test]
-    public function it_distributes_net_profit_by_client_for_the_selected_year(): void
+    public function it_distributes_net_revenue_by_client_for_the_selected_year(): void
     {
         $year = now()->year - 1;
         $clientA = Client::factory()->create(['name' => 'Client A']);
@@ -44,7 +44,7 @@ class ClientProfitDistributionChartTest extends TestCase
             ->create(['paid_at' => "$year-06-01", 'transitory' => false, 'pricing_unit' => PricingUnit::Hour, 'price' => 100, 'discount' => null]);
         Position::factory()->for($invoiceB)->withDuration(2)->create(['pause_duration' => 0]);
 
-        $widget = new ClientProfitDistributionChart();
+        $widget = new ClientRevenueDistributionChart();
         $widget->filter = (string) $year;
         $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
 
@@ -59,7 +59,7 @@ class ClientProfitDistributionChartTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(ClientProfitDistributionChart::class)
+        Livewire::test(ClientRevenueDistributionChart::class)
             ->assertSuccessful()
             ->assertSee(__('noDataAvailable'));
     }

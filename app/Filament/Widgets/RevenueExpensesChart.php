@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
-class SalesChart extends ChartWidget
+class RevenueExpensesChart extends ChartWidget
 {
     use GroupsByPeriod;
 

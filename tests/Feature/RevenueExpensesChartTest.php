@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ExpenseCategory;
 use App\Enums\PricingUnit;
-use App\Filament\Widgets\SalesChart;
+use App\Filament\Widgets\RevenueExpensesChart;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Project;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use Tests\TestCase;
 
-class SalesChartTest extends TestCase
+class RevenueExpensesChartTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -24,7 +24,7 @@ class SalesChartTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        Livewire::test(SalesChart::class)->assertSuccessful();
+        Livewire::test(RevenueExpensesChart::class)->assertSuccessful();
     }
 
     #[Test]
@@ -61,7 +61,7 @@ class SalesChartTest extends TestCase
             'taxable_ratio' => 0.5,
         ]);
 
-        $widget = new SalesChart();
+        $widget = new RevenueExpensesChart();
         $widget->filter = 'y';
         $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
 
@@ -93,7 +93,7 @@ class SalesChartTest extends TestCase
             ->for(Project::factory())
             ->create(['paid_at' => "$boundaryYear-01-01", 'transitory' => false, 'pricing_unit' => PricingUnit::Project, 'price' => 1200, 'discount' => null]);
 
-        $widget = new SalesChart();
+        $widget = new RevenueExpensesChart();
         $widget->filter = 'y';
         $data = (new ReflectionMethod($widget, 'getData'))->invoke($widget);
 
