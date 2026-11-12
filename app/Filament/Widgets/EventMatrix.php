@@ -52,19 +52,20 @@ class EventMatrix extends Widget
         }
 
         // Positions
-        if (in_array($this->mode, ['total', 'earnings'])) {
+        if (in_array($this->mode, ['total', 'earnings', 'hours'])) {
             $positions = Position::with('invoice.project.client')
                 ->whereBetween('started_at', [$start, $end])
                 ->oldest('started_at')
                 ->get();
             foreach ($positions as $p) {
                 $key = $p->started_at->format('Y-m-d');
-                $days[$key]['value'] += $p->net;
+                $value = $this->mode === 'hours' ? $p->duration : $p->net;
+                $days[$key]['value'] += $value;
                 $days[$key]['amounts']++;
                 $days[$key]['events'][] = $this->eventLine(
                     $p->invoice->project->client->color,
                     $p->invoice->project->title,
-                    $p->net,
+                    $value,
                 );
             }
         }
@@ -129,13 +130,16 @@ class EventMatrix extends Widget
     }
 
     /**
-     * Single tooltip line for an event with colored dot, label and optional amount
+     * Single tooltip line for an event with colored dot, label and optional amount (hours in hours mode)
      */
     private function eventLine(string $color, string $label, ?float $amount = null): string
     {
         $line = '<span style="color:' . e($color) . '">●</span> ' . e($label);
         if ($amount !== null) {
-            $line .= ' (' . Number::currency($amount, 'EUR', locale: app()->getLocale()) . ')';
+            $line .= ' (' . ($this->mode === 'hours'
+                ? Number::format($amount, maxPrecision: 2, locale: app()->getLocale()) . ' ' . trans_choice('hour', $amount)
+                : Number::currency($amount, 'EUR', locale: app()->getLocale())
+            ) . ')';
         }
         return $line;
     }
@@ -169,8 +173,9 @@ class EventMatrix extends Widget
             'lastCol' => end($days)['col'],
             'weekdays' => collect([1, 3, 5])->mapWithKeys(fn($d) => [$d + 1 => rtrim(now()->isoWeekday($d)->isoFormat('ddd'), '.')]),
             'modes' => [
-                'total' => __('total'),
+                'total' => __('profit'),
                 'earnings' => __('earnings'),
+                'hours' => trans_choice('hour', 2),
                 'expenses' => trans_choice('expense', 2),
                 'taxes' => __('taxes'),
                 'offtimes' => trans_choice('offtime', 2),

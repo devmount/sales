@@ -151,6 +151,9 @@ textarea.position-limit {
     &.mode-taxes {
         --cell-color: #f97316;
     }
+    &.mode-hours {
+        --cell-color: #22c55e;
+    }
 
     /* Month and weekday labels */
     small {

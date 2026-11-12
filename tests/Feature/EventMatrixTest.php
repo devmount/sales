@@ -56,7 +56,11 @@ class EventMatrixTest extends TestCase
             ->assertSuccessful()
             ->set('mode', 'offtimes')
             ->set('year', (string) now()->year)
-            ->assertSuccessful();
+            ->assertSuccessful()
+            ->set('mode', 'hours')
+            ->assertSuccessful()
+            ->assertSee(__('profit'))
+            ->assertSee(trans_choice('hour', 2));
     }
 
     #[Test]
@@ -85,6 +89,31 @@ class EventMatrixTest extends TestCase
         $this->assertSame(4, $days[$date]['level']);
         $this->assertSame(500.0, $this->getDays('earnings')[$date]['value']);
         $this->assertSame(100.0, $this->getDays('expenses')[$date]['value']);
+    }
+
+    #[Test]
+    public function it_sums_worked_hours_per_day_in_hours_mode(): void
+    {
+        $date = now()->subDays(10)->format('Y-m-d');
+        $this->createPosition($date, '#abcdef', 'Hours project');
+        $this->createPosition($date);
+
+        Expense::factory()->notTaxable()->create([
+            'expended_at' => $date,
+            'price' => 100,
+            'quantity' => 1,
+            'category' => ExpenseCategory::Good,
+        ]);
+
+        $day = $this->getDays('hours')[$date];
+
+        $this->assertSame(10.0, $day['value']);
+        $this->assertSame(4, $day['level']);
+        $this->assertStringContainsString('Hours project', $day['tooltip']);
+        $this->assertStringContainsString('#abcdef', $day['tooltip']);
+        $this->assertStringContainsString('5 ' . trans_choice('hour', 5), $day['tooltip']);
+        $this->assertStringContainsString('10 ' . trans_choice('hour', 10), $day['tooltip']);
+        $this->assertStringNotContainsString('€', $day['tooltip']);
     }
 
     #[Test]
