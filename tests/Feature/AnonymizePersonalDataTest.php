@@ -39,6 +39,20 @@ class AnonymizePersonalDataTest extends TestCase
     }
 
     #[Test]
+    public function it_removes_client_api_configs_including_credentials(): void
+    {
+        $client = Client::factory()->create(['api_config' => [
+            'url' => 'https://api.example.com/entries',
+            'auth' => 'token',
+            'token' => 'real-secret',
+        ]]);
+
+        $this->artisan('db:anonymize')->assertSuccessful();
+
+        $this->assertNull($client->refresh()->api_config);
+    }
+
+    #[Test]
     public function it_anonymizes_project_estimate_and_invoice_titles_and_descriptions(): void
     {
         $project = Project::factory()->create(['title' => 'Real Project Title', 'description' => 'Real project description']);

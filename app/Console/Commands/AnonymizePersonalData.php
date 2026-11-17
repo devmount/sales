@@ -66,6 +66,8 @@ class AnonymizePersonalData extends Command
             $obj->country = 'DE';
             $obj->email = fake()->companyEmail();
             $obj->phone = fake()->phoneNumber();
+            // Remove credentials and endpoints, so no positions can be sent to real client systems
+            $obj->api_config = null;
             $obj->save();
             $bar->advance();
         }

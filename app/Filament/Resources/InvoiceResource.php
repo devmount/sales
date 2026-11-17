@@ -10,6 +10,7 @@ use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
 use App\Models\Invoice;
 use App\Models\Project;
+use App\Services\ExternalApiService;
 use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -96,7 +97,7 @@ class InvoiceResource extends Resource
     {
         return $table
             // Eager load relations needed for the computed columns
-            ->modifyQueryUsing(fn(Builder $query) => $query->with(['positions', 'documents']))
+            ->modifyQueryUsing(fn(Builder $query) => $query->with(['positions', 'documents', 'project.client']))
             ->columns([
                 ColorColumn::make('project.client.color')
                     ->label(''),
@@ -186,6 +187,26 @@ class InvoiceResource extends Resource
                         ->action(function (Invoice $record) {
                             InvoiceService::generateDocuments($record);
                             Notification::make()->title(__('invoiceDocumentGenerated'))->success()->send();
+                        }),
+                    Action::make('register')
+                        ->label(__('registerPositions'))
+                        ->icon('tabler-cloud-upload')
+                        ->hidden(fn(Invoice $record) => !$record->project?->client?->api_config
+                            || $record->positions->whereNull('external_id')->isEmpty())
+                        ->requiresConfirmation()
+                        ->modalDescription(__('registerPositionsDescription'))
+                        ->action(function (Invoice $record) {
+                            ['sent' => $sent, 'errors' => $errors] = ExternalApiService::pushInvoice($record);
+                            if (!$errors) {
+                                Notification::make()->title(__('apiPositionsSent', ['sent' => $sent]))->success()->send();
+                                return;
+                            }
+                            Notification::make()
+                                ->title(__('apiPositionsFailed', ['sent' => $sent, 'failed' => count($errors)]))
+                                ->body(new HtmlString(collect($errors)->map(fn(string $error) => e($error))->join('<br>')))
+                                ->danger()
+                                ->persistent()
+                                ->send();
                         }),
                     Action::make('send')
                         ->label(__('send'))

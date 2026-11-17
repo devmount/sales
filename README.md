@@ -9,6 +9,7 @@ A service sales manager especially for freelancers. Built in German, available i
 - Create projects for clients and provide estimations
 - Create invoices and fill them with descriptive positions
 - Export quotes or invoices from projects as PDF
+- Send invoice positions to a client's own time tracking or finance system via API
 - Keep track of expenses and taxes
 - Keep track of gifts and donations (e.g. if you're an OS maintainer)
 - Anonymize data in staging/dev environments
@@ -60,6 +61,39 @@ To anonymize all personal data, run the following command:
 ```bash
 ddev artisan db:anonymize
 ```
+
+## External API
+
+Some clients require worked positions to be registered in their own systems. For those clients, you can configure an API in the _API_ section of the client form. The invoice action _Register positions_ then sends each position of an invoice as a separate HTTP request. The id returned by the API is stored on the position, so a position is never sent twice.
+
+The configuration consists of:
+
+- **URL** and **method** (`POST` by default) of the endpoint creating a single entry
+- **Authentication**: none, a static bearer token, basic auth, or a login (username and password are posted as JSON to a login URL, the token is read from the configured response field, `token` by default, and sent as bearer token)
+- **Request body**: a JSON template for one position
+- **Id field**: the response field holding the id of the created entry (`id` by default, dot notation like `data.id` is possible)
+
+These placeholders can be used in the request body. They are inserted as JSON values, so don't wrap them in quotes:
+
+| Placeholder | Value |
+| --- | --- |
+| `{date}` | Start date of the position (`Y-m-d`) |
+| `{started_at}` | Start of the position (ISO 8601) |
+| `{finished_at}` | End of the position (ISO 8601) |
+| `{hours}` | Duration in hours without pause |
+| `{pause}` | Pause duration in hours |
+| `{description}` | Description of the position |
+| `{remote}` | Whether the position was done remotely |
+| `{invoice_title}` | Title of the invoice |
+| `{project_reference}` | The _API reference_ set on the project, e.g. a project id in the client's system |
+
+Example body:
+
+```json
+{"date": {date}, "hours": {hours}, "comment": {description}, "projectId": {project_reference}}
+```
+
+The API configuration including credentials is stored encrypted with the `APP_KEY`, so changing that key makes existing configurations unreadable.
 
 ## Development
 

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Relations\PositionsRelationManager;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
+use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Position;
 use App\Models\Project;
@@ -34,6 +35,20 @@ class PositionsRelationManagerTest extends TestCase
             'ownerRecord' => $invoice,
             'pageClass' => EditInvoice::class,
         ])->assertSuccessful();
+    }
+
+    #[Test]
+    public function it_shows_the_registered_column_only_for_clients_with_an_api_config(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['api_config' => ['url' => 'https://api.example.com', 'body' => '{}']]);
+        $withApi = Invoice::factory()->for(Project::factory()->for($client))->create();
+        $withoutApi = Invoice::factory()->create();
+
+        Livewire::test(PositionsRelationManager::class, ['ownerRecord' => $withApi, 'pageClass' => EditInvoice::class])
+            ->assertTableColumnVisible('external_id');
+        Livewire::test(PositionsRelationManager::class, ['ownerRecord' => $withoutApi, 'pageClass' => EditInvoice::class])
+            ->assertTableColumnHidden('external_id');
     }
 
     #[Test]

@@ -147,6 +147,73 @@ class ClientResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_saves_an_api_config_for_a_client(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm([
+                'api_config.url' => 'https://api.example.com/entries',
+                'api_config.method' => 'POST',
+                'api_config.auth' => 'token',
+                'api_config.token' => 'secret',
+                'api_config.body' => '{"comment": {description}}',
+                'api_config.id_field' => 'id',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $config = $client->refresh()->api_config;
+        $this->assertSame('https://api.example.com/entries', $config['url']);
+        $this->assertSame('secret', $config['token']);
+        $this->assertSame('{"comment": {description}}', $config['body']);
+    }
+
+    #[Test]
+    public function it_requires_a_body_when_an_api_url_is_given(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm(['api_config.url' => 'https://api.example.com/entries', 'api_config.body' => ''])
+            ->call('save')
+            ->assertHasFormErrors(['api_config.body' => 'required']);
+    }
+
+    #[Test]
+    public function it_shows_only_the_fields_of_the_selected_api_auth(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm(['api_config.auth' => 'basic'])
+            ->assertFormFieldVisible('api_config.username')
+            ->assertFormFieldVisible('api_config.password')
+            ->assertFormFieldHidden('api_config.token')
+            ->assertFormFieldHidden('api_config.login_url')
+            ->fillForm(['api_config.auth' => 'login'])
+            ->assertFormFieldVisible('api_config.login_url')
+            ->assertFormFieldVisible('api_config.token_field');
+    }
+
+    #[Test]
+    public function it_removes_the_api_config_when_the_url_is_cleared(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['api_config' => ['url' => 'https://api.example.com', 'body' => '{}']]);
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm(['api_config.url' => ''])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertNull($client->refresh()->api_config);
+    }
+
+    #[Test]
     public function it_requires_a_name_when_updating_a_client(): void
     {
         $this->actingAs(User::factory()->create());

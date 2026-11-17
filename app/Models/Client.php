@@ -27,6 +27,7 @@ class Client extends Model
         'phone',
         'language',
         'vat_id',
+        'api_config',
     ];
 
     /**
@@ -45,6 +46,18 @@ class Client extends Model
         return $this->hasManyThrough(Invoice::class, Project::class);
     }
 
+    /**
+     * Drop the api config entirely if no url is given, so a client without url counts as not configured
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $client) {
+            if (blank($client->api_config['url'] ?? null)) {
+                $client->api_config = null;
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -60,6 +73,7 @@ class Client extends Model
             'phone'      => 'string',
             'language'   => LanguageCode::class,
             'vat_id'     => 'string',
+            'api_config' => 'encrypted:array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

@@ -5,6 +5,7 @@ use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Position;
 use App\Models\Project;
+use Illuminate\Support\Facades\DB;
 
 it('has expected fillable attributes', function () {
     expect((new Client())->getFillable())->toBe([
@@ -20,7 +21,16 @@ it('has expected fillable attributes', function () {
         'phone',
         'language',
         'vat_id',
+        'api_config',
     ]);
+});
+
+it('stores the api config encrypted and casts it to an array', function () {
+    $config = ['url' => 'https://example.com/entries', 'auth' => 'token', 'token' => 'secret'];
+    $client = Client::factory()->create(['api_config' => $config]);
+
+    expect($client->fresh()->api_config)->toBe($config)
+        ->and(DB::table('clients')->where('id', $client->id)->value('api_config'))->not->toContain('secret');
 });
 
 it('casts attributes to their expected types', function () {

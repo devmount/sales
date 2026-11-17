@@ -19,6 +19,7 @@ it('has expected fillable attributes', function () {
         'price',
         'pricing_unit',
         'aborted',
+        'api_reference',
     ]);
 });
 
@@ -28,12 +29,14 @@ it('casts attributes to their expected types', function () {
         'price' => '100',
         'pricing_unit' => 'h',
         'aborted' => 0,
+        'api_reference' => 42,
     ]);
 
     expect($project->scope)->toBeFloat()
         ->and($project->price)->toBeFloat()
         ->and($project->pricing_unit)->toBe(PricingUnit::Hour)
-        ->and($project->aborted)->toBeFalse();
+        ->and($project->aborted)->toBeFalse()
+        ->and($project->api_reference)->toBe('42');
 });
 
 it('belongs to a client', function () {
