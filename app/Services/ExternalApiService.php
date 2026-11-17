@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\Position;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -66,9 +67,9 @@ class ExternalApiService
      */
     public static function push(Position $position, PendingRequest $request, array $config): string
     {
-        $response = $request
-            ->send($config['method'] ?? 'POST', $config['url'], ['json' => self::renderBody($position, $config['body'])])
-            ->throw();
+        $response = self::throwIfFailed(
+            $request->send($config['method'] ?? 'POST', $config['url'], ['json' => self::renderBody($position, $config['body'])]),
+        );
 
         $id = $response->json($config['id_field'] ?? 'id');
         if ($id === null || $id === '') {
@@ -114,13 +115,32 @@ class ExternalApiService
             'token' => $request->withToken($config['token']),
             'basic' => $request->withBasicAuth($config['username'], $config['password']),
             'login' => $request->withToken(
-                Http::acceptJson()
-                    ->post($config['login_url'], ['username' => $config['username'], 'password' => $config['password']])
-                    ->throw()
+                self::throwIfFailed(
+                    Http::acceptJson()->post($config['login_url'], ['username' => $config['username'], 'password' => $config['password']]),
+                )
                     ->json($config['token_field'] ?? 'token')
                     ?? throw new RuntimeException(__('apiLoginWithoutToken')),
             ),
             default => $request,
         };
+    }
+
+    /**
+     * Throw a readable error for a failed response, e.g. "401 Unauthorized: Bad credentials"
+     */
+    private static function throwIfFailed(Response $response): Response
+    {
+        if (!$response->failed()) {
+            return $response;
+        }
+
+        $json = $response->json();
+        $message = is_array($json)
+            ? collect(['detail', 'message', 'error_description', 'error', 'title'])
+                ->map(fn(string $field) => data_get($json, $field))
+                ->first(fn($value) => is_string($value) && $value !== '' && $value !== $response->reason())
+            : Str::limit(trim(strip_tags($response->body())), 200);
+
+        throw new RuntimeException(trim("{$response->status()} {$response->reason()}") . ($message ? ": $message" : ''));
     }
 }

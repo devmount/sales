@@ -161,14 +161,13 @@ class ExternalApiServiceTest extends TestCase
     #[Test]
     public function it_reports_a_failed_login_without_pushing_any_position(): void
     {
-        Http::fake([self::LOGIN_URL => Http::response(['error' => 'nope'], 401)]);
+        Http::fake([self::LOGIN_URL => Http::response(['type' => 'about:blank', 'title' => 'Unauthorized', 'status' => 401, 'detail' => 'Bad credentials'], 401)]);
         $invoice = $this->makeInvoice(['auth' => 'login', 'login_url' => self::LOGIN_URL, 'username' => 'me', 'password' => 'pw']);
         Position::factory()->for($invoice)->create();
 
         $result = ExternalApiService::pushInvoice($invoice);
 
-        $this->assertSame(0, $result['sent']);
-        $this->assertCount(1, $result['errors']);
+        $this->assertSame(['sent' => 0, 'errors' => ['401 Unauthorized: Bad credentials']], $result);
         Http::assertSentCount(1);
     }
 
@@ -177,16 +176,40 @@ class ExternalApiServiceTest extends TestCase
     {
         Http::fake([self::URL => Http::sequence()->push(['message' => 'No budget left'], 422)->push(['id' => 5], 201)]);
         $invoice = $this->makeInvoice();
-        $failing = Position::factory()->for($invoice)->create(['started_at' => '2026-03-01 09:00', 'finished_at' => '2026-03-01 10:00']);
+        $failing = Position::factory()->for($invoice)->create(['started_at' => '2026-03-01 09:00', 'finished_at' => '2026-03-01 10:00', 'description' => 'Failing']);
         $working = Position::factory()->for($invoice)->create(['started_at' => '2026-03-02 09:00', 'finished_at' => '2026-03-02 10:00']);
 
         $result = ExternalApiService::pushInvoice($invoice);
 
         $this->assertSame(1, $result['sent']);
         $this->assertCount(1, $result['errors']);
-        $this->assertStringContainsString('No budget left', $result['errors'][0]);
+        $this->assertSame('Failing: 422 Unprocessable Entity: No budget left', $result['errors'][0]);
         $this->assertNull($failing->fresh()->external_id);
         $this->assertSame('5', $working->fresh()->external_id);
+    }
+
+    #[Test]
+    public function it_omits_a_response_message_that_only_repeats_the_status(): void
+    {
+        Http::fake([self::URL => Http::response(['status' => 401, 'error' => 'Unauthorized', 'message' => 'Unauthorized', 'path' => '/entries'], 401)]);
+        $invoice = $this->makeInvoice();
+        Position::factory()->for($invoice)->create(['description' => 'Work']);
+
+        $result = ExternalApiService::pushInvoice($invoice);
+
+        $this->assertSame(['Work: 401 Unauthorized'], $result['errors']);
+    }
+
+    #[Test]
+    public function it_reports_the_plain_text_of_a_non_json_error_response(): void
+    {
+        Http::fake([self::URL => Http::response('<h1>Service down</h1>', 503)]);
+        $invoice = $this->makeInvoice();
+        Position::factory()->for($invoice)->create(['description' => 'Work']);
+
+        $result = ExternalApiService::pushInvoice($invoice);
+
+        $this->assertSame(['Work: 503 Service Unavailable: Service down'], $result['errors']);
     }
 
     #[Test]

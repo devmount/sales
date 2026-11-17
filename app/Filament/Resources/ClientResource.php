@@ -320,7 +320,7 @@ class ClientResource extends Resource
                 ->revealable()
                 ->required($required)
                 ->hidden($authIsNot('token'))
-                ->columnSpan(2),
+                ->columnSpanFull(),
             TextInput::make('api_config.login_url')
                 ->label(__('loginUrl'))
                 ->url()
