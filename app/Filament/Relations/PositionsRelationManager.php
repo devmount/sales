@@ -20,6 +20,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -47,6 +48,12 @@ class PositionsRelationManager extends RelationManager
                     ->description(fn(Position $record): string => $record->time_range),
                 ToggleColumn::make('remote')
                     ->label(__('remote')),
+                IconColumn::make('external_id')
+                    ->label(__('registered'))
+                    ->state(fn(Position $record): bool => filled($record->external_id))
+                    ->boolean()
+                    ->tooltip(fn(Position $record): ?string => $record->external_id)
+                    ->hidden(fn(): bool => !$this->getOwnerRecord()->project?->client?->api_config),
             ])
             ->headerActions([
                 CreateAction::make()

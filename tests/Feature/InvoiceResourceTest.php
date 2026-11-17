@@ -6,8 +6,10 @@ use App\Enums\PricingUnit;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Models\Client;
 use App\Models\Document;
 use App\Models\Invoice;
+use App\Models\Position;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\User;
@@ -15,6 +17,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -222,6 +225,70 @@ class InvoiceResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_hides_the_register_action_for_clients_without_an_api_config(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        Position::factory()->for($invoice)->create();
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->assertTableActionHidden('register', $invoice);
+    }
+
+    #[Test]
+    public function it_hides_the_register_action_when_all_positions_were_sent(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = $this->makeApiInvoice();
+        Position::factory()->for($invoice)->create(['external_id' => '1']);
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->assertTableActionHidden('register', $invoice);
+    }
+
+    #[Test]
+    public function it_shows_the_register_action_when_unsent_positions_exist(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = $this->makeApiInvoice();
+        Position::factory()->for($invoice)->create(['external_id' => '1']);
+        Position::factory()->for($invoice)->create();
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->assertTableActionVisible('register', $invoice);
+    }
+
+    #[Test]
+    public function it_registers_unsent_positions_via_the_api(): void
+    {
+        Http::fake(['https://api.example.com/*' => Http::response(['id' => 99], 201)]);
+        $this->actingAs(User::factory()->create());
+        $invoice = $this->makeApiInvoice();
+        $position = Position::factory()->for($invoice)->create();
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->callAction(TestAction::make('register')->table($invoice))
+            ->assertNotified(__('apiPositionsSent', ['sent' => 1]));
+
+        $this->assertSame('99', $position->fresh()->external_id);
+    }
+
+    #[Test]
+    public function it_notifies_about_positions_that_could_not_be_registered(): void
+    {
+        Http::fake(['https://api.example.com/*' => Http::response(['message' => 'Nope'], 422)]);
+        $this->actingAs(User::factory()->create());
+        $invoice = $this->makeApiInvoice();
+        $position = Position::factory()->for($invoice)->create();
+
+        Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
+            ->callAction(TestAction::make('register')->table($invoice))
+            ->assertNotified(__('apiPositionsFailed', ['sent' => 0, 'failed' => 1]));
+
+        $this->assertNull($position->fresh()->external_id);
+    }
+
+    #[Test]
     public function it_generates_and_attaches_a_single_invoice_document_from_the_edit_page(): void
     {
         $this->actingAs(User::factory()->create());
@@ -283,5 +350,18 @@ class InvoiceResourceTest extends TestCase
         @unlink($this->signaturePath);
 
         parent::tearDown();
+    }
+
+    /**
+     * Create an invoice whose client has a minimal api config
+     */
+    private function makeApiInvoice(): Invoice
+    {
+        $client = Client::factory()->create(['api_config' => [
+            'url' => 'https://api.example.com/entries',
+            'body' => '{"comment": {description}}',
+        ]]);
+
+        return Invoice::factory()->for(Project::factory()->for($client))->create();
     }
 }
