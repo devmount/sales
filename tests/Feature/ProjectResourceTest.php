@@ -80,6 +80,33 @@ class ProjectResourceTest extends TestCase
     }
 
     #[Test]
+    public function it_shows_the_api_reference_only_for_clients_with_an_api_config(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $withApi = Project::factory()->for(Client::factory()->create(['api_config' => ['url' => 'https://api.example.com']]))->create();
+        $withoutApi = Project::factory()->create();
+
+        Livewire::test(EditProject::class, ['record' => $withApi->getKey()])
+            ->assertFormFieldVisible('api_reference');
+        Livewire::test(EditProject::class, ['record' => $withoutApi->getKey()])
+            ->assertFormFieldHidden('api_reference');
+    }
+
+    #[Test]
+    public function it_saves_the_api_reference_of_a_project(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $project = Project::factory()->for(Client::factory()->create(['api_config' => ['url' => 'https://api.example.com']]))->create();
+
+        Livewire::test(EditProject::class, ['record' => $project->getKey()])
+            ->fillForm(['api_reference' => '42'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('42', $project->refresh()->api_reference);
+    }
+
+    #[Test]
     public function it_has_no_minimum_field_in_the_form(): void
     {
         $this->actingAs(User::factory()->create());

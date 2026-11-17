@@ -10,6 +10,7 @@ use App\Filament\Resources\ClientResource\Pages\ListClients;
 use App\Mail\ContactClient;
 use App\Models\Client;
 use App\Models\Setting;
+use App\Services\ExternalApiService;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -21,10 +22,12 @@ use Filament\Actions\ReplicateAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\Width;
@@ -267,10 +270,95 @@ class ClientResource extends Resource
                 ->columnSpan(3)
                 ->suffixIcon('tabler-phone')
                 ->tel(),
+            Section::make(__('api'))
+                ->description(__('api.description'))
+                ->icon('tabler-api')
+                ->collapsible()
+                ->collapsed()
+                ->columnSpanFull()
+                ->columns(6)
+                ->schema(self::apiFields()),
         ];
 
         return $useSection
             ? [Section::make()->columnSpan($columns)->schema($fields)->columns($columns)]
             : [Grid::make()->columns($columns)->schema($fields)];
+    }
+
+    /**
+     * Return form fields for the external API config, only required if an url is given
+     */
+    private static function apiFields(): array
+    {
+        $required = fn(Get $get): bool => filled($get('api_config.url'));
+        $authIsNot = fn(string ...$types) => fn(Get $get): bool => !in_array($get('api_config.auth'), $types);
+
+        return [
+            TextInput::make('api_config.url')
+                ->label(__('url'))
+                ->url()
+                ->suffixIcon('tabler-world')
+                ->columnSpan(4),
+            Select::make('api_config.method')
+                ->label(__('method'))
+                ->options(['POST' => 'POST', 'PUT' => 'PUT', 'PATCH' => 'PATCH'])
+                ->placeholder('POST')
+                ->columnSpan(2),
+            Select::make('api_config.auth')
+                ->label(__('authentication'))
+                ->options([
+                    'token' => __('api.auth.token'),
+                    'basic' => __('api.auth.basic'),
+                    'login' => __('api.auth.login'),
+                ])
+                ->placeholder(__('api.auth.none'))
+                ->live()
+                ->columnSpan(2),
+            TextInput::make('api_config.token')
+                ->label(__('token'))
+                ->password()
+                ->revealable()
+                ->required($required)
+                ->hidden($authIsNot('token'))
+                ->columnSpan(4),
+            TextInput::make('api_config.login_url')
+                ->label(__('loginUrl'))
+                ->url()
+                ->required($required)
+                ->hidden($authIsNot('login'))
+                ->columnSpan(4),
+            TextInput::make('api_config.username')
+                ->label(__('username'))
+                ->required($required)
+                ->hidden($authIsNot('basic', 'login'))
+                ->columnSpan(2),
+            TextInput::make('api_config.password')
+                ->label(__('password'))
+                ->password()
+                ->revealable()
+                ->required($required)
+                ->hidden($authIsNot('basic', 'login'))
+                ->columnSpan(2),
+            TextInput::make('api_config.token_field')
+                ->label(__('tokenField'))
+                ->placeholder('token')
+                ->hidden($authIsNot('login'))
+                ->columnSpan(2),
+            Textarea::make('api_config.body')
+                ->label(__('requestBody'))
+                ->helperText(__('api.body.hint', [
+                    'placeholders' => collect(ExternalApiService::PLACEHOLDERS)->map(fn($p) => '{' . $p . '}')->join(', '),
+                ]))
+                ->placeholder('{"date": {date}, "hours": {hours}, "comment": {description}}')
+                ->autosize()
+                ->required($required)
+                ->columnSpanFull(),
+            TextInput::make('api_config.id_field')
+                ->label(__('idField'))
+                ->hint(__('api.idField.hint'))
+                ->hintIcon('tabler-info-circle')
+                ->placeholder('id')
+                ->columnSpan(3),
+        ];
     }
 }

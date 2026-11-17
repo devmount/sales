@@ -8,6 +8,7 @@ use App\Filament\Relations\EstimatesRelationManager;
 use App\Filament\Relations\InvoicesRelationManager;
 use App\Filament\Resources\ProjectResource\Pages\EditProject;
 use App\Filament\Resources\ProjectResource\Pages\ListProjects;
+use App\Models\Client;
 use App\Models\Project;
 use App\Services\ProjectService;
 use Carbon\Carbon;
@@ -28,6 +29,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\ColorColumn;
@@ -228,6 +230,7 @@ class ProjectResource extends Resource
                 ->preload()
                 ->suffixIcon('tabler-users')
                 ->columnSpan($half)
+                ->live()
                 ->required(),
             DatePicker::make('start_at')
                 ->label(__('startAt'))
@@ -277,6 +280,13 @@ class ProjectResource extends Resource
                 ->label(__('aborted'))
                 ->inline(false)
                 ->columnSpan($half / 2),
+            TextInput::make('api_reference')
+                ->label(__('apiReference'))
+                ->hint(__('apiReference.hint'))
+                ->hintIcon('tabler-info-circle')
+                ->suffixIcon('tabler-api')
+                ->hidden(fn(Get $get): bool => !Client::find($get('client_id'))?->api_config)
+                ->columnSpan($half),
         ];
 
         return $useSection
