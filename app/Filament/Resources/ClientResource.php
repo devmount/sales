@@ -276,7 +276,7 @@ class ClientResource extends Resource
                 ->collapsible()
                 ->collapsed()
                 ->columnSpanFull()
-                ->columns(6)
+                ->columns(4)
                 ->schema(self::apiFields()),
         ];
 
@@ -298,12 +298,12 @@ class ClientResource extends Resource
                 ->label(__('url'))
                 ->url()
                 ->suffixIcon('tabler-world')
-                ->columnSpan(4),
+                ->columnSpan(2),
             Select::make('api_config.method')
                 ->label(__('method'))
                 ->options(['POST' => 'POST', 'PUT' => 'PUT', 'PATCH' => 'PATCH'])
                 ->placeholder('POST')
-                ->columnSpan(2),
+                ->columnSpan(1),
             Select::make('api_config.auth')
                 ->label(__('authentication'))
                 ->options([
@@ -313,20 +313,25 @@ class ClientResource extends Resource
                 ])
                 ->placeholder(__('api.auth.none'))
                 ->live()
-                ->columnSpan(2),
+                ->columnSpan(1),
             TextInput::make('api_config.token')
                 ->label(__('token'))
                 ->password()
                 ->revealable()
                 ->required($required)
                 ->hidden($authIsNot('token'))
-                ->columnSpan(4),
+                ->columnSpan(2),
             TextInput::make('api_config.login_url')
                 ->label(__('loginUrl'))
                 ->url()
                 ->required($required)
                 ->hidden($authIsNot('login'))
-                ->columnSpan(4),
+                ->columnSpan(2),
+            TextInput::make('api_config.token_field')
+                ->label(__('tokenField'))
+                ->placeholder('token')
+                ->hidden($authIsNot('login'))
+                ->columnSpan(2),
             TextInput::make('api_config.username')
                 ->label(__('username'))
                 ->required($required)
@@ -338,11 +343,6 @@ class ClientResource extends Resource
                 ->revealable()
                 ->required($required)
                 ->hidden($authIsNot('basic', 'login'))
-                ->columnSpan(2),
-            TextInput::make('api_config.token_field')
-                ->label(__('tokenField'))
-                ->placeholder('token')
-                ->hidden($authIsNot('login'))
                 ->columnSpan(2),
             Textarea::make('api_config.body')
                 ->label(__('requestBody'))
@@ -358,7 +358,7 @@ class ClientResource extends Resource
                 ->hint(__('api.idField.hint'))
                 ->hintIcon('tabler-info-circle')
                 ->placeholder('id')
-                ->columnSpan(3),
+                ->columnSpanFull(),
         ];
     }
 }
