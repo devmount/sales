@@ -12,6 +12,7 @@ it('has expected fillable attributes', function () {
         'pause_duration',
         'description',
         'remote',
+        'external_id',
     ]);
 });
 
@@ -21,11 +22,13 @@ it('casts attributes to their expected types', function () {
         'finished_at' => '2026-03-01 17:00:00',
         'pause_duration' => '1.5',
         'remote' => 1,
+        'external_id' => 123,
     ]);
 
     expect($position->started_at)->toBeInstanceOf(Illuminate\Support\Carbon::class)
         ->and($position->pause_duration)->toBeFloat()->toBe(1.5)
-        ->and($position->remote)->toBeTrue();
+        ->and($position->remote)->toBeTrue()
+        ->and($position->external_id)->toBe('123');
 });
 
 it('belongs to an invoice', function () {

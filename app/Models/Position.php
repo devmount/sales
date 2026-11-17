@@ -19,6 +19,7 @@ class Position extends Model
         'pause_duration',
         'description',
         'remote',
+        'external_id',
     ];
 
     /**
@@ -37,6 +38,7 @@ class Position extends Model
             'pause_duration' => 'float',
             'description'    => 'string',
             'remote'         => 'bool',
+            'external_id'    => 'string',
             'created_at'     => 'datetime',
             'updated_at'     => 'datetime',
         ];

@@ -27,6 +27,7 @@ class Project extends Model
         'price',
         'pricing_unit',
         'aborted',
+        'api_reference',
     ];
 
     /**
@@ -72,6 +73,7 @@ class Project extends Model
             'price' => 'float',
             'pricing_unit' => PricingUnit::class,
             'aborted' => 'bool',
+            'api_reference' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

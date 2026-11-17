@@ -27,6 +27,7 @@ class Client extends Model
         'phone',
         'language',
         'vat_id',
+        'api_config',
     ];
 
     /**
@@ -60,6 +61,7 @@ class Client extends Model
             'phone'      => 'string',
             'language'   => LanguageCode::class,
             'vat_id'     => 'string',
+            'api_config' => 'encrypted:array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
