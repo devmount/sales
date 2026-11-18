@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Enums\PricingUnit;
+use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Filament\Resources\ProjectResource;
 use App\Models\Client;
 use App\Models\Document;
 use App\Models\Invoice;
@@ -222,6 +224,62 @@ class InvoiceResourceTest extends TestCase
         Livewire::test(ListInvoices::class, ['activeTab' => 'all'])
             ->assertTableActionVisible('pdf', $invoice)
             ->assertTableActionVisible('xml', $invoice);
+    }
+
+    #[Test]
+    public function it_links_to_the_client_on_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $client = $invoice->project->client;
+        $client->update(['name' => 'Smith & "Sons" GmbH']);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertSeeHtml('<span>' . e($client->short) . '</span>')
+            ->assertSeeHtml('x-tooltip.raw="' . e(__('editName', ['name' => $client->name])) . '"')
+            ->assertSee(ClientResource::getUrl('edit', ['record' => $client]));
+    }
+
+    #[Test]
+    public function it_links_to_the_project_on_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $project = $invoice->project;
+        $project->update(['title' => 'Map & "More" 2026']);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertSee(ProjectResource::getUrl('edit', ['record' => $project]))
+            ->assertSeeHtml('<span style="font-family: var(--font-family-mono), monospace">' . e($project->progress_percent) . '</span>')
+            ->assertSeeHtml('x-tooltip.raw="' . e(__('editName', ['name' => $project->title])) . '"');
+    }
+
+    #[Test]
+    public function it_shows_the_client_name_as_heading_if_no_short_is_given(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $client = $invoice->project->client;
+        $client->update(['short' => null]);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertSeeHtml('<span>' . e($client->name) . '</span>');
+    }
+
+    #[Test]
+    public function it_shows_an_api_icon_for_clients_with_an_api_config_on_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $icon = 'aria-label="' . e(__('api')) . '"';
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertDontSeeHtml($icon);
+
+        $invoice->project->client->update(['api_config' => ['url' => 'https://api.example.com', 'body' => '{}']]);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertSeeHtml($icon);
     }
 
     #[Test]

@@ -75,6 +75,7 @@
     "downloadStartsAutomatically": "Der Download startet automatisch...",
     "dueAt": "Fällig",
     "earliest": "Früheste",
+    "editName": ":name bearbeiten",
     "edv": "EDV",
     "edvDescription": "Laufende EDV-Kosten (z.B. Beratung, Wartung, Reparatur, Software-Abos)",
     "email": "E-Mail",
@@ -309,6 +310,6 @@
     "workEquipmentDescription": "Arbeitsmittel (z.B. Bürobedarf, Porto, Fachliteratur, Schreibtischzubehör)",
     "workingDays": "Produktive Arbeitstage",
     "workingHours": "Arbeitszeit",
-    "year": "Jahr",
+    "year": "Jahr|Jahre",
     "zip": "PLZ"
 }

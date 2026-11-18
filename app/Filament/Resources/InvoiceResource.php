@@ -6,8 +6,10 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PricingUnit;
 use App\Filament\Relations\DocumentsRelationManager;
 use App\Filament\Relations\PositionsRelationManager;
+use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Filament\Resources\ProjectResource;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Services\ExternalApiService;
@@ -33,6 +35,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\IconSize;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -42,6 +45,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
+use Illuminate\View\ComponentAttributeBag;
 use Illuminate\Database\Eloquent\Builder;
 
 class InvoiceResource extends Resource
@@ -79,13 +83,27 @@ class InvoiceResource extends Resource
                     ->columns(1)
                     ->columnSpan(['lg' => 2])
                     ->schema(fn(?Invoice $record) => [
-                        Stat::make('project', '...')
-                            ->label(trans_choice('project', 1))
-                            ->value($record->project?->progress_percent ?? '-')
-                            ->description($record->project?->hours . ' / ' . $record->project?->scope_with_label),
-                        Stat::make('invoice', '...')
-                            ->label(trans_choice('invoice', 1))
-                            ->value($record->hours_formatted)
+                        Stat::make('', new HtmlString(
+                            '<span style="display: flex; align-items: center; gap: .5rem">'
+                            . '<span style="flex-shrink: 0; width: .6em; height: .6em; border-radius: 50%; background: '
+                            . e($record->project?->client?->color) . '"></span>'
+                            . '<span>' . e($record->project?->client?->short ?: $record->project?->client?->name) . '</span>'
+                            . ($record->project?->client?->api_config ? \Filament\Support\generate_icon_html(
+                                'tabler-api',
+                                attributes: new ComponentAttributeBag(['aria-label' => __('api'), 'style' => 'margin-left: .25rem']),
+                                size: IconSize::Large,
+                            )->toHtml() : '')
+                            . '</span>',
+                        ))
+                            ->extraAttributes(['x-tooltip.raw' => e(__('editName', ['name' => $record->project?->client?->name]))])
+                            ->url(ClientResource::getUrl('edit', ['record' => $record->project?->client])),
+                        Stat::make(trans_choice('project', 1), new HtmlString(
+                            '<span style="font-family: var(--font-family-mono), monospace">' . e($record->project?->progress_percent ?? '-') . '</span>',
+                        ))
+                            ->description($record->project?->hours . ' / ' . $record->project?->scope_with_label)
+                            ->extraAttributes(['x-tooltip.raw' => e(__('editName', ['name' => $record->project?->title]))])
+                            ->url(ProjectResource::getUrl('edit', ['record' => $record->project])),
+                        Stat::make(trans_choice('invoice', 1), $record->hours_formatted)
                             ->description(new HtmlString(
                                 "$record->positions_formatted<br />$record->net_formatted " . __('net'),
                             )),

@@ -38,6 +38,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Illuminate\Database\Eloquent\Builder;
 
 class ProjectResource extends Resource
@@ -69,9 +70,9 @@ class ProjectResource extends Resource
                     ->columns(1)
                     ->columnSpan(['lg' => 2])
                     ->schema(fn(?Project $record) => [
-                        Stat::make('progress', '...')
-                            ->label(__('progress'))
-                            ->value($record?->progress_percent ?? '-')
+                        Stat::make(__('progress'), new HtmlString(
+                            '<span style="font-family: var(--font-family-mono), monospace">' . e($record?->progress_percent ?? '-') . '</span>',
+                        ))
                             ->description($record?->hours . ' / ' . $record?->scope_with_label),
                     ]),
             ]);

@@ -37,6 +37,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -74,12 +75,15 @@ class ClientResource extends Resource
                     ->columns(1)
                     ->columnSpan(['lg' => 2])
                     ->schema(fn(?Client $record) => [
-                        Stat::make('invoices', '...')
-                            ->label(fn() => ($count = $record?->projects()->count() ?? 0) . ' ' . trans_choice('project', $count))
-                            ->value(fn() => ($count = $record?->invoices()->count() ?? 0) . ' ' . trans_choice('invoice', $count)),
-                        Stat::make('net', '...')
-                            ->label(__('netRevenue'))
-                            ->value(Number::currency($record?->net ?? 0, 'eur')),
+                        Stat::make(
+                            ($count = $record?->projects()->count() ?? 0) . ' ' . trans_choice('project', $count),
+                            Number::format($years = $record?->years ?? 0) . ' ' . trans_choice('year', $years),
+                        )
+                            ->description(($count = $record?->invoices()->count() ?? 0) . ' ' . trans_choice('invoice', $count)),
+                        Stat::make(__('netRevenue'), new HtmlString(
+                            '<span style="font-family: var(--font-family-mono), monospace">'
+                            . e(Number::currency($record?->net ?? 0, 'eur')) . '</span>',
+                        )),
                     ]),
             ]);
     }

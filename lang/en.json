@@ -75,6 +75,7 @@
     "downloadStartsAutomatically": "Download starts automatically...",
     "dueAt": "Due at",
     "earliest": "Earliest",
+    "editName": "Edit :name",
     "edv": "IT",
     "edvDescription": "Ongoing IT costs (e.g. consulting, maintenance, repair)",
     "email": "Email",
@@ -309,6 +310,6 @@
     "workEquipmentDescription": "Work equipment (e.g. office supplies, postage, specialist literature)",
     "workingDays": "Working days",
     "workingHours": "Working hours",
-    "year": "Year",
+    "year": "Year|Years",
     "zip": "ZIP"
 }
