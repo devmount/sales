@@ -17,6 +17,7 @@
     "api.body.hint": "JSON template for one position. Placeholders are inserted as JSON values, so use them without quotes: :placeholders",
     "api.description": "Transfer positions of this client's invoices to an external system.",
     "api.idField.hint": "Response field holding the id of the created entry, dot notation possible",
+    "api.secret.keep": "Leave blank to keep the current value",
     "apiLoginWithoutToken": "The login response contains no token.",
     "apiNotConfigured": "No API is configured for this client.",
     "apiPositionsFailed": ":sent position(s) sent, :failed failed",

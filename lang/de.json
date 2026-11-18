@@ -17,6 +17,7 @@
     "api.body.hint": "JSON-Vorlage für eine Position. Platzhalter werden als JSON-Werte eingesetzt, also ohne Anführungszeichen verwenden: :placeholders",
     "api.description": "Positionen von Rechnungen dieses Kunden an ein externes System übertragen.",
     "api.idField.hint": "Feld der Antwort mit der ID des angelegten Eintrags, Punktnotation möglich",
+    "api.secret.keep": "Leer lassen, um den aktuellen Wert zu behalten",
     "apiLoginWithoutToken": "Die Login-Antwort enthält kein Token.",
     "apiNotConfigured": "Für diesen Kunden ist keine API konfiguriert.",
     "apiPositionsFailed": ":sent Position(en) übertragen, :failed fehlgeschlagen",

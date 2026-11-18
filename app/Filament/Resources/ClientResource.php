@@ -156,6 +156,7 @@ class ClientResource extends Resource
                     ->modalWidth(Width::Large),
                 ReplicateAction::make()
                     ->icon('tabler-copy')
+                    ->excludeAttributes(['api_config'])
                     ->schema(self::formFields(6, false))
                     ->slideOver()
                     ->modalWidth(Width::Large),
@@ -287,16 +288,19 @@ class ClientResource extends Resource
 
     /**
      * Return form fields for the external API config, only required if an url is given
+     * Stored secrets are never sent to the browser and kept if left blank
      */
     private static function apiFields(): array
     {
         $required = fn(Get $get): bool => filled($get('api_config.url'));
         $authIsNot = fn(string ...$types) => fn(Get $get): bool => !in_array($get('api_config.auth'), $types);
+        $stored = fn(?Client $record, string $key): ?string => $record?->api_config[$key] ?? null;
 
         return [
             TextInput::make('api_config.url')
                 ->label(__('url'))
                 ->url()
+                ->startsWith(['https://'])
                 ->suffixIcon('tabler-world')
                 ->columnSpan(2),
             Select::make('api_config.method')
@@ -318,12 +322,16 @@ class ClientResource extends Resource
                 ->label(__('token'))
                 ->password()
                 ->revealable()
-                ->required($required)
+                ->formatStateUsing(fn() => null)
+                ->dehydrateStateUsing(fn(?string $state, ?Client $record) => $state ?: $stored($record, 'token'))
+                ->placeholder(fn(?Client $record) => $stored($record, 'token') ? __('api.secret.keep') : null)
+                ->required(fn(Get $get, ?Client $record) => $required($get) && !$stored($record, 'token'))
                 ->hidden($authIsNot('token'))
                 ->columnSpanFull(),
             TextInput::make('api_config.login_url')
                 ->label(__('loginUrl'))
                 ->url()
+                ->startsWith(['https://'])
                 ->required($required)
                 ->hidden($authIsNot('login'))
                 ->columnSpan(2),
@@ -341,7 +349,10 @@ class ClientResource extends Resource
                 ->label(__('password'))
                 ->password()
                 ->revealable()
-                ->required($required)
+                ->formatStateUsing(fn() => null)
+                ->dehydrateStateUsing(fn(?string $state, ?Client $record) => $state ?: $stored($record, 'password'))
+                ->placeholder(fn(?Client $record) => $stored($record, 'password') ? __('api.secret.keep') : null)
+                ->required(fn(Get $get, ?Client $record) => $required($get) && !$stored($record, 'password'))
                 ->hidden($authIsNot('basic', 'login'))
                 ->columnSpan(2),
             Textarea::make('api_config.body')

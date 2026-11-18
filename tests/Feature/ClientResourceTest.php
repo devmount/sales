@@ -13,6 +13,7 @@ use App\Models\Project;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -211,6 +212,105 @@ class ClientResourceTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertNull($client->refresh()->api_config);
+    }
+
+    #[Test]
+    public function it_rejects_non_https_api_urls(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm([
+                'api_config.url' => 'http://api.example.com/entries',
+                'api_config.auth' => 'login',
+                'api_config.login_url' => 'http://api.example.com/login',
+                'api_config.username' => 'user',
+                'api_config.password' => 'secret',
+                'api_config.body' => '{}',
+            ])
+            ->call('save')
+            ->assertHasFormErrors(['api_config.url' => 'starts_with', 'api_config.login_url' => 'starts_with']);
+    }
+
+    #[Test]
+    public function it_does_not_expose_stored_api_secrets_in_the_form(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['api_config' => [
+            'url' => 'https://api.example.com',
+            'auth' => 'login',
+            'login_url' => 'https://api.example.com/login',
+            'username' => 'user',
+            'password' => 'stored-password',
+            'token' => 'stored-token',
+            'body' => '{}',
+        ]]);
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->assertFormSet(['api_config.token' => null, 'api_config.password' => null])
+            ->assertDontSee('stored-password')
+            ->assertDontSee('stored-token');
+    }
+
+    #[Test]
+    public function it_keeps_stored_api_secrets_when_left_blank(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['api_config' => [
+            'url' => 'https://api.example.com',
+            'auth' => 'token',
+            'token' => 'stored-token',
+            'body' => '{}',
+        ]]);
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm(['api_config.body' => '{"a": {hours}}'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $config = $client->refresh()->api_config;
+        $this->assertSame('stored-token', $config['token']);
+        $this->assertSame('{"a": {hours}}', $config['body']);
+    }
+
+    #[Test]
+    public function it_updates_api_secrets_when_a_new_value_is_given(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['api_config' => [
+            'url' => 'https://api.example.com',
+            'auth' => 'basic',
+            'username' => 'user',
+            'password' => 'stored-password',
+            'body' => '{}',
+        ]]);
+
+        Livewire::test(EditClient::class, ['record' => $client->getKey()])
+            ->fillForm(['api_config.password' => 'new-password'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('new-password', $client->refresh()->api_config['password']);
+    }
+
+    #[Test]
+    public function it_does_not_copy_the_api_config_when_replicating(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create(['api_config' => [
+            'url' => 'https://api.example.com',
+            'auth' => 'token',
+            'token' => 'stored-token',
+            'body' => '{}',
+        ]]);
+
+        Livewire::test(ListClients::class)
+            ->callAction(TestAction::make(ReplicateAction::class)->table($client))
+            ->assertHasNoFormErrors();
+
+        $replica = Client::where('id', '!=', $client->id)->sole();
+        $this->assertNull($replica->api_config);
     }
 
     #[Test]
