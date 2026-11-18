@@ -82,29 +82,23 @@ class InvoiceResource extends Resource
                     ->columns(1)
                     ->columnSpan(['lg' => 2])
                     ->schema(fn(?Invoice $record) => [
-                        Stat::make('client', '...')
-                            ->label('')
-                            ->value(new HtmlString(
-                                '<span style="display: flex; align-items: center; gap: .5rem">'
-                                . '<span style="flex-shrink: 0; width: .6em; height: .6em; border-radius: 50%; background: '
-                                . e($record->project?->client?->color) . '"></span>'
-                                . '<span>' . e($record->project?->client?->short ?: $record->project?->client?->name) . '</span>'
-                                . ($record->project?->client?->api_config ? \Filament\Support\generate_icon_html(
-                                    'tabler-api',
-                                    attributes: new ComponentAttributeBag(['aria-label' => __('api'), 'style' => 'margin-left: .25rem']),
-                                    size: IconSize::Large,
-                                )->toHtml() : '')
-                                . '</span>',
-                            ))
+                        Stat::make('', new HtmlString(
+                            '<span style="display: flex; align-items: center; gap: .5rem">'
+                            . '<span style="flex-shrink: 0; width: .6em; height: .6em; border-radius: 50%; background: '
+                            . e($record->project?->client?->color) . '"></span>'
+                            . '<span>' . e($record->project?->client?->short ?: $record->project?->client?->name) . '</span>'
+                            . ($record->project?->client?->api_config ? \Filament\Support\generate_icon_html(
+                                'tabler-api',
+                                attributes: new ComponentAttributeBag(['aria-label' => __('api'), 'style' => 'margin-left: .25rem']),
+                                size: IconSize::Large,
+                            )->toHtml() : '')
+                            . '</span>',
+                        ))
                             ->extraAttributes(['x-tooltip.raw' => e(__('editName', ['name' => $record->project?->client?->name]))])
                             ->url(ClientResource::getUrl('edit', ['record' => $record->project?->client])),
-                        Stat::make('project', '...')
-                            ->label(trans_choice('project', 1))
-                            ->value($record->project?->progress_percent ?? '-')
+                        Stat::make(trans_choice('project', 1), $record->project?->progress_percent ?? '-')
                             ->description($record->project?->hours . ' / ' . $record->project?->scope_with_label),
-                        Stat::make('invoice', '...')
-                            ->label(trans_choice('invoice', 1))
-                            ->value($record->hours_formatted)
+                        Stat::make(trans_choice('invoice', 1), $record->hours_formatted)
                             ->description(new HtmlString(
                                 "$record->positions_formatted<br />$record->net_formatted " . __('net'),
                             )),

@@ -69,9 +69,7 @@ class ProjectResource extends Resource
                     ->columns(1)
                     ->columnSpan(['lg' => 2])
                     ->schema(fn(?Project $record) => [
-                        Stat::make('progress', '...')
-                            ->label(__('progress'))
-                            ->value($record?->progress_percent ?? '-')
+                        Stat::make(__('progress'), $record?->progress_percent ?? '-')
                             ->description($record?->hours . ' / ' . $record?->scope_with_label),
                     ]),
             ]);

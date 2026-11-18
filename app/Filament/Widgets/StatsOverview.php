@@ -35,22 +35,19 @@ class StatsOverview extends BaseWidget
         $vLaravel = InstalledVersions::getPrettyVersion('laravel/framework');
 
         return [
-            Stat::make('weeklyRevenue', $revenueStat)
-                ->label(__('weeklyRevenue'))
+            Stat::make(__('weeklyRevenue'), $revenueStat)
                 ->description($revenueDiffPercent . '% ' . ($revenueIncrease ? __('increase') : __('decrease')))
                 ->descriptionIcon($revenueIncrease ? 'tabler-trending-up' : 'tabler-trending-down')
                 ->chart($revenue)
                 ->color($revenueIncrease ? Color::Blue : Color::Red)
                 ->extraAttributes(['class' => 'font-mono']),
-            Stat::make('weeklyWorkingHours', Number::format($hoursStat))
-                ->label(__('weeklyWorkingHours'))
+            Stat::make(__('weeklyWorkingHours'), Number::format($hoursStat))
                 ->description($hoursDiffPercent . '% ' . ($hoursIncrease ? __('increase') : __('decrease')))
                 ->descriptionIcon($hoursIncrease ? 'tabler-trending-up' : 'tabler-trending-down')
                 ->chart($hours)
                 ->color($hoursIncrease ? Color::Blue : Color::Red)
                 ->extraAttributes(['class' => 'font-mono']),
-            Stat::make('info', filament()->getBrandName() . ' v' . config('app.version'))
-                ->label("Filament $vFilament · Laravel $vLaravel")
+            Stat::make("Filament $vFilament · Laravel $vLaravel", filament()->getBrandName() . ' v' . config('app.version'))
                 ->description('PHP v' . phpversion()),
         ];
     }
