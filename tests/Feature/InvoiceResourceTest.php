@@ -7,6 +7,7 @@ use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Filament\Resources\ProjectResource;
 use App\Models\Client;
 use App\Models\Document;
 use App\Models\Invoice;
@@ -237,6 +238,20 @@ class InvoiceResourceTest extends TestCase
             ->assertSeeHtml('<span>' . e($client->short) . '</span>')
             ->assertSeeHtml('x-tooltip.raw="' . e(__('editName', ['name' => $client->name])) . '"')
             ->assertSee(ClientResource::getUrl('edit', ['record' => $client]));
+    }
+
+    #[Test]
+    public function it_links_to_the_project_on_the_edit_page(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $project = $invoice->project;
+        $project->update(['title' => 'Map & "More" 2026']);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getKey()])
+            ->assertSee(ProjectResource::getUrl('edit', ['record' => $project]))
+            ->assertSeeHtml('<span style="font-family: var(--font-family-mono), monospace">' . e($project->progress_percent) . '</span>')
+            ->assertSeeHtml('x-tooltip.raw="' . e(__('editName', ['name' => $project->title])) . '"');
     }
 
     #[Test]

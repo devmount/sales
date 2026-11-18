@@ -9,6 +9,7 @@ use App\Filament\Relations\PositionsRelationManager;
 use App\Filament\Resources\ClientResource;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Filament\Resources\ProjectResource;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Services\ExternalApiService;
@@ -96,8 +97,12 @@ class InvoiceResource extends Resource
                         ))
                             ->extraAttributes(['x-tooltip.raw' => e(__('editName', ['name' => $record->project?->client?->name]))])
                             ->url(ClientResource::getUrl('edit', ['record' => $record->project?->client])),
-                        Stat::make(trans_choice('project', 1), $record->project?->progress_percent ?? '-')
-                            ->description($record->project?->hours . ' / ' . $record->project?->scope_with_label),
+                        Stat::make(trans_choice('project', 1), new HtmlString(
+                            '<span style="font-family: var(--font-family-mono), monospace">' . e($record->project?->progress_percent ?? '-') . '</span>',
+                        ))
+                            ->description($record->project?->hours . ' / ' . $record->project?->scope_with_label)
+                            ->extraAttributes(['x-tooltip.raw' => e(__('editName', ['name' => $record->project?->title]))])
+                            ->url(ProjectResource::getUrl('edit', ['record' => $record->project])),
                         Stat::make(trans_choice('invoice', 1), $record->hours_formatted)
                             ->description(new HtmlString(
                                 "$record->positions_formatted<br />$record->net_formatted " . __('net'),
