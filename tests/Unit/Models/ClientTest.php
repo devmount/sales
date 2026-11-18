@@ -222,3 +222,23 @@ it('returns zero average payment delay when no invoice is paid', function () {
 
     expect($client->avg_payment_delay)->toBe(0.0);
 });
+
+it('calculates the years from the first project start to the last project due date', function () {
+    $this->travelTo('2026-06-01');
+    $client = Client::factory()->create();
+    Project::factory()->for($client)->create(['start_at' => '2022-01-01', 'due_at' => '2023-01-01']);
+    Project::factory()->for($client)->create(['start_at' => '2023-01-01', 'due_at' => '2025-07-01']);
+
+    expect($client->years)->toBe(3.5);
+});
+
+it('limits the years to today and returns zero without project dates', function () {
+    $this->travelTo('2026-01-01');
+    $client = Client::factory()->create();
+
+    expect($client->years)->toBe(0.0);
+
+    Project::factory()->for($client)->create(['start_at' => '2025-01-01', 'due_at' => '2027-01-01']);
+
+    expect($client->fresh()->years)->toBe(1.0);
+});

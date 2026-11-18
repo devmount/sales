@@ -31,13 +31,19 @@ class ClientResourceTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
         $client = Client::factory()->create();
-        $projects = Project::factory()->count(2)->create(['client_id' => $client->id]);
+        $this->travelTo('2026-06-01');
+        $projects = Project::factory()->count(2)->create([
+            'client_id' => $client->id,
+            'start_at' => '2024-06-01',
+            'due_at' => '2025-12-01',
+        ]);
         Invoice::factory()->count(5)->create(['project_id' => $projects->first()->id]);
 
         Livewire::test(EditClient::class, ['record' => $client->getKey()])
             ->assertSeeHtmlInOrder([
                 'fi-wi-stats-overview-stat-label', '2 ' . trans_choice('project', 2),
-                'fi-wi-stats-overview-stat-value', '5 ' . trans_choice('invoice', 5),
+                'fi-wi-stats-overview-stat-value', Number::format(1.5) . ' ' . trans_choice('year', 1.5),
+                'fi-wi-stats-overview-stat-description', '5 ' . trans_choice('invoice', 5),
             ]);
     }
 
@@ -58,7 +64,8 @@ class ClientResourceTest extends TestCase
         Livewire::test(EditClient::class, ['record' => $client->getKey()])
             ->assertSeeHtmlInOrder([
                 'fi-wi-stats-overview-stat-label', __('netRevenue'),
-                'fi-wi-stats-overview-stat-value', e(Number::currency(1234.5, 'eur')),
+                'fi-wi-stats-overview-stat-value',
+                '<span style="font-family: var(--font-family-mono), monospace">' . e(Number::currency(1234.5, 'eur')),
             ]);
     }
 

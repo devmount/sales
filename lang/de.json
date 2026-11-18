@@ -310,6 +310,6 @@
     "workEquipmentDescription": "Arbeitsmittel (z.B. Bürobedarf, Porto, Fachliteratur, Schreibtischzubehör)",
     "workingDays": "Produktive Arbeitstage",
     "workingHours": "Arbeitszeit",
-    "year": "Jahr",
+    "year": "Jahr|Jahre",
     "zip": "PLZ"
 }

@@ -310,6 +310,6 @@
     "workEquipmentDescription": "Work equipment (e.g. office supplies, postage, specialist literature)",
     "workingDays": "Working days",
     "workingHours": "Working hours",
-    "year": "Year",
+    "year": "Year|Years",
     "zip": "ZIP"
 }

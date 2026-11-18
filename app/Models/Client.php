@@ -125,6 +125,17 @@ class Client extends Model
     }
 
     /**
+     * Number of years from the first project start to the last project due date, but not beyond today
+     */
+    protected function years(): Attribute
+    {
+        $start = $this->projects->min('start_at');
+        $end = min($this->projects->max('due_at') ?? now(), now());
+        $years = $start && $start < $end ? round($start->floatDiffInYears($end), 1) : 0.0;
+        return Attribute::make(fn(): float => $years);
+    }
+
+    /**
      * Number of days this client takse to pay bills on average
      */
     protected function avgPaymentDelay(): Attribute
