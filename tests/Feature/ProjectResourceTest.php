@@ -125,7 +125,7 @@ class ProjectResourceTest extends TestCase
 
         Livewire::test(EditProject::class, ['record' => $project->getKey()])
             ->assertSee(__('progress'))
-            ->assertSee($project->progress_percent)
+            ->assertSeeHtml('<span style="font-family: var(--font-family-mono), monospace">' . e($project->progress_percent) . '</span>')
             ->assertSee($project->hours . ' / ' . $project->scope_with_label);
     }
 
