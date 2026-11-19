@@ -63,7 +63,7 @@ class ProjectsRelationManager extends RelationManager
                 CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('create'))
-                    ->schema(ProjectResource::formFields(useSection: false))
+                    ->schema(ProjectResource::formFields(6, false))
                     ->mountUsing(function (Schema $schema) {
                         $schema->fill();
                         if ($this->getOwnerRecord() instanceof Client) {
@@ -78,13 +78,13 @@ class ProjectsRelationManager extends RelationManager
                 ActionGroup::make([
                     EditAction::make()
                         ->icon('tabler-edit')
-                        ->schema(ProjectResource::formFields(useSection: false))
+                        ->schema(ProjectResource::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(Width::Large)
                         ->after(fn() => $this->dispatch('refresh-page')),
                     ReplicateAction::make()
                         ->icon('tabler-copy')
-                        ->schema(ProjectResource::formFields(useSection: false))
+                        ->schema(ProjectResource::formFields(6, false))
                         ->slideOver()
                         ->modalWidth(Width::Large)
                         ->after(fn() => $this->dispatch('refresh-page')),
