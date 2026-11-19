@@ -343,3 +343,11 @@ it('returns recent distinct position descriptions of its client', function () {
     expect($invoice->recentPositionDescriptions())->toBe(['Newest', 'Repeated', 'Older'])
         ->and($invoice->recentPositionDescriptions(2))->toBe(['Newest', 'Repeated']);
 });
+
+it('excludes a given position from recent position descriptions', function () {
+    $invoice = Invoice::factory()->create();
+    Position::factory()->for($invoice)->create(['description' => 'Older', 'created_at' => '2026-01-01']);
+    $position = Position::factory()->for($invoice)->create(['description' => 'Newest', 'created_at' => '2026-01-02']);
+
+    expect($invoice->recentPositionDescriptions(except: $position))->toBe(['Older']);
+});
