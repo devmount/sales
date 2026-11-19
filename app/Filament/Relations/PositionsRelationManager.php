@@ -81,7 +81,7 @@ class PositionsRelationManager extends RelationManager
                 EditAction::make()
                     ->icon('tabler-edit')
                     ->label('')
-                    ->schema(PositionResource::formFields(useSection: false))
+                    ->schema(fn() => [...PositionResource::formFields(useSection: false), $this->descriptionHistory()])
                     ->slideOver()
                     ->modalWidth(Width::TwoExtraLarge)
                     ->after(fn() => $this->dispatch('refresh-page')),

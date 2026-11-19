@@ -147,6 +147,23 @@ class PositionsRelationManagerTest extends TestCase
     }
 
     #[Test]
+    public function it_fills_the_description_from_history_when_editing_a_position(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $position = Position::factory()->for($invoice)->create(['description' => 'Reused description']);
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->mountAction(TestAction::make(EditAction::class)->table($position))
+            ->fillForm(['description' => 'Changed description'])
+            ->callAction(TestAction::make('useDescription')->schemaComponent('history_0'))
+            ->assertActionDataSet(['description' => 'Reused description']);
+    }
+
+    #[Test]
     public function it_requires_start_finish_and_description_when_creating_a_position(): void
     {
         $this->actingAs(User::factory()->create());
