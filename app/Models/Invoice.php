@@ -61,12 +61,13 @@ class Invoice extends Model
     }
 
     /**
-     * Latest distinct position descriptions of this invoice's client
+     * Latest distinct position descriptions of this invoice's client, optionally without a given position
      */
-    public function recentPositionDescriptions(int $limit = 20): array
+    public function recentPositionDescriptions(int $limit = 20, ?Position $except = null): array
     {
         return Position::query()
             ->whereHas('invoice.project', fn(Builder $query) => $query->where('client_id', $this->project->client_id))
+            ->when($except, fn(Builder $query) => $query->whereKeyNot($except->getKey()))
             ->latest()
             ->limit($limit * 5) // headroom for duplicates
             ->pluck('description')

@@ -147,6 +147,61 @@ class PositionsRelationManagerTest extends TestCase
     }
 
     #[Test]
+    public function it_fills_the_description_from_history_when_editing_a_position(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        Position::factory()->for($invoice)->create(['description' => 'Reused description']);
+        $position = Position::factory()->for($invoice)->create();
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->mountAction(TestAction::make(EditAction::class)->table($position))
+            ->fillForm(['description' => 'Changed description'])
+            ->callAction(TestAction::make('useDescription')->schemaComponent('history_0'))
+            ->assertActionDataSet(['description' => 'Reused description']);
+    }
+
+    #[Test]
+    public function it_excludes_the_edited_position_from_history(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        Position::factory()->for($invoice)->create(['description' => 'Other description']);
+        $position = Position::factory()->for($invoice)->create(['description' => 'Own description']);
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->mountAction(TestAction::make(EditAction::class)->table($position))
+            ->assertSchemaComponentExists(
+                'history_0',
+                checkComponentUsing: fn(TextEntry $entry): bool => $entry->getState() === 'Other description',
+            )
+            ->assertSchemaComponentDoesNotExist('history_1');
+    }
+
+    #[Test]
+    public function it_fills_the_description_from_history_when_replicating_a_position(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $invoice = Invoice::factory()->create();
+        $position = Position::factory()->for($invoice)->create(['description' => 'Reused description']);
+
+        Livewire::test(PositionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => EditInvoice::class,
+        ])
+            ->mountAction(TestAction::make(ReplicateAction::class)->table($position))
+            ->fillForm(['description' => 'Changed description'])
+            ->callAction(TestAction::make('useDescription')->schemaComponent('history_0'))
+            ->assertActionDataSet(['description' => 'Reused description']);
+    }
+
+    #[Test]
     public function it_requires_start_finish_and_description_when_creating_a_position(): void
     {
         $this->actingAs(User::factory()->create());

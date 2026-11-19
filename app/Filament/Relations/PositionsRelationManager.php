@@ -81,14 +81,17 @@ class PositionsRelationManager extends RelationManager
                 EditAction::make()
                     ->icon('tabler-edit')
                     ->label('')
-                    ->schema(PositionResource::formFields(useSection: false))
+                    ->schema(fn(Position $record) => [
+                        ...PositionResource::formFields(useSection: false),
+                        $this->descriptionHistory($record),
+                    ])
                     ->slideOver()
                     ->modalWidth(Width::TwoExtraLarge)
                     ->after(fn() => $this->dispatch('refresh-page')),
                 ReplicateAction::make()
                     ->icon('tabler-copy')
                     ->label('')
-                    ->schema(PositionResource::formFields(useSection: false))
+                    ->schema(fn() => [...PositionResource::formFields(useSection: false), $this->descriptionHistory()])
                     ->slideOver()
                     ->modalWidth(Width::TwoExtraLarge)
                     ->after(fn() => $this->dispatch('refresh-page')),
@@ -118,9 +121,9 @@ class PositionsRelationManager extends RelationManager
     /**
      * Section listing recent descriptions of the client, each can be used for the description field
      */
-    private function descriptionHistory(): Section
+    private function descriptionHistory(?Position $except = null): Section
     {
-        $descriptions = $this->getOwnerRecord()->recentPositionDescriptions();
+        $descriptions = $this->getOwnerRecord()->recentPositionDescriptions(except: $except);
 
         return Section::make(__('recentDescriptions'))
             ->collapsed()
