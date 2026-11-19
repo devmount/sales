@@ -282,7 +282,11 @@ class InvoiceResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(Width::Large),
+                CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->schema(self::formFields(6, false))
+                    ->slideOver()
+                    ->modalWidth(Width::ExtraLarge),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')
