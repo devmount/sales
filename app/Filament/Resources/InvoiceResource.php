@@ -189,7 +189,7 @@ class InvoiceResource extends Resource
                         return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
                     }),
                 ActionGroup::make([
-                    EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(Width::Large),
+                    EditAction::make()->icon('tabler-edit'),
                     ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->beforeFormFilled(function (Invoice $record) {
@@ -282,7 +282,11 @@ class InvoiceResource extends Resource
                 ->icon('tabler-dots-vertical'),
             ])
             ->emptyStateActions([
-                CreateAction::make()->icon('tabler-plus')->slideOver()->modalWidth(Width::Large),
+                CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->schema(self::formFields(6, false))
+                    ->slideOver()
+                    ->modalWidth(Width::ExtraLarge),
             ])
             ->emptyStateIcon('tabler-ban')
             ->defaultSort('created_at', 'desc')

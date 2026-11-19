@@ -13,6 +13,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -202,5 +203,24 @@ class ProjectsRelationManagerTest extends TestCase
         ])
             ->callAction(TestAction::make(EditAction::class)->table($project), data: ['title' => ''])
             ->assertHasFormErrors(['title' => 'required']);
+    }
+
+    #[Test]
+    public function it_uses_the_compact_form_layout_in_the_slide_over(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $client = Client::factory()->create();
+        $project = Project::factory()->for($client)->create();
+
+        Livewire::test(ProjectsRelationManager::class, [
+            'ownerRecord' => $client,
+            'pageClass' => EditClient::class,
+        ])
+            ->mountAction(TestAction::make(EditAction::class)->table($project))
+            ->assertSchemaComponentExists(
+                'pricing_unit',
+                checkComponentUsing: fn(Select $field): bool
+                => $field->getContainer()->getParentComponent()->getColumns('lg') === 6,
+            );
     }
 }
