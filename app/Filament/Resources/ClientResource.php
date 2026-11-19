@@ -225,54 +225,55 @@ class ClientResource extends Resource
      */
     public static function formFields(int $columns = 12, bool $useSection = true): array
     {
+        $half = intval($columns / ($columns > 6 ? 2 : 1));
         $fields = [
             TextInput::make('name')
                 ->label(__('name'))
                 ->hint(__('client.name.hint'))
                 ->hintIcon('tabler-info-circle')
-                ->columnSpan(6)
+                ->columnSpan($half)
                 ->required(),
             TextInput::make('short')
                 ->label(__('short'))
-                ->columnSpan(3)
+                ->columnSpan($half / 2)
                 ->suffixIcon('tabler-letter-spacing'),
             ColorPicker::make('color')
                 ->label(__('color'))
-                ->columnSpan(3)
+                ->columnSpan($half / 2)
                 ->suffixIcon('tabler-palette'),
             TextInput::make('address')
                 ->label(__('address'))
-                ->columnSpan(6),
+                ->columnSpan($half),
             Select::make('language')
                 ->label(__('language'))
-                ->columnSpan(3)
+                ->columnSpan($half / 2)
                 ->suffixIcon('tabler-language')
                 ->options(LanguageCode::class)
                 ->required(),
             TextInput::make('vat_id')
                 ->label(__('vatId'))
                 ->suffixIcon('tabler-tax-euro')
-                ->columnSpan(3),
+                ->columnSpan($half / 2),
             TextInput::make('street')
                 ->label(__('street'))
-                ->columnSpan(3),
+                ->columnSpan($half / 2),
             TextInput::make('zip')
                 ->label(__('zip'))
-                ->columnSpan(3),
+                ->columnSpan($half / 2),
             TextInput::make('city')
                 ->label(__('city'))
-                ->columnSpan(3),
+                ->columnSpan($half / 2),
             TextInput::make('country')
                 ->label(__('country'))
-                ->columnSpan(3),
+                ->columnSpan($half / 2),
             TextInput::make('email')
                 ->label(__('email'))
-                ->columnSpan(3)
+                ->columnSpan($half / 2)
                 ->suffixIcon('tabler-mail')
                 ->email(),
             TextInput::make('phone')
                 ->label(__('phone'))
-                ->columnSpan(3)
+                ->columnSpan($half / 2)
                 ->suffixIcon('tabler-phone')
                 ->tel(),
             Section::make(__('api'))

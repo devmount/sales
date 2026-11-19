@@ -189,7 +189,7 @@ class InvoiceResource extends Resource
                         return Storage::disk($document->disk)->download($document->attachment_path, $document->attachment_filename);
                     }),
                 ActionGroup::make([
-                    EditAction::make()->icon('tabler-edit')->slideOver()->modalWidth(Width::Large),
+                    EditAction::make()->icon('tabler-edit'),
                     ReplicateAction::make()
                         ->icon('tabler-copy')
                         ->beforeFormFilled(function (Invoice $record) {
